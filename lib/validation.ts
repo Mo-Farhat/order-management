@@ -36,6 +36,40 @@ export const businessBasicsSchema = z.object({
     .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
 });
 
+// --- Catalog (Phase 2) ---------------------------------------------------
+
+const priceString = z
+  .string()
+  .trim()
+  .min(1, { error: "Enter a price." })
+  .regex(/^\d+(\.\d{1,2})?$/, { error: "Price must be a number like 1200 or 1200.50." })
+  .refine((v) => Number(v) >= 0, { error: "Price can't be negative." });
+
+const stockInt = z.coerce
+  .number({ error: "Enter a whole number." })
+  .int({ error: "Stock must be a whole number." })
+  .min(0, { error: "Stock can't be negative." })
+  .max(1_000_000, { error: "That's a lot of stock — check the number." });
+
+export const productSchema = z.object({
+  name: z.string().trim().min(1, { error: "Name is required." }).max(120),
+  price: priceString,
+  stockQty: stockInt,
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+  category: z.string().trim().max(60).optional().or(z.literal("")),
+  lowStockThreshold: z
+    .union([z.literal(""), z.coerce.number().int().min(0).max(1_000_000)])
+    .optional(),
+  sku: z.string().trim().max(60).optional().or(z.literal("")),
+});
+
+export type ProductInput = z.infer<typeof productSchema>;
+
+export const stockAdjustSchema = z.object({
+  stockQty: stockInt,
+  note: z.string().trim().max(200).optional().or(z.literal("")),
+});
+
 /** Turns "Aisha's Kitchen" into "aishas-kitchen". */
 export function slugify(input: string): string {
   return (

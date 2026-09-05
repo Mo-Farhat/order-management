@@ -59,6 +59,18 @@ const STATEMENTS: string[] = [
        or current_setting('app.current_tenant', true) = ''
        or tenant_id = current_setting('app.current_tenant', true)::uuid
      )`,
+
+  // Catalog tables (Phase 2) — all scoped by tenant_id.
+  ...["products", "product_photos", "stock_movements"].flatMap((table) => [
+    `alter table ${table} enable row level security`,
+    `drop policy if exists tenant_isolation on ${table}`,
+    `create policy tenant_isolation on ${table}
+       using (
+         current_setting('app.current_tenant', true) is null
+         or current_setting('app.current_tenant', true) = ''
+         or tenant_id = current_setting('app.current_tenant', true)::uuid
+       )`,
+  ]),
 ];
 
 async function main() {

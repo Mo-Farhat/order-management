@@ -32,6 +32,14 @@ export const planStatusEnum = pgEnum("plan_status", [
   "cancelled",
 ]);
 
+export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [
+  "initial", // set when the product is created
+  "manual_adjustment", // quick stock editor / edit form
+  "import", // CSV bulk import
+  "order_confirmed", // Phase 3: stock decremented (FR-5)
+  "order_cancelled", // Phase 3: stock restored (FR-5)
+]);
+
 // --- Tenancy ---------------------------------------------------------------
 
 export const tenants = pgTable("tenants", {
@@ -89,6 +97,83 @@ export const memberships = pgTable(
     uniqueIndex("memberships_user_tenant_uq").on(t.userId, t.tenantId),
     index("memberships_tenant_idx").on(t.tenantId),
   ],
+);
+
+// --- Catalog (Phase 2) -------------------------------------------------
+
+export const products = pgTable(
+  "products",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+
+    name: text("name").notNull(),
+    price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+    stockQty: integer("stock_qty").notNull().default(0),
+
+    // "More details" — all optional (catalog UX S2).
+    description: text("description"),
+    category: text("category"),
+    lowStockThreshold: integer("low_stock_threshold"),
+    sku: text("sku"),
+
+    // Soft delete (FR-6): archived products leave the public page and the
+    // new-order grid but stay attached to historical orders.
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("products_tenant_idx").on(t.tenantId, t.archivedAt),
+    index("products_tenant_category_idx").on(t.tenantId, t.category),
+  ],
+);
+
+export const productPhotos = pgTable(
+  "product_photos",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    // Storage key in the object store (R2). The public URL is derived from it.
+    key: text("key").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("product_photos_product_idx").on(t.productId, t.sortOrder)],
+);
+
+/**
+ * Append-only stock ledger (FR-5). Every change to `products.stock_qty` writes
+ * one row here with the delta, the resulting balance, who did it, and why.
+ */
+export const stockMovements = pgTable(
+  "stock_movements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    delta: integer("delta").notNull(),
+    balanceAfter: integer("balance_after").notNull(),
+    reason: stockMovementReasonEnum("reason").notNull(),
+    // Phase 3 wires the FK; kept nullable and unconstrained for now.
+    orderId: uuid("order_id"),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("stock_movements_product_idx").on(t.productId, t.createdAt)],
 );
 
 // --- Audit log ----------------------------------------------------------
@@ -158,3 +243,7 @@ export type Tenant = typeof tenants.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type Role = (typeof roleEnum.enumValues)[number];
+export type Product = typeof products.$inferSelect;
+export type ProductPhoto = typeof productPhotos.$inferSelect;
+export type StockMovement = typeof stockMovements.$inferSelect;
+export type StockMovementReason = (typeof stockMovementReasonEnum.enumValues)[number];

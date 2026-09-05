@@ -5,9 +5,10 @@
 **Last updated:** 2026-09-05
 **Repo placement:** `/docs/PRD.md`
 
-> **Build note (2026-09-05):** Phase 1 (schema, tenancy, auth, RBAC skeleton) is
-> in progress. Stack decisions in §9 are now resolved. Setup and key handover:
-> see `/GUIDE.md`. Architecture detail: see `/docs/architecture.md`.
+> **Build note (2026-09-05):** Phase 1 (schema, tenancy, auth, RBAC skeleton) and
+> Phase 2 (catalog: FR-4–7) are built. Stack decisions in §9 are resolved. Photo
+> upload needs Cloudflare R2 (GUIDE.md step 4a) — the catalog works without it.
+> Setup and key handover: `/GUIDE.md`. Architecture: `/docs/architecture.md`.
 > Product name remains a placeholder ("Storefront Desk") — see §14.
 
 ---

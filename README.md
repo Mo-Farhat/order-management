@@ -30,8 +30,11 @@ URLs print to the dev-server console.
 
 ## Status
 
-**Phase 1** (schema, tenancy, auth, RBAC skeleton) — in progress. See PRD §11 for
-the rollout plan.
+- **Phase 1** — schema, tenancy, auth, RBAC skeleton ✅
+- **Phase 2** — catalog (products, stock ledger, CSV import; photos pending R2) ✅
+- **Phase 3** — order desk — next
+
+See PRD §11 for the full rollout plan.
 
 ## Scripts
 

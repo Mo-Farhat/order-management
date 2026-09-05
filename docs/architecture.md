@@ -15,7 +15,10 @@ app/                     App Router routes
   (auth)/                login, signup, verify-request  (public)
   onboarding/business/   business-basics step           (auth, no tenant yet)
   desk/                  the authed app                 (auth + tenant)
-  actions/               server actions (auth, onboarding, session)
+    layout.tsx           header + tab nav (Orders / Catalog / Share)
+    page.tsx             orders (Phase 3 placeholder)
+    catalog/             product list, new, [id] edit, import
+  actions/               server actions (auth, onboarding, session, catalog)
   api/auth/[...nextauth] Auth.js route handlers
 auth.ts                  full Auth.js config (Node runtime)
 auth.config.ts           edge-safe subset used by proxy.ts
@@ -29,6 +32,9 @@ lib/
   session.ts             requireUser / requireActive / requireCapability
   validation.ts          zod schemas
   email.ts               magic-link sender (console in dev)
+  catalog.ts             product CRUD + stock ledger (server-only)
+  csv-import.ts          CSV parse / preview / all-or-nothing commit
+  storage.ts             R2 upload (no-op + UI hidden when unconfigured)
 drizzle/                 generated migrations
 scripts/apply-rls.ts     installs row-level security policies
 ```
@@ -42,6 +48,22 @@ scripts/apply-rls.ts     installs row-level security policies
 | `memberships` | user × tenant × role. Unique on `(user_id, tenant_id)`. v1 creates exactly one per user. |
 | `audit_log` | actor + before/after JSON per mutation (NFR "auditability"). |
 | `accounts` / `sessions` / `verification_tokens` | Auth.js adapter tables. Sessions are JWTs, but the table exists for the adapter contract. |
+
+### Catalog (Phase 2)
+
+| Table | Purpose |
+|---|---|
+| `products` | name, price (`numeric`), `stock_qty`, plus optional description / category / `low_stock_threshold` / sku. `archived_at` is the soft-delete marker (FR-6). No variants. |
+| `product_photos` | up to 6 per product; stores the R2 object `key`, public URL derived at read time. |
+| `stock_movements` | append-only ledger (FR-5). Every `stock_qty` change writes a row: `delta`, `balance_after`, `reason` enum, actor, optional note / `order_id` (FK wired in Phase 3). |
+
+Catalog reads use `db` with an explicit `tenantId` filter. Every mutation that
+touches stock (`createProduct`, `updateProduct`, `setStock`, CSV `commitImport`)
+runs inside `withTenant()` so the product write and its ledger row commit
+atomically. CSV import (FR-7) is all-or-nothing: `buildPreview` validates every
+row first; `commitImport` throws (writing nothing) if any row has an error.
+Hard delete is blocked once a product has an `order_confirmed` / `order_cancelled`
+movement — archive instead.
 
 Roles: `owner` \| `staff` \| `viewer` (`role` enum). Plan status:
 `trialing` \| `active` \| `past_due` \| `read_only` \| `cancelled`.
