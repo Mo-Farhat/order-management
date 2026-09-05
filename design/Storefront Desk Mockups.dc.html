@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/forty-pixels-design-system-05641fb6-c189-432e-881d-071cbb152406/styles.css">
+<script src="_ds/forty-pixels-design-system-05641fb6-c189-432e-881d-071cbb152406/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:#e6e5df}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:650 10px var(--font-mono),monospace;padding:3px 8px;border-radius:999px;background:#201f1d;color:#fff;text-decoration:none}
+.dv-tname{font:520 15px/1.2 var(--font-sans),sans-serif;letter-spacing:-.02em;color:#181a19}
+.dv-opts{display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.dv-oid{font:650 10.5px var(--font-mono),monospace;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.09);color:#181a19;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 var(--font-sans),sans-serif;color:rgba(24,26,25,.6)}
+.dv-card{max-width:100%;background:#f1f0eb;border:1px solid rgba(0,0,0,.1);border-radius:14px;overflow:hidden}
+.fp-button{border-radius:999px}
+.fp-button,.fp-button:hover,.fp-button-solid,.fp-button-solid:hover{background:#181a19;color:#faf8f4;border-color:#181a19}
+.dv-opt:target .dv-oid{background:#181a19;color:#faf8f4}
+.dv-next{margin:24px 0 0;font:12px/1.6 var(--font-mono),monospace;color:rgba(24,26,25,.5)}
+</style></helmet>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Storefront Desk — v1 flow board, all four spec files</span></div>
+
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>01 — Onboarding &amp; Auth · signup to first product, four screens</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S1 — landing / sign up</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>9:41</span><span>LTE ▮▮▯ 74%</span></div>
+<div style="padding:26px 22px 0"><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.12em;text-transform:uppercase;opacity:.5">storefront desk</div></div>
+<div style="padding:38px 22px 0"><h1 style="margin:0;font-size:2.05rem;line-height:.98;letter-spacing:-.055em;font-weight:520">Your orders stop living in your DMs.</h1>
+<p style="margin:16px 0 0;font-size:.9rem;line-height:1.45;opacity:.62">Every order in one list — what is confirmed, what is packed, who paid. Takes two minutes to set up.</p></div>
+<div style="padding:34px 22px 0;display:flex;flex-direction:column;gap:22px">
+<label style="display:flex;flex-direction:column;gap:7px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Email</span><div style="border-bottom:1px solid #b9bab4;padding:9px 0;font-size:.95rem">amara@threadco.shop</div></label>
+<label style="display:flex;flex-direction:column;gap:7px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Password</span><div style="border-bottom:1px solid #b9bab4;padding:9px 0;font-size:.95rem;letter-spacing:.2em;opacity:.55">••••••••</div></label>
+</div>
+<div style="margin-top:auto;padding:0 22px 26px;display:flex;flex-direction:column;gap:14px;align-items:stretch">
+<div style="display:grid"><x-import component-from-global-scope="FortyPixelsDS.Button" variant="solid" href="#1a" hint-size="100%,52px">Start free — no card needed</x-import></div>
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5;text-align:center">14 days free · no card · cancel anytime</div>
+<div style="border-top:1px solid #b9bab4;padding-top:14px;display:flex;justify-content:space-between;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span style="opacity:.75">Email me a link instead</span><span>↗</span></div>
+</div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S2 — business basics</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>9:42</span><span>LTE ▮▮▯ 74%</span></div>
+<div style="padding:22px 22px 0;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">step 2 of 2</span><span style="font-size:1rem;opacity:.5">✕</span></div>
+<div style="padding:34px 22px 0"><h1 style="margin:0;font-size:1.9rem;line-height:1;letter-spacing:-.05em;font-weight:520">Two things and you are in.</h1></div>
+<div style="padding:32px 22px 0;display:flex;flex-direction:column;gap:26px">
+<label style="display:flex;flex-direction:column;gap:7px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Business name</span><div style="border-bottom:1px solid #b9bab4;padding:9px 0;font-size:.95rem">Thread &amp; Co.</div>
+<span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.5">desk.fortypixels.com/<span style="color:#181a19;opacity:1;border-bottom:2px solid #181a19">thread-co</span> · edit</span></label>
+<label style="display:flex;flex-direction:column;gap:7px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">WhatsApp number</span><div style="border-bottom:1px solid #b9bab4;padding:9px 0;font-size:.95rem">+1 415 555 0132</div>
+<span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.5">Customers reach you here from your share link</span></label>
+</div>
+<div style="margin-top:auto;padding:0 22px 26px;display:grid"><x-import component-from-global-scope="FortyPixelsDS.Button" variant="solid" href="#1a" hint-size="100%,52px">Continue</x-import></div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S3 — empty catalog</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>9:43</span><span>LTE ▮▮▯ 73%</span></div>
+<div style="padding:20px 20px 16px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #b9bab4"><span style="font-size:1.15rem;letter-spacing:-.04em;font-weight:520">Catalog</span><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.55">Thread &amp; Co.</span></div>
+<div style="background:#201f1d;color:#fff;padding:14px 20px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.6">getting started · 1 of 3</span><span style="font-size:.85rem;opacity:.55">✕</span></div>
+<div style="display:flex;gap:8px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="height:3px;border-radius:999px;background:#fafaf7"></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;text-transform:uppercase">Add a product</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="height:3px;border-radius:999px;background:rgba(255,255,255,.22)"></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;text-transform:uppercase;opacity:.5">Take an order</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><div style="height:3px;border-radius:999px;background:rgba(255,255,255,.22)"></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;text-transform:uppercase;opacity:.5">Share your link</span></div>
+</div></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:18px;padding:0 24px">
+<div style="width:100%;border:1px dashed #b9bab4;border-radius:12px;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px">
+<div style="width:52px;height:52px;border:1px solid #181a19;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:300;background:#181a19;color:#faf8f4">+</div>
+<span style="font-size:1.35rem;letter-spacing:-.04em;font-weight:520">Add your first product</span>
+<span style="font-size:.82rem;opacity:.55;text-align:center;max-width:22ch;line-height:1.4">A photo, a name, a price, a stock number. Thirty seconds.</span>
+</div>
+<div style="display:flex;justify-content:space-between;width:100%;border-top:1px solid #b9bab4;padding-top:14px;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6"><span>Have a list already? Import a CSV</span><span>↗</span></div>
+</div>
+<div style="border-top:1px solid #b9bab4;display:flex;padding:12px 0 18px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;opacity:.45"><span>▣</span><span>Orders</span></div>
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;border-radius:999px;background:#181a19;color:#faf8f4"><span>▤</span><span>Catalog</span></div>
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;opacity:.45"><span>◉</span><span>Link</span></div>
+</div>
+</div></div></div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S4 — magic link sent</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>9:41</span><span>LTE ▮▮▯ 74%</span></div>
+<div style="padding:22px 22px 0;font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">check your inbox</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 22px;gap:18px">
+<div style="width:64px;height:64px;border:1px solid #181a19;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">✉</div>
+<h1 style="margin:0;font-size:1.8rem;line-height:1;letter-spacing:-.05em;font-weight:520">Link sent to amara@threadco.shop</h1>
+<p style="margin:0;font-size:.9rem;line-height:1.45;opacity:.6">Open it on this phone and you are signed in. It works once and expires in 15 minutes.</p>
+<div style="border-top:1px solid #b9bab4;border-bottom:1px solid #b9bab4;padding:14px 0;display:flex;justify-content:space-between;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>Resend link</span><span style="opacity:.45">Available in 0:48</span></div>
+<div style="display:flex;justify-content:space-between;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6"><span>Use a password instead</span><span>↗</span></div>
+</div>
+</div></div></div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>02 — Catalog · list, add, edit, quick stock</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S1 — product list</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif;position:relative">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>11:20</span><span>LTE ▮▮▮ 61%</span></div>
+<div style="padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1.5rem;letter-spacing:-.05em;font-weight:520">Catalog</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.55">14 items</span></div>
+<div style="padding:0 20px 12px"><div style="border:1px solid #b9bab4;border-radius:10px;padding:10px 12px;display:flex;gap:9px;align-items:center;font-size:.85rem;opacity:.55"><span>⌕</span><span>Search products</span></div></div>
+<div style="padding:0 20px 12px;display:flex;gap:7px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">
+<span style="padding:5px 10px;background:#181a19;color:#fff">All</span><span style="padding:5px 11px;border:1px solid #b9bab4;border-radius:999px">Tops</span><span style="padding:5px 11px;border:1px solid #b9bab4;border-radius:999px">Denim</span><span style="padding:5px 11px;border:1px solid #b9bab4;border-radius:999px">Access.</span>
+</div>
+<div style="flex:1;overflow:hidden;border-top:1px solid #b9bab4">
+<div style="display:flex;gap:13px;padding:13px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="flex:1;min-width:0"><div style="font-size:.95rem;letter-spacing:-.02em">Oat Linen Shirt</div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:4px">$68.00</div></div>
+<div style="text-align:right"><div style="font-size:1.25rem;letter-spacing:-.04em;font-weight:520">12</div><div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">in stock</div></div></div>
+<div style="display:flex;gap:13px;padding:13px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="flex:1;min-width:0"><div style="font-size:.95rem;letter-spacing:-.02em">Wide-Leg Trouser</div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:4px">$84.00</div><div style="display:inline-block;margin-top:6px;padding:3px 7px;background:#efe9cf;border:1px solid #d8cd9c;border-radius:999px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Low · reorder</div></div>
+<div style="text-align:right"><div style="font-size:1.25rem;letter-spacing:-.04em;font-weight:520">3</div><div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">in stock</div></div></div>
+<div style="display:flex;gap:13px;padding:13px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="flex:1;min-width:0"><div style="font-size:.95rem;letter-spacing:-.02em">Cropped Denim Jacket</div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:4px">$120.00</div></div>
+<div style="text-align:right"><div style="font-size:1.25rem;letter-spacing:-.04em;font-weight:520">7</div><div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">in stock</div></div></div>
+<div style="display:flex;gap:13px;padding:13px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="flex:1;min-width:0"><div style="font-size:.95rem;letter-spacing:-.02em">Ribbed Tank — Black</div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:4px">$32.00</div></div>
+<div style="text-align:right"><div style="font-size:1.25rem;letter-spacing:-.04em;font-weight:520">24</div><div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">in stock</div></div></div>
+<div style="display:flex;gap:13px;padding:13px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="flex:1;min-width:0"><div style="font-size:.95rem;letter-spacing:-.02em">Silk Scarf — Ochre</div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:4px">$45.00</div></div>
+<div style="text-align:right"><div style="font-size:1.25rem;letter-spacing:-.04em;font-weight:520">9</div><div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">in stock</div></div></div>
+</div>
+<div style="position:absolute;right:18px;bottom:80px;background:#181a19;color:#faf8f4;border:1px solid #181a19;border-radius:999px;padding:14px 20px;display:flex;gap:9px;align-items:center;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;box-shadow:0 8px 20px rgba(0,0,0,.18)"><span style="font-size:.9rem">+</span>Add product</div>
+<div style="border-top:1px solid #b9bab4;display:flex;padding:12px 0 18px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;background:#f1f0eb">
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;opacity:.45"><span>▣</span><span>Orders</span></div>
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;border-radius:999px;background:#181a19;color:#faf8f4"><span>▤</span><span>Catalog</span></div>
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;opacity:.45"><span>◉</span><span>Link</span></div>
+</div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S2 — add product</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>11:21</span><span>LTE ▮▮▮ 61%</span></div>
+<div style="padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">← Catalog</span><span style="font-size:1.05rem;letter-spacing:-.03em;font-weight:520">New product</span></div>
+<div style="padding:18px 20px 0"><div style="width:100%;aspect-ratio:1.35;background:#d9d8d2;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px"><div style="width:40px;height:40px;border:1px solid #181a19;border-radius:10px;display:flex;align-items:center;justify-content:center">▢</div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase">Take a photo · choose from gallery</span><span style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;opacity:.55">Cropped to square before upload</span></div></div>
+<div style="padding:24px 20px 0;display:flex;flex-direction:column;gap:22px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Name</span><div style="border-bottom:1px solid #b9bab4;padding:8px 0;font-size:.95rem">Boxy Poplin Shirt</div></label>
+<div style="display:flex;gap:18px">
+<label style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Price</span><div style="border-bottom:1px solid #181a19;padding:8px 0;font-size:1.05rem">$ 72.00</div></label>
+<label style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Stock</span><div style="border-bottom:1px solid #b9bab4;padding:8px 0;font-size:1.05rem">10</div></label>
+</div>
+<div style="border-top:1px solid #b9bab4;padding-top:14px;display:flex;justify-content:space-between;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.7"><span>More details</span><span>+</span></div>
+<span style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.45;margin-top:-14px">Description · category · low-stock threshold · SKU</span>
+</div>
+<div style="margin-top:auto;padding:0 20px 24px;display:grid"><x-import component-from-global-scope="FortyPixelsDS.Button" variant="solid" href="#1b" arrow="{{ false }}" hint-size="100%,52px">Save product</x-import></div>
+</div></div></div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S3 — product detail / edit</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>11:24</span><span>LTE ▮▮▮ 60%</span></div>
+<div style="padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">← Catalog</span><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase">Save</span></div>
+<div style="padding:16px 20px 0;display:flex;gap:14px;align-items:flex-start"><div style="width:96px;height:96px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="flex:1"><div style="font-size:1.15rem;letter-spacing:-.035em;font-weight:520;line-height:1.15">Wide-Leg Trouser</div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:6px">$84.00 · 3 in stock</div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;border-bottom:1px solid #181a19;display:inline-block">Replace photo</div></div></div>
+<div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #b9bab4;padding-bottom:8px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Category</span><span style="font-size:.9rem">Denim</span></div>
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #b9bab4;padding-bottom:8px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Low-stock at</span><span style="font-size:.9rem">4</span></div>
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #b9bab4;padding-bottom:8px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">SKU</span><span style="font-size:.9rem">TC-WLT-02</span></div>
+</div>
+<div style="padding:22px 20px 0"><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">stock movement</div>
+<div style="margin-top:10px;display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;border-top:1px solid #b9bab4;padding:8px 0;font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em"><span style="opacity:.6">12 Mar</span><span>−2 · order #1043</span><span style="opacity:.6">Amara</span></div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid #b9bab4;padding:8px 0;font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em"><span style="opacity:.6">09 Mar</span><span>+6 · restock</span><span style="opacity:.6">Amara</span></div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid #b9bab4;padding:8px 0;font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em"><span style="opacity:.6">02 Mar</span><span>−1 · order #1031</span><span style="opacity:.6">Tunde</span></div>
+</div></div>
+<div style="margin-top:auto;padding:16px 20px 24px;border-top:1px solid #b9bab4;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>Archive product</span><span>↘</span></div>
+<div style="display:flex;justify-content:space-between;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.35"><span>Delete product</span><span>✕</span></div>
+<span style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.5;line-height:1.5">Delete is off — this product appears in 7 past orders. Archive removes it from your share link and keeps the history.</span>
+</div>
+</div></div></div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S4 — quick stock editor</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif;position:relative">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>11:26</span><span>LTE ▮▮▮ 60%</span></div>
+<div style="padding:18px 20px 14px;font-size:1.5rem;letter-spacing:-.05em;font-weight:520">Catalog</div>
+<div style="opacity:.4;filter:blur(1px)">
+<div style="display:flex;gap:13px;padding:13px 20px;border-top:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1"><div style="font-size:.95rem">Oat Linen Shirt</div><div style="font:650 .6rem var(--font-mono),monospace;opacity:.6;margin-top:4px">$68.00</div></div><div style="font-size:1.25rem;font-weight:520">12</div></div>
+<div style="display:flex;gap:13px;padding:13px 20px;border-top:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1"><div style="font-size:.95rem">Wide-Leg Trouser</div><div style="font:650 .6rem var(--font-mono),monospace;opacity:.6;margin-top:4px">$84.00</div></div><div style="font-size:1.25rem;font-weight:520">3</div></div>
+<div style="display:flex;gap:13px;padding:13px 20px;border-top:1px solid #b9bab4;align-items:center"><div style="width:62px;height:62px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1"><div style="font-size:.95rem">Cropped Denim Jacket</div><div style="font:650 .6rem var(--font-mono),monospace;opacity:.6;margin-top:4px">$120.00</div></div><div style="font-size:1.25rem;font-weight:520">7</div></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(24,26,25,.35)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:#fafaf7;border-top:1px solid #181a19;padding:20px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div><div style="font-size:1.05rem;letter-spacing:-.03em;font-weight:520">Cropped Denim Jacket</div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.55;margin-top:5px">Stock on hand</div></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">Saving…</span></div>
+<div style="display:flex;align-items:stretch;gap:0;border:1px solid #181a19;border-radius:10px">
+<div style="width:74px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:300;border-right:1px solid #181a19">−</div>
+<div style="flex:1;text-align:center;padding:16px 0;font-size:2.6rem;letter-spacing:-.06em;font-weight:520;line-height:1">8</div>
+<div style="width:74px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:300;border-left:1px solid #181a19;background:#181a19;color:#faf8f4">+</div>
+</div>
+<div style="display:flex;justify-content:space-between;font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55"><span>Tap the number to type it</span><span>Saves on close · no button</span></div>
+<div style="display:flex;gap:8px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase"><span style="flex:1;text-align:center;border:1px solid #b9bab4;border-radius:10px;padding:9px 0">+5</span><span style="flex:1;text-align:center;border:1px solid #b9bab4;border-radius:10px;padding:9px 0">+10</span><span style="flex:1;text-align:center;border:1px solid #b9bab4;border-radius:10px;padding:9px 0">Set to 0</span></div>
+</div>
+</div></div></div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>03 — Order Desk mobile · the 30-second loop, one continuous flow</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S1 — order list · needs action</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif;position:relative">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>17:02</span><span>LTE ▮▮▯ 48%</span></div>
+<div style="padding:18px 20px 12px;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1.5rem;letter-spacing:-.05em;font-weight:520">Orders</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.55">⌕ Search</span></div>
+<div style="padding:0 20px 14px"><div style="display:flex;gap:4px;padding:4px;border:1px solid #b9bab4;border-radius:999px;font:650 .56rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">
+<div style="flex:1;padding:9px 0;text-align:center;border-radius:999px;background:#181a19;color:#faf8f4">Needs action 5</div>
+<div style="flex:1;padding:9px 0;text-align:center;border-radius:999px;opacity:.6">Shipped 3</div>
+<div style="flex:1;padding:9px 0;text-align:center;border-radius:999px;opacity:.6">All 41</div>
+</div></div>
+<div style="flex:1;overflow:hidden">
+<div style="padding:14px 20px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1rem;letter-spacing:-.025em">Ifeoma A.</span><span style="font-size:1.05rem;letter-spacing:-.035em;font-weight:520">$152.00</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #181a19;border-radius:999px;background:#181a19;color:#faf8f4;font:650 .53rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">◉ Confirmed</span><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55">3 items · #1048 · 12m ago</span></div>
+</div>
+<div style="padding:14px 20px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1rem;letter-spacing:-.025em">Kunle O.</span><span style="font-size:1.05rem;letter-spacing:-.035em;font-weight:520">$84.00</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #181a19;border-radius:999px;font:650 .53rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">▣ Packed</span><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55">1 item · #1047 · 1h ago</span></div>
+</div>
+<div style="padding:14px 20px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1rem;letter-spacing:-.025em">Blessing E.</span><span style="font-size:1.05rem;letter-spacing:-.035em;font-weight:520">$212.00</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #181a19;border-radius:999px;background:#181a19;color:#faf8f4;font:650 .53rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">◉ Confirmed</span><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55">4 items · #1046 · 3h ago</span></div>
+</div>
+<div style="padding:14px 20px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1rem;letter-spacing:-.025em">Tunde B.</span><span style="font-size:1.05rem;letter-spacing:-.035em;font-weight:520">$45.00</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #181a19;border-radius:999px;font:650 .53rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">▣ Packed</span><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55">1 item · #1045 · 5h ago</span></div>
+</div>
+<div style="padding:14px 20px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1rem;letter-spacing:-.025em">Adaeze N.</span><span style="font-size:1.05rem;letter-spacing:-.035em;font-weight:520">$68.00</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #181a19;border-radius:999px;background:#181a19;color:#faf8f4;font:650 .53rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">◉ Confirmed</span><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55">1 item · #1044 · yesterday</span></div>
+</div>
+</div>
+<div style="position:absolute;right:18px;bottom:80px;background:#181a19;color:#faf8f4;border:1px solid #181a19;border-radius:999px;padding:14px 20px;display:flex;gap:9px;align-items:center;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;box-shadow:0 8px 20px rgba(0,0,0,.18)"><span style="font-size:.9rem">+</span>New order</div>
+<div style="border-top:1px solid #b9bab4;display:flex;padding:12px 0 18px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;background:#f1f0eb">
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;border-radius:999px;background:#181a19;color:#faf8f4"><span>▣</span><span>Orders</span></div>
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;opacity:.45"><span>▤</span><span>Catalog</span></div>
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;gap:5px;padding:7px 0;opacity:.45"><span>◉</span><span>Link</span></div>
+</div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S3 — find or add customer</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>17:03</span><span>LTE ▮▮▯ 48%</span></div>
+<div style="padding:18px 20px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">✕ Cancel</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.5">Step 1 of 3</span></div>
+<div style="display:flex;gap:5px;padding:0 20px 18px"><div style="flex:1;height:3px;border-radius:999px;background:#181a19"></div><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div></div>
+<div style="padding:0 20px"><h2 style="margin:0;font-size:1.6rem;line-height:1.02;letter-spacing:-.05em;font-weight:520">Who is it for?</h2></div>
+<div style="padding:20px 20px 0"><label style="display:flex;flex-direction:column;gap:7px"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Phone number</span><div style="border-bottom:1px solid #181a19;padding:9px 0;font-size:1.2rem;letter-spacing:-.02em">+1 415 555 0<span style="opacity:.35">|</span></div></label></div>
+<div style="padding:22px 20px 0"><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">1 match</div>
+<div style="margin-top:12px;border:1px solid #181a19;border-radius:10px;background:#fafaf7;padding:14px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:1.05rem;letter-spacing:-.03em;font-weight:520">Ifeoma Adeyemi</div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:5px">+1 415 555 0198 · last order 4 Mar · 6 orders</div></div>
+<span style="font-size:1.1rem">→</span>
+</div>
+<div style="margin-top:12px;border:1px dashed #b9bab4;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;opacity:.75">
+<div><div style="font-size:.95rem">Add a new customer</div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.7;margin-top:5px">Name + phone, nothing else</div></div>
+<span style="font-size:1.1rem">+</span>
+</div>
+</div>
+<div style="padding:24px 20px 0"><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">or start from a share-link code</div>
+<div style="margin-top:10px;border:1px solid #b9bab4;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .75rem var(--font-mono),monospace;letter-spacing:.14em">TC-4K9P</span><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Paste code</span></div>
+<span style="display:block;margin-top:8px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.5;line-height:1.5">Pulls the customer and the items they picked straight into a draft.</span></div>
+<div style="margin-top:auto;padding:0 20px 24px;display:grid"><x-import component-from-global-scope="FortyPixelsDS.Button" variant="solid" href="#1c" hint-size="100%,52px">Continue to items</x-import></div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S4 — add items</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif;position:relative">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>17:03</span><span>LTE ▮▮▯ 47%</span></div>
+<div style="padding:16px 20px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">← Ifeoma A.</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.5">Step 2 of 3</span></div>
+<div style="display:flex;gap:5px;padding:0 20px 14px"><div style="flex:1;height:3px;border-radius:999px;background:#181a19"></div><div style="flex:1;height:3px;border-radius:999px;background:#181a19"></div><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div></div>
+<div style="padding:0 20px 12px"><div style="border:1px solid #b9bab4;border-radius:10px;padding:9px 12px;display:flex;gap:9px;align-items:center;font-size:.85rem;opacity:.55"><span>⌕</span><span>Search 14 products</span></div></div>
+<div style="flex:1;overflow:hidden;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start">
+<div style="border:1px solid #181a19;border-radius:10px;background:#fafaf7">
+<div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="padding:8px 9px"><div style="font-size:.82rem;line-height:1.2;letter-spacing:-.02em">Oat Linen Shirt</div><div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em;margin-top:5px">$68.00</div></div>
+<div style="display:flex;border-top:1px solid #181a19;align-items:stretch;font:650 .7rem var(--font-mono),monospace"><div style="flex:none;width:34px;text-align:center;padding:7px 0;border-right:1px solid #181a19">−</div><div style="flex:1;text-align:center;padding:7px 0;font-weight:650">2</div><div style="flex:none;width:34px;text-align:center;padding:7px 0;border-left:1px solid #181a19;background:#181a19;color:#faf8f4">+</div></div>
+</div>
+<div style="border:1px solid #b9bab4;border-radius:10px;background:#fafaf7">
+<div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="padding:8px 9px"><div style="font-size:.82rem;line-height:1.2;letter-spacing:-.02em">Silk Scarf — Ochre</div><div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em;margin-top:5px">$45.00</div></div>
+<div style="border-top:1px solid #b9bab4;text-align:center;padding:7px 0;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div>
+</div>
+<div style="border:1px solid #181a19;border-radius:10px;background:#fafaf7">
+<div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div>
+<div style="padding:8px 9px"><div style="font-size:.82rem;line-height:1.2;letter-spacing:-.02em">Cropped Denim Jacket</div><div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em;margin-top:5px">$120.00</div></div>
+<div style="display:flex;border-top:1px solid #181a19;align-items:stretch;font:650 .7rem var(--font-mono),monospace"><div style="flex:none;width:34px;text-align:center;padding:7px 0;border-right:1px solid #181a19">−</div><div style="flex:1;text-align:center;padding:7px 0;font-weight:650">1</div><div style="flex:none;width:34px;text-align:center;padding:7px 0;border-left:1px solid #181a19;background:#181a19;color:#faf8f4">+</div></div>
+</div>
+<div style="border:1px solid #b9bab4;border-radius:10px;background:#fafaf7;opacity:.5">
+<div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.5">PHOTO</div>
+<div style="padding:8px 9px"><div style="font-size:.82rem;line-height:1.2;letter-spacing:-.02em">Wide-Leg Trouser</div><div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.04em;margin-top:5px">$84.00</div></div>
+<div style="border-top:1px solid #b9bab4;text-align:center;padding:7px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Out of stock · 0</div>
+</div>
+</div>
+<div style="border-top:1px solid #181a19;background:#201f1d;color:#fff;padding:14px 20px 20px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">3 items</div><div style="font-size:1.45rem;letter-spacing:-.05em;font-weight:520;margin-top:3px">$256.00</div></div>
+<div style="background:#fafaf7;color:#181a19;padding:12px 16px;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;display:flex;gap:9px;align-items:center">Review<span>→</span></div>
+</div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S5 — review &amp; save</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>17:04</span><span>LTE ▮▮▯ 47%</span></div>
+<div style="padding:16px 20px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">← Items</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.5">Step 3 of 3</span></div>
+<div style="display:flex;gap:5px;padding:0 20px 16px"><div style="flex:1;height:3px;border-radius:999px;background:#181a19"></div><div style="flex:1;height:3px;border-radius:999px;background:#181a19"></div><div style="flex:1;height:3px;border-radius:999px;background:#181a19"></div></div>
+<div style="padding:0 20px 14px;border-bottom:1px solid #b9bab4"><div style="font-size:1.05rem;letter-spacing:-.03em;font-weight:520">Ifeoma Adeyemi</div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:4px">+1 415 555 0198</div></div>
+<div style="flex:1;overflow:hidden">
+<div style="display:flex;gap:11px;padding:12px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:44px;height:44px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1"><div style="font-size:.9rem">Oat Linen Shirt</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$68.00 each</div></div><div style="display:flex;border:1px solid #b9bab4;border-radius:10px;font:650 .62rem var(--font-mono),monospace"><span style="width:26px;text-align:center;padding:4px 0;border-right:1px solid #b9bab4">−</span><span style="width:26px;text-align:center;padding:4px 0">2</span><span style="width:26px;text-align:center;padding:4px 0;border-left:1px solid #b9bab4">+</span></div></div>
+<div style="display:flex;gap:11px;padding:12px 20px;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:44px;height:44px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1"><div style="font-size:.9rem">Cropped Denim Jacket</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$120.00 each</div></div><div style="display:flex;border:1px solid #b9bab4;border-radius:10px;font:650 .62rem var(--font-mono),monospace"><span style="width:26px;text-align:center;padding:4px 0;border-right:1px solid #b9bab4">−</span><span style="width:26px;text-align:center;padding:4px 0">1</span><span style="width:26px;text-align:center;padding:4px 0;border-left:1px solid #b9bab4">+</span></div></div>
+<div style="padding:14px 20px 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #b9bab4;padding-bottom:8px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Delivery fee</span><span style="font-size:.9rem">$8.00</span></div>
+<div style="display:flex;justify-content:space-between;border-bottom:1px solid #b9bab4;padding-bottom:8px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Discount</span><span style="font-size:.9rem;opacity:.45">Flat or %</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Note</span><div style="border:1px solid #b9bab4;border-radius:10px;padding:9px 11px;font-size:.85rem;line-height:1.4;min-height:52px">Wants it before Friday, gate code 4402</div></div>
+</div>
+</div>
+<div style="border-top:1px solid #181a19;padding:14px 20px 20px;background:#f1f0eb;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">Order total</span><span style="font-size:1.6rem;letter-spacing:-.055em;font-weight:520">$264.00</span></div>
+<div style="display:flex;gap:10px"><div style="flex:1;border:1px solid #181a19;border-radius:999px;text-align:center;padding:15px 0;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Save draft</div><div style="flex:1.4;background:#181a19;color:#faf8f4;border:1px solid #181a19;border-radius:999px;text-align:center;padding:15px 0;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Confirm order</div></div>
+</div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S6 — order detail</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#f1f0eb;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 2px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>17:10</span><span>LTE ▮▮▯ 46%</span></div>
+<div style="padding:16px 20px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">← Orders</span><span style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase">#1048</span></div>
+<div style="padding:0 20px 14px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;align-items:flex-start">
+<div><div style="font-size:1.2rem;letter-spacing:-.035em;font-weight:520">Ifeoma Adeyemi</div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.6;margin-top:5px">+1 415 555 0198</div></div>
+<div style="display:flex;gap:7px"><span style="width:38px;height:38px;border:1px solid #181a19;border-radius:10px;display:flex;align-items:center;justify-content:center">✆</span><span style="width:38px;height:38px;border:1px solid #181a19;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#181a19;color:#faf8f4">✆</span></div>
+</div>
+<div style="padding:14px 20px;background:#201f1d;color:#fff;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.55">Stage 2 of 5</div><div style="display:flex;align-items:center;gap:7px;margin-top:5px"><span style="font-size:1.05rem;letter-spacing:-.03em;font-weight:520">◉ Confirmed</span></div></div>
+<div style="background:#fafaf7;color:#181a19;padding:11px 14px;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Mark packed →</div>
+</div>
+<div style="flex:1;overflow:hidden">
+<div style="display:flex;justify-content:space-between;padding:11px 20px;border-bottom:1px solid #b9bab4;font-size:.88rem"><span>Oat Linen Shirt × 2</span><span style="font:650 .62rem var(--font-mono),monospace">$136.00</span></div>
+<div style="display:flex;justify-content:space-between;padding:11px 20px;border-bottom:1px solid #b9bab4;font-size:.88rem"><span>Cropped Denim Jacket × 1</span><span style="font:650 .62rem var(--font-mono),monospace">$120.00</span></div>
+<div style="display:flex;justify-content:space-between;padding:11px 20px;border-bottom:1px solid #b9bab4;font-size:.88rem;opacity:.7"><span>Delivery</span><span style="font:650 .62rem var(--font-mono),monospace">$8.00</span></div>
+<div style="display:flex;justify-content:space-between;padding:13px 20px;border-bottom:1px solid #181a19;align-items:baseline"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">Total</span><span style="font-size:1.3rem;letter-spacing:-.045em;font-weight:520">$264.00</span></div>
+<div style="padding:14px 20px 0"><div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Note</div><div style="margin-top:7px;border-left:2px solid #181a19;padding-left:10px;font-size:.85rem;line-height:1.4">Wants it before Friday, gate code 4402</div></div>
+<div style="padding:18px 20px 0"><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">history</div>
+<div style="margin-top:9px">
+<div style="display:flex;justify-content:space-between;border-top:1px solid #b9bab4;padding:7px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.04em"><span>Confirmed</span><span style="opacity:.6">17:04 · Amara</span></div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid #b9bab4;padding:7px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.04em"><span>Draft created</span><span style="opacity:.6">17:02 · Amara</span></div>
+</div></div>
+</div>
+<div style="border-top:1px solid #b9bab4;padding:13px 20px 20px;display:flex;justify-content:space-between;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.65"><span>Cancel order</span><span>Edit items</span></div>
+</div></div></div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>03 S2 + owner desktop · board view and catalog on a wider screen</div>
+<div class="dv-card"><div style="padding:32px;display:flex;flex-direction:column;gap:28px">
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S2 — board view · desktop / tablet only</div>
+<div style="width:1180px;background:#fafaf7;border:1px solid rgba(0,0,0,.2);border-radius:12px;box-shadow:0 24px 55px rgba(0,0,0,.18)">
+<div style="display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-bottom:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.03)"><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><span style="margin-left:14px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;opacity:.5">desk.fortypixels.com/orders/board</span></div>
+<div style="background:#f1f0eb;color:#181a19;font-family:var(--font-sans),sans-serif;display:flex;min-height:600px">
+<div style="width:190px;flex:none;border-right:1px solid #b9bab4;padding:22px 18px;display:flex;flex-direction:column;gap:26px">
+<div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.55">thread &amp; co.</div>
+<div style="display:flex;flex-direction:column;gap:13px;font:650 .6rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">
+<span style="padding:7px 12px;border-radius:999px;background:#181a19;color:#faf8f4;text-align:center">Orders</span><span style="opacity:.55">Catalog</span><span style="opacity:.55">Customers</span><span style="opacity:.55">Share link</span><span style="opacity:.55">Settings</span>
+</div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:11px">
+<div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.5">Needs action</div><div style="font-size:1.9rem;letter-spacing:-.055em;font-weight:520;line-height:1">5</div></div>
+<div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.5">Today</div><div style="font-size:1.9rem;letter-spacing:-.055em;font-weight:520;line-height:1">$612</div></div>
+<div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.5">Low stock</div><div style="font-size:1.9rem;letter-spacing:-.055em;font-weight:520;line-height:1">3</div></div>
+</div>
+</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="padding:20px 24px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4">
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font-size:1.5rem;letter-spacing:-.05em;font-weight:520">Order board</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.5">List view ↗</span></div>
+<div style="display:flex;gap:10px;align-items:center"><div style="border:1px solid #b9bab4;border-radius:10px;padding:8px 12px;font-size:.8rem;opacity:.55">⌕ Customer, phone, or #</div><div style="background:#181a19;color:#faf8f4;border:1px solid #181a19;border-radius:10px;padding:9px 14px;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">+ New order</div></div>
+</div>
+<div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr)">
+<div style="border-right:1px solid #b9bab4;display:flex;flex-direction:column">
+<div style="padding:13px 14px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;font:650 .56rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>◌ Draft</span><span style="opacity:.5">2</span></div>
+<div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Chidi M.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">2 items · #1049</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$98.00</div></div>
+<div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Ngozi K.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">1 item · #1050 · from link</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$45.00</div></div>
+</div></div>
+<div style="border-right:1px solid #b9bab4;display:flex;flex-direction:column;background:rgba(24,26,25,.05)">
+<div style="padding:13px 14px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;font:650 .56rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>◉ Confirmed</span><span style="opacity:.5">3</span></div>
+<div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#fafaf7;border:1px solid #181a19;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Ifeoma A.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">3 items · #1048</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$264.00</div><div style="margin-top:9px;border-top:1px solid #b9bab4;padding-top:8px;font:650 .53rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Mark packed →</div></div>
+<div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Blessing E.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">4 items · #1046</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$212.00</div></div>
+<div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Adaeze N.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">1 item · #1044</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$68.00</div></div>
+</div></div>
+<div style="border-right:1px solid #b9bab4;display:flex;flex-direction:column">
+<div style="padding:13px 14px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;font:650 .56rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>▣ Packed</span><span style="opacity:.5">2</span></div>
+<div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Kunle O.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">1 item · #1047</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$84.00</div></div>
+<div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Tunde B.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">1 item · #1045</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$45.00</div></div>
+</div></div>
+<div style="border-right:1px solid #b9bab4;display:flex;flex-direction:column">
+<div style="padding:13px 14px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;font:650 .56rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>➔ Shipped</span><span style="opacity:.5">1</span></div>
+<div style="padding:12px"><div style="background:#fafaf7;border:1px solid #b9bab4;border-radius:10px;padding:11px"><div style="font-size:.88rem;letter-spacing:-.02em">Amina S.</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:5px">2 items · #1042</div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520;margin-top:7px">$156.00</div></div></div>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="padding:13px 14px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;font:650 .56rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>✓ Delivered</span><span style="opacity:.5">0</span></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px"><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.35;text-align:center;line-height:1.6">Drag a card here<br>when it lands</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">02 S1 + 04 owner settings · desktop</div>
+<div style="display:flex;gap:24px;align-items:flex-start">
+<div style="width:578px;flex:none;background:#fafaf7;border:1px solid rgba(0,0,0,.2);border-radius:12px;box-shadow:0 24px 55px rgba(0,0,0,.18)">
+<div style="display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-bottom:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.03)"><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><span style="margin-left:14px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;opacity:.5">desk.fortypixels.com/catalog</span></div>
+<div style="background:#f1f0eb;color:#181a19;font-family:var(--font-sans),sans-serif;padding:24px;min-height:520px">
+<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4;padding-bottom:16px"><span style="font-size:1.5rem;letter-spacing:-.05em;font-weight:520">Catalog</span><div style="background:#181a19;color:#faf8f4;border:1px solid #181a19;border-radius:10px;padding:9px 14px;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">+ Add product</div></div>
+<div style="display:grid;grid-template-columns:72px 1fr 90px 90px 110px;padding:12px 0;border-bottom:1px solid #b9bab4;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.55"><span></span><span>Product</span><span>Price</span><span>Stock</span><span>Category</span></div>
+<div style="display:grid;grid-template-columns:72px 1fr 90px 90px 110px;padding:12px 0;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:56px;height:56px;background:#d9d8d2;border-radius:8px"></div><span style="font-size:.95rem">Oat Linen Shirt</span><span style="font:650 .62rem var(--font-mono),monospace">$68.00</span><span style="font-size:1.05rem;font-weight:520">12</span><span style="font:650 .55rem var(--font-mono),monospace;opacity:.6">Tops</span></div>
+<div style="display:grid;grid-template-columns:72px 1fr 90px 90px 110px;padding:12px 0;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:56px;height:56px;background:#d9d8d2;border-radius:8px"></div><div><span style="font-size:.95rem">Wide-Leg Trouser</span><div style="display:inline-block;margin-left:9px;padding:2px 6px;background:#efe9cf;border:1px solid #d8cd9c;border-radius:999px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Low</div></div><span style="font:650 .62rem var(--font-mono),monospace">$84.00</span><span style="font-size:1.05rem;font-weight:520">3</span><span style="font:650 .55rem var(--font-mono),monospace;opacity:.6">Denim</span></div>
+<div style="display:grid;grid-template-columns:72px 1fr 90px 90px 110px;padding:12px 0;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:56px;height:56px;background:#d9d8d2;border-radius:8px"></div><span style="font-size:.95rem">Cropped Denim Jacket</span><span style="font:650 .62rem var(--font-mono),monospace">$120.00</span><span style="font-size:1.05rem;font-weight:520">7</span><span style="font:650 .55rem var(--font-mono),monospace;opacity:.6">Denim</span></div>
+<div style="display:grid;grid-template-columns:72px 1fr 90px 90px 110px;padding:12px 0;border-bottom:1px solid #b9bab4;align-items:center"><div style="width:56px;height:56px;background:#d9d8d2;border-radius:8px"></div><span style="font-size:.95rem">Ribbed Tank — Black</span><span style="font:650 .62rem var(--font-mono),monospace">$32.00</span><span style="font-size:1.05rem;font-weight:520">24</span><span style="font:650 .55rem var(--font-mono),monospace;opacity:.6">Tops</span></div>
+<div style="display:grid;grid-template-columns:72px 1fr 90px 90px 110px;padding:12px 0;border-bottom:1px solid #b9bab4;align-items:center;opacity:.45"><div style="width:56px;height:56px;background:#d9d8d2;border-radius:8px"></div><div><span style="font-size:.95rem">Linen Shorts — Sand</span><div style="display:inline-block;margin-left:9px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Archived</div></div><span style="font:650 .62rem var(--font-mono),monospace">$54.00</span><span style="font-size:1.05rem;font-weight:520">0</span><span style="font:650 .55rem var(--font-mono),monospace;opacity:.6">Tops</span></div>
+</div>
+</div>
+
+<div style="width:452px;flex:none;background:#fafaf7;border:1px solid rgba(0,0,0,.2);border-radius:12px;box-shadow:0 24px 55px rgba(0,0,0,.18)">
+<div style="display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-bottom:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.03)"><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><i style="width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);display:block"></i><span style="margin-left:14px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;opacity:.5">desk.fortypixels.com/share-link</span></div>
+<div style="background:#f1f0eb;color:#181a19;font-family:var(--font-sans),sans-serif;padding:24px;min-height:520px;display:flex;flex-direction:column;gap:20px">
+<div><div style="font:650 .6rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5">share link</div><h2 style="margin:10px 0 0;font-size:1.7rem;letter-spacing:-.05em;font-weight:520;line-height:1">Your page, and how to hand it out.</h2></div>
+<div style="display:flex;gap:18px;align-items:flex-start">
+<div style="width:132px;height:132px;flex:none;background:repeating-conic-gradient(#181a19 0% 25%,#fafaf7 0% 50%) 0 0/12px 12px;position:relative;border:6px solid #fafaf7;outline:1px solid #181a19">
+<div style="position:absolute;top:0;left:0;width:34px;height:34px;background:#181a19;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;background:#fafaf7;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;background:#181a19"></div></div></div>
+<div style="position:absolute;top:0;right:0;width:34px;height:34px;background:#181a19;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;background:#fafaf7;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;background:#181a19"></div></div></div>
+<div style="position:absolute;bottom:0;left:0;width:34px;height:34px;background:#181a19;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:20px;background:#fafaf7;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;background:#181a19"></div></div></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px">
+<div style="border:1px solid #181a19;border-radius:10px;padding:10px 12px;font:650 .58rem var(--font-mono),monospace;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center"><span>desk.fortypixels.com/thread-co</span><span style="letter-spacing:.07em;text-transform:uppercase">Copy</span></div>
+<div style="display:flex;gap:8px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase"><span style="flex:1;text-align:center;border:1px solid #b9bab4;border-radius:10px;padding:8px 0">Download QR</span><span style="flex:1;text-align:center;border:1px solid #b9bab4;border-radius:10px;padding:8px 0">Print card</span></div>
+<span style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55;line-height:1.5">Stick the QR on your counter — it opens the same page.</span>
+</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #b9bab4;border-bottom:1px solid #b9bab4;padding:14px 0">
+<div><div style="font-size:.95rem">Page is live</div><div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55;margin-top:4px">Pause it and visitors see a short notice</div></div>
+<div style="width:52px;height:28px;background:#181a19;border:1px solid #181a19;border-radius:10px;border-radius:999px;display:flex;justify-content:flex-end;padding:2px"><div style="width:24px;height:100%;border-radius:999px;background:#faf8f4"></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4;padding-bottom:9px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Logo</span><div style="display:flex;gap:9px;align-items:center"><div style="width:34px;height:34px;background:#d9d8d2;border-radius:8px"></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Replace</span></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4;padding-bottom:9px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Accent colour</span><div style="display:flex;gap:6px"><span style="width:22px;height:22px;border-radius:999px;background:#8a5a3b;outline:1px solid #181a19;outline-offset:2px"></span><span style="width:22px;height:22px;border-radius:999px;background:#2f4a3c"></span><span style="width:22px;height:22px;border-radius:999px;background:#1f3a5f"></span><span style="width:22px;height:22px;border-radius:999px;background:#181a19;color:#faf8f4"></span></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #b9bab4;padding-bottom:9px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Business name</span><span style="font-size:.9rem">Thread &amp; Co.</span></div>
+<div style="display:flex;flex-direction:column;gap:7px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Delivery note shown at checkout</span><div style="border:1px solid #b9bab4;border-radius:10px;padding:10px;font-size:.85rem;line-height:1.4">Lagos delivery 1–2 days, $8 flat. Outside Lagos, we quote on WhatsApp.</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>04 — Share link · the only screen a customer sees, plus the handoff</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S1 — public catalog</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#faf8f4;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 6px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>19:20</span><span>LTE ▮▮▮ 88%</span></div>
+<div style="padding:0 14px 8px"><div style="border:1px solid #b9bab4;border-radius:10px;background:#efedE8;padding:6px 10px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.04em;opacity:.6;text-align:center">desk.fortypixels.com/thread-co</div></div>
+<div style="padding:18px 20px 16px;border-bottom:1px solid #e0ddd5;display:flex;justify-content:space-between;align-items:flex-start">
+<div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:44px;background:#d9d8d2;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.45">LOGO</div>
+<div><div style="font-size:1.15rem;letter-spacing:-.04em;font-weight:520">Thread &amp; Co.</div><div style="font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.55;margin-top:3px">Lagos · made-to-order</div></div></div>
+<div style="width:36px;height:36px;border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;display:flex;align-items:center;justify-content:center">✆</div>
+</div>
+<div style="padding:12px 20px 12px;display:flex;gap:7px;font:650 .53rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase"><span style="padding:5px 11px;border-radius:999px;background:#8a5a3b;color:#faf8f4">All</span><span style="padding:5px 11px;border:1px solid #cfc9bd;border-radius:999px">Tops</span><span style="padding:5px 11px;border:1px solid #cfc9bd;border-radius:999px">Denim</span><span style="padding:5px 11px;border:1px solid #cfc9bd;border-radius:999px">Access.</span></div>
+<div style="flex:1;overflow:hidden;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start">
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Oat Linen Shirt</div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:5px"><span style="font:650 .6rem var(--font-mono),monospace">$68.00</span><span style="font:650 .48rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">In stock</span></div></div><div style="border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;text-align:center;padding:8px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Cropped Denim Jacket</div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:5px"><span style="font:650 .6rem var(--font-mono),monospace">$120.00</span><span style="font:650 .48rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">Low stock</span></div></div><div style="border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;text-align:center;padding:8px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Silk Scarf — Ochre</div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:5px"><span style="font:650 .6rem var(--font-mono),monospace">$45.00</span><span style="font:650 .48rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">In stock</span></div></div><div style="border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;text-align:center;padding:8px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+<div style="opacity:.5"><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.5">PHOTO</div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Wide-Leg Trouser</div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:5px"><span style="font:650 .6rem var(--font-mono),monospace">$84.00</span><span style="font:650 .48rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.55">Sold out</span></div></div><div style="border:1px solid #cfc9bd;border-radius:10px;text-align:center;padding:8px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Unavailable</div></div>
+</div>
+<div style="border-top:1px solid #e0ddd5;padding:14px 20px 20px;display:flex;justify-content:space-between;align-items:center;background:#faf8f4"><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.5">Nothing selected yet</span><span style="font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.4">Tap add on an item</span></div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S2 — item selected · same tile as 03 S4</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#faf8f4;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 6px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>19:21</span><span>LTE ▮▮▮ 88%</span></div>
+<div style="padding:0 14px 8px"><div style="border:1px solid #b9bab4;border-radius:10px;background:#efedE8;padding:6px 10px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.04em;opacity:.6;text-align:center">desk.fortypixels.com/thread-co</div></div>
+<div style="padding:14px 20px 14px;border-bottom:1px solid #e0ddd5;display:flex;gap:12px;align-items:center"><div style="width:36px;height:36px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="font-size:1.05rem;letter-spacing:-.04em;font-weight:520">Thread &amp; Co.</div></div>
+<div style="flex:1;overflow:hidden;padding:14px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start">
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO<div style="position:absolute;top:0;right:0;background:#8a5a3b;color:#faf8f4;padding:4px 7px;font:650 .52rem var(--font-mono),monospace">×2</div></div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Oat Linen Shirt</div><div style="font:650 .6rem var(--font-mono),monospace;margin-top:5px">$68.00</div></div><div style="display:flex;border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;font:650 .7rem var(--font-mono),monospace"><span style="width:32px;text-align:center;padding:6px 0;border-right:1px solid #8a5a3b">−</span><span style="flex:1;text-align:center;padding:6px 0">2</span><span style="width:32px;text-align:center;padding:6px 0;border-left:1px solid #8a5a3b;background:#8a5a3b;color:#faf8f4">+</span></div></div>
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Cropped Denim Jacket</div><div style="font:650 .6rem var(--font-mono),monospace;margin-top:5px">$120.00</div></div><div style="border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;text-align:center;padding:8px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;position:relative;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO<div style="position:absolute;top:0;right:0;background:#8a5a3b;color:#faf8f4;padding:4px 7px;font:650 .52rem var(--font-mono),monospace">×1</div></div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Silk Scarf — Ochre</div><div style="font:650 .6rem var(--font-mono),monospace;margin-top:5px">$45.00</div></div><div style="display:flex;border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;font:650 .7rem var(--font-mono),monospace"><span style="width:32px;text-align:center;padding:6px 0;border-right:1px solid #8a5a3b">−</span><span style="flex:1;text-align:center;padding:6px 0">1</span><span style="width:32px;text-align:center;padding:6px 0;border-left:1px solid #8a5a3b;background:#8a5a3b;color:#faf8f4">+</span></div></div>
+<div><div style="aspect-ratio:.82;background:#d9d8d2;border-radius:8px;display:flex;align-items:center;justify-content:center;font:650 .5rem var(--font-mono),monospace;opacity:.4">PHOTO</div><div style="padding:8px 0"><div style="font-size:.85rem;line-height:1.25;letter-spacing:-.02em">Ribbed Tank — Black</div><div style="font:650 .6rem var(--font-mono),monospace;margin-top:5px">$32.00</div></div><div style="border:1px solid #8a5a3b;border-radius:10px;color:#8a5a3b;text-align:center;padding:8px 0;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+</div>
+<div style="border-top:1px solid #181a19;background:#8a5a3b;color:#faf8f4;padding:13px 20px 20px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.7">3 items selected</div><div style="font-size:1.3rem;letter-spacing:-.05em;font-weight:520;margin-top:3px">$181.00</div></div>
+<div style="background:#faf8f4;color:#181a19;padding:12px 15px;font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;display:flex;gap:8px;align-items:center">Continue<span>→</span></div>
+</div>
+</div></div></div>
+
+<div style="align-self:center;font:650 .6rem var(--font-mono),monospace;opacity:.4;flex:none">→</div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">S3 — checkout handoff</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#faf8f4;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 6px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>19:22</span><span>LTE ▮▮▮ 87%</span></div>
+<div style="padding:14px 20px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e0ddd5"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">← Keep browsing</span><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;color:#8a5a3b">Your order</span></div>
+<div style="padding:20px 20px 0"><h2 style="margin:0;font-size:1.6rem;line-height:1.02;letter-spacing:-.05em;font-weight:520">Send this to Thread &amp; Co.</h2><p style="margin:10px 0 0;font-size:.85rem;line-height:1.45;opacity:.6">We open WhatsApp with the list ready. Amara confirms price and delivery there.</p></div>
+<div style="padding:20px 20px 0">
+<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid #e0ddd5;font-size:.88rem"><span>Oat Linen Shirt × 2</span><span style="font:650 .6rem var(--font-mono),monospace">$136.00</span></div>
+<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid #e0ddd5;font-size:.88rem"><span>Silk Scarf — Ochre × 1</span><span style="font:650 .6rem var(--font-mono),monospace">$45.00</span></div>
+<div style="display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid #181a19;align-items:baseline"><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">Subtotal</span><span style="font-size:1.4rem;letter-spacing:-.05em;font-weight:520">$181.00</span></div>
+<div style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.55;line-height:1.5">Lagos delivery 1–2 days, $8 flat. Outside Lagos, we quote on WhatsApp.</div>
+</div>
+<div style="padding:18px 20px 0;display:flex;flex-direction:column;gap:7px"><span style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Any request for the seller</span><div style="border:1px solid #cfc9bd;border-radius:10px;padding:10px;font-size:.85rem;min-height:58px;opacity:.45">Delivery area, preferred day, anything else…</div></div>
+<div style="margin-top:auto;padding:0 20px 24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;border:1px dashed #cfc9bd;border-radius:10px;padding:10px 12px"><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.6">Reference</span><span style="font:650 .75rem var(--font-mono),monospace;letter-spacing:.16em">TC-4K9P</span></div>
+<div style="background:#181a19;color:#faf8f4;border-radius:999px;text-align:center;padding:17px 0;font:650 .62rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:center;gap:10px;align-items:center">✆ Order on WhatsApp</div>
+<span style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.05em;opacity:.5;text-align:center">No account, no payment here</span>
+</div>
+</div></div></div>
+
+<div style="width:328px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">handoff result — the pre-filled message</div>
+<div style="width:328px;height:672px;background:#201f1d;border-radius:30px;padding:9px 8px;box-shadow:0 18px 40px rgba(0,0,0,.16)"><div style="height:100%;background:#e9e4dc;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 6px;font:650 .55rem var(--font-mono),monospace;opacity:.45"><span>19:22</span><span>LTE ▮▮▮ 87%</span></div>
+<div style="padding:12px 18px;background:#d6d0c6;display:flex;gap:11px;align-items:center;border-bottom:1px solid #c2bcb1"><span style="font:650 .7rem var(--font-mono),monospace">←</span><div style="width:34px;height:34px;background:#c2bcb1;border-radius:50%"></div><div><div style="font-size:.95rem">Thread &amp; Co.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:2px">+1 415 555 0132</div></div></div>
+<div style="flex:1;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px">
+<div style="align-self:flex-end;max-width:82%;background:#dcf5a8;border:1px solid #c3d996;border-radius:14px;padding:12px 13px;font-size:.85rem;line-height:1.5">
+Hi Thread &amp; Co., I'd like to order:<br><br>2 × Oat Linen Shirt — $136.00<br>1 × Silk Scarf, Ochre — $45.00<br><br>Subtotal $181.00<br>Ref: TC-4K9P<br><br>Delivering to Yaba, any day this week works.
+<div style="text-align:right;font:650 .5rem var(--font-mono),monospace;opacity:.5;margin-top:8px">19:22</div>
+</div>
+<div style="align-self:center;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.45;text-align:center;line-height:1.6;max-width:24ch">Owner pastes TC-4K9P in Order Desk → draft with these line items</div>
+</div>
+<div style="padding:12px 16px 20px;background:#d6d0c6;display:flex;gap:10px;align-items:center"><div style="flex:1;background:#faf8f4;border:1px solid #c2bcb1;border-radius:10px;padding:11px 13px;font-size:.85rem;opacity:.5">Message</div><div style="width:42px;height:42px;background:#181a19;color:#faf8f4;display:flex;align-items:center;justify-content:center">➤</div></div>
+</div></div></div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Order list — three ways in · tabs / grouped feed / mobile swimlanes</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">A · status tabs (as spec'd)</div>
+<div style="width:300px;height:520px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 18px 10px;font-size:1.35rem;letter-spacing:-.05em;font-weight:520">Orders</div>
+<div style="padding:0 18px 12px"><div style="display:flex;gap:4px;padding:4px;border:1px solid #b9bab4;border-radius:999px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase"><div style="flex:1;padding:8px 0;text-align:center;border-radius:999px;background:#181a19;color:#faf8f4">Needs action 5</div><div style="flex:1;padding:8px 0;text-align:center;border-radius:999px;opacity:.6">Shipped 3</div><div style="flex:1;padding:8px 0;text-align:center;border-radius:999px;opacity:.6">All 41</div></div></div>
+<div style="flex:1">
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between"><span style="font-size:.92rem">Ifeoma A.</span><span style="font-size:1rem;font-weight:520;letter-spacing:-.03em">$152.00</span></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="padding:3px 8px;border:1px solid #181a19;border-radius:999px;background:#181a19;color:#faf8f4;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">◉ Confirmed</span><span style="font:650 .5rem var(--font-mono),monospace;opacity:.55">3 items · 12m</span></div></div>
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between"><span style="font-size:.92rem">Kunle O.</span><span style="font-size:1rem;font-weight:520;letter-spacing:-.03em">$84.00</span></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="padding:3px 8px;border:1px solid #181a19;border-radius:999px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">▣ Packed</span><span style="font:650 .5rem var(--font-mono),monospace;opacity:.55">1 item · 1h</span></div></div>
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;flex-direction:column;gap:7px"><div style="display:flex;justify-content:space-between"><span style="font-size:.92rem">Blessing E.</span><span style="font-size:1rem;font-weight:520;letter-spacing:-.03em">$212.00</span></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="padding:3px 8px;border:1px solid #181a19;border-radius:999px;background:#181a19;color:#faf8f4;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">◉ Confirmed</span><span style="font:650 .5rem var(--font-mono),monospace;opacity:.55">4 items · 3h</span></div></div>
+</div>
+<div style="border-top:1px solid #b9bab4;padding:11px 18px 16px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;opacity:.6"><span>One list, filtered</span><span>Familiar</span></div>
+</div></div></div>
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">B · grouped action feed</div>
+<div style="width:300px;height:520px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 18px 4px;font-size:1.35rem;letter-spacing:-.05em;font-weight:520">Today</div>
+<div style="padding:0 18px 12px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.55">5 need you · 3 in transit · $612 taken</div>
+<div style="flex:1;overflow:hidden">
+<div style="background:#201f1d;color:#fff;padding:8px 18px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase">pack these · 3</div>
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.92rem">Ifeoma A.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">3 items · $152.00</div></div><span style="border:1px solid #181a19;border-radius:10px;background:#181a19;color:#faf8f4;padding:7px 9px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Pack →</span></div>
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.92rem">Blessing E.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">4 items · $212.00</div></div><span style="border:1px solid #181a19;border-radius:10px;background:#181a19;color:#faf8f4;padding:7px 9px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Pack →</span></div>
+<div style="background:#201f1d;color:#fff;padding:8px 18px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase">send these · 2</div>
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.92rem">Kunle O.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">1 item · $84.00</div></div><span style="border:1px solid #181a19;border-radius:10px;padding:7px 9px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Ship →</span></div>
+<div style="padding:12px 18px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.92rem">Tunde B.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">1 item · $45.00</div></div><span style="border:1px solid #181a19;border-radius:10px;padding:7px 9px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Ship →</span></div>
+</div>
+<div style="border-top:1px solid #b9bab4;padding:11px 18px 16px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;opacity:.6"><span>Verbs, not statuses</span><span>Fewer taps</span></div>
+</div></div></div>
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">C · swipeable mobile lanes</div>
+<div style="width:300px;height:520px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 18px 10px;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:1.35rem;letter-spacing:-.05em;font-weight:520">Board</span><span style="font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.55">Swipe lanes ←→</span></div>
+<div style="display:flex;gap:4px;padding:0 18px 12px"><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div><div style="flex:2;height:3px;border-radius:999px;background:#181a19"></div><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div><div style="flex:1;height:3px;border-radius:999px;background:#b9bab4"></div></div>
+<div style="flex:1;display:flex;gap:10px;padding:0 0 0 18px;overflow:hidden">
+<div style="width:216px;flex:none;border:1px solid #181a19;border-radius:10px;background:#fafaf7;display:flex;flex-direction:column">
+<div style="padding:10px 12px;border-bottom:1px solid #181a19;display:flex;justify-content:space-between;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>◉ Confirmed</span><span style="opacity:.5">3</span></div>
+<div style="padding:11px;display:flex;flex-direction:column;gap:9px">
+<div style="border:1px solid #b9bab4;border-radius:10px;padding:10px"><div style="font-size:.88rem">Ifeoma A.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">3 items · #1048</div><div style="font-size:1rem;font-weight:520;letter-spacing:-.035em;margin-top:6px">$152.00</div><div style="margin-top:8px;border-top:1px solid #b9bab4;padding-top:7px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Hold to move →</div></div>
+<div style="border:1px solid #b9bab4;border-radius:10px;padding:10px"><div style="font-size:.88rem">Blessing E.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">4 items · #1046</div><div style="font-size:1rem;font-weight:520;letter-spacing:-.035em;margin-top:6px">$212.00</div></div>
+<div style="border:1px solid #b9bab4;border-radius:10px;padding:10px"><div style="font-size:.88rem">Adaeze N.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">1 item · #1044</div><div style="font-size:1rem;font-weight:520;letter-spacing:-.035em;margin-top:6px">$68.00</div></div>
+</div></div>
+<div style="width:216px;flex:none;border:1px solid #b9bab4;border-radius:10px;background:#fafaf7;display:flex;flex-direction:column;opacity:.6">
+<div style="padding:10px 12px;border-bottom:1px solid #b9bab4;display:flex;justify-content:space-between;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase"><span>▣ Packed</span><span style="opacity:.5">2</span></div>
+<div style="padding:11px"><div style="border:1px solid #b9bab4;border-radius:10px;padding:10px"><div style="font-size:.88rem">Kunle O.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:4px">1 item · #1047</div></div></div></div>
+</div>
+<div style="border-top:1px solid #b9bab4;padding:11px 18px 16px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;opacity:.6"><span>Board on a phone</span><span>Riskier one-handed</span></div>
+</div></div></div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1g"><div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Item grid — the shared tile (03 S4 ≡ 04 S2) · three patterns</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">A · 2-up photo tile, stepper in footer</div>
+<div style="width:300px;height:460px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 16px 10px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">Add items · 14 products</div>
+<div style="flex:1;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:11px;align-content:start">
+<div style="border:1px solid #181a19;border-radius:10px;background:#fafaf7"><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px"></div><div style="padding:7px 8px"><div style="font-size:.8rem;line-height:1.2">Oat Linen Shirt</div><div style="font:650 .55rem var(--font-mono),monospace;margin-top:4px">$68.00</div></div><div style="display:flex;border-top:1px solid #181a19;font:650 .68rem var(--font-mono),monospace"><span style="width:30px;text-align:center;padding:6px 0;border-right:1px solid #181a19">−</span><span style="flex:1;text-align:center;padding:6px 0">2</span><span style="width:30px;text-align:center;padding:6px 0;border-left:1px solid #181a19;background:#181a19;color:#faf8f4">+</span></div></div>
+<div style="border:1px solid #b9bab4;border-radius:10px;background:#fafaf7"><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px"></div><div style="padding:7px 8px"><div style="font-size:.8rem;line-height:1.2">Silk Scarf</div><div style="font:650 .55rem var(--font-mono),monospace;margin-top:4px">$45.00</div></div><div style="border-top:1px solid #b9bab4;text-align:center;padding:6px 0;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+<div style="border:1px solid #b9bab4;border-radius:10px;background:#fafaf7"><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px"></div><div style="padding:7px 8px"><div style="font-size:.8rem;line-height:1.2">Ribbed Tank</div><div style="font:650 .55rem var(--font-mono),monospace;margin-top:4px">$32.00</div></div><div style="border-top:1px solid #b9bab4;text-align:center;padding:6px 0;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</div></div>
+<div style="border:1px solid #b9bab4;border-radius:10px;background:#fafaf7;opacity:.5"><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px"></div><div style="padding:7px 8px"><div style="font-size:.8rem;line-height:1.2">Wide-Leg Trouser</div><div style="font:650 .55rem var(--font-mono),monospace;margin-top:4px">$84.00</div></div><div style="border-top:1px solid #b9bab4;text-align:center;padding:6px 0;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Out · 0</div></div>
+</div>
+<div style="background:#201f1d;color:#fff;padding:11px 16px 16px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:1.15rem;letter-spacing:-.045em;font-weight:520">$256.00</span><span style="background:#fafaf7;color:#181a19;padding:9px 12px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Review →</span></div>
+</div></div></div>
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">B · 3-up dense grid, badge counter</div>
+<div style="width:300px;height:460px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 16px 10px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">Add items · tap to +1</div>
+<div style="flex:1;padding:0 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;align-content:start">
+<div><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;position:relative;border:1px solid #181a19;border-radius:10px"><div style="position:absolute;top:0;right:0;background:#181a19;color:#faf8f4;border-left:1px solid #181a19;border-bottom:1px solid #181a19;padding:2px 6px;font:650 .55rem var(--font-mono),monospace">2</div></div><div style="font-size:.68rem;line-height:1.25;margin-top:5px">Oat Linen Shirt</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.65">$68</div></div>
+<div><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;border:1px solid #b9bab4;border-radius:10px"></div><div style="font-size:.68rem;line-height:1.25;margin-top:5px">Silk Scarf</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.65">$45</div></div>
+<div><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;border:1px solid #b9bab4;border-radius:10px"></div><div style="font-size:.68rem;line-height:1.25;margin-top:5px">Ribbed Tank</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.65">$32</div></div>
+<div><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;position:relative;border:1px solid #181a19;border-radius:10px"><div style="position:absolute;top:0;right:0;background:#181a19;color:#faf8f4;border-left:1px solid #181a19;border-bottom:1px solid #181a19;padding:2px 6px;font:650 .55rem var(--font-mono),monospace">1</div></div><div style="font-size:.68rem;line-height:1.25;margin-top:5px">Denim Jacket</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.65">$120</div></div>
+<div style="opacity:.45"><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;border:1px solid #b9bab4;border-radius:10px;display:flex;align-items:flex-end"><span style="font:650 .45rem var(--font-mono),monospace;letter-spacing:.05em;text-transform:uppercase;background:#f1f0eb;padding:2px 4px;margin:4px">Out</span></div><div style="font-size:.68rem;line-height:1.25;margin-top:5px">Wide-Leg Trouser</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.65">$84</div></div>
+<div><div style="aspect-ratio:1;background:#d9d8d2;border-radius:8px;border:1px solid #b9bab4;border-radius:10px"></div><div style="font-size:.68rem;line-height:1.25;margin-top:5px">Canvas Tote</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.65">$38</div></div>
+</div>
+<div style="background:#201f1d;color:#fff;padding:11px 16px 16px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:1.15rem;letter-spacing:-.045em;font-weight:520">$256.00</span><span style="background:#fafaf7;color:#181a19;padding:9px 12px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Review →</span></div>
+</div></div></div>
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">C · photo rows, thumb-side stepper</div>
+<div style="width:300px;height:460px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 16px 10px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.6">Add items · one hand</div>
+<div style="flex:1">
+<div style="display:flex;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid #b9bab4"><div style="width:52px;height:52px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1;min-width:0"><div style="font-size:.85rem">Oat Linen Shirt</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$68.00</div></div><div style="display:flex;border:1px solid #181a19;border-radius:10px;font:650 .65rem var(--font-mono),monospace"><span style="width:28px;text-align:center;padding:6px 0;border-right:1px solid #181a19">−</span><span style="width:26px;text-align:center;padding:6px 0">2</span><span style="width:28px;text-align:center;padding:6px 0;border-left:1px solid #181a19;background:#181a19;color:#faf8f4">+</span></div></div>
+<div style="display:flex;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid #b9bab4"><div style="width:52px;height:52px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1;min-width:0"><div style="font-size:.85rem">Silk Scarf — Ochre</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$45.00</div></div><span style="border:1px solid #b9bab4;border-radius:10px;padding:8px 11px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Add</span></div>
+<div style="display:flex;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid #b9bab4"><div style="width:52px;height:52px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1;min-width:0"><div style="font-size:.85rem">Cropped Denim Jacket</div><div style="font:650 .55rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$120.00</div></div><div style="display:flex;border:1px solid #181a19;border-radius:10px;font:650 .65rem var(--font-mono),monospace"><span style="width:28px;text-align:center;padding:6px 0;border-right:1px solid #181a19">−</span><span style="width:26px;text-align:center;padding:6px 0">1</span><span style="width:28px;text-align:center;padding:6px 0;border-left:1px solid #181a19;background:#181a19;color:#faf8f4">+</span></div></div>
+<div style="display:flex;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid #b9bab4;opacity:.5"><div style="width:52px;height:52px;background:#d9d8d2;border-radius:8px;flex:none"></div><div style="flex:1;min-width:0"><div style="font-size:.85rem">Wide-Leg Trouser</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.7;margin-top:3px">Out of stock · 0</div></div></div>
+</div>
+<div style="background:#201f1d;color:#fff;padding:11px 16px 16px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:1.15rem;letter-spacing:-.045em;font-weight:520">$256.00</span><span style="background:#fafaf7;color:#181a19;padding:9px 12px;font:650 .52rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Review →</span></div>
+</div></div></div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1h"><div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Status pills — readable without colour · three systems</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:34px;align-items:flex-start;font-family:var(--font-sans),sans-serif;color:#181a19">
+
+<div style="width:280px;display:flex;flex-direction:column;gap:14px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">A · glyph + label</div>
+<div style="display:flex;flex-direction:column;gap:9px;align-items:flex-start">
+<span style="padding:5px 10px;border:1px dashed #b9bab4;border-radius:999px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">◌ Draft</span>
+<span style="padding:5px 10px;border:1px solid #181a19;border-radius:999px;background:#181a19;color:#faf8f4;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">◉ Confirmed</span>
+<span style="padding:5px 10px;border:1px solid #181a19;border-radius:999px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">▣ Packed</span>
+<span style="padding:5px 10px;border:1px solid #181a19;border-radius:999px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">➔ Shipped</span>
+<span style="padding:5px 10px;border-radius:999px;background:#181a19;color:#fff;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">✓ Delivered</span>
+<span style="padding:5px 10px;border:1px solid #b9bab4;border-radius:999px;opacity:.6;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;text-decoration:line-through">✕ Cancelled</span>
+<span style="padding:5px 10px;border:1px solid #181a19;border-radius:999px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">↩ Returned</span>
+</div>
+<p style="margin:0;font-size:.8rem;line-height:1.5;opacity:.6">Shape, fill and glyph all carry the state. Survives greyscale and a cracked screen.</p>
+</div>
+
+<div style="width:280px;display:flex;flex-direction:column;gap:14px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">B · stage ticks, position = progress</div>
+<div style="display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:3px"><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Draft · 1/5</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:3px"><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Confirmed · 2/5</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:3px"><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div><div style="width:20px;height:4px;border-radius:999px;background:#dcdbd4"></div></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Packed · 3/5</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:3px"><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19;color:#faf8f4"></div></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase">Delivered · 5/5</span></div>
+<div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;gap:3px"><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:20px;height:4px;border-radius:999px;background:#181a19"></div><div style="width:104px;height:4px;border-radius:999px;background:repeating-linear-gradient(90deg,#b9bab4 0 4px,transparent 4px 8px)"></div></div><span style="font:650 .55rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6">Cancelled at 2/5</span></div>
+</div>
+<p style="margin:0;font-size:.8rem;line-height:1.5;opacity:.6">Scannable down a list — how far along, not just what it is called.</p>
+</div>
+
+<div style="width:300px;display:flex;flex-direction:column;gap:14px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">C · left-edge weight on the row</div>
+<div style="display:flex;flex-direction:column;background:#fafaf7;border:1px solid #b9bab4;border-radius:10px">
+<div style="display:flex;gap:11px;padding:12px;border-bottom:1px solid #b9bab4;border-left:6px solid #b9bab4;align-items:center"><div style="flex:1"><div style="font-size:.9rem">Chidi M.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:3px">Draft · not sent</div></div><span style="font:650 .55rem var(--font-mono),monospace">$98.00</span></div>
+<div style="display:flex;gap:11px;padding:12px;border-bottom:1px solid #b9bab4;border-left:6px solid #181a19;background:rgba(24,26,25,.06);align-items:center"><div style="flex:1"><div style="font-size:.9rem">Ifeoma A.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:3px">Confirmed · pack next</div></div><span style="font:650 .55rem var(--font-mono),monospace">$152.00</span></div>
+<div style="display:flex;gap:11px;padding:12px;border-bottom:1px solid #b9bab4;border-left:6px solid #181a19;align-items:center"><div style="flex:1"><div style="font-size:.9rem">Kunle O.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:3px">Packed · awaiting pickup</div></div><span style="font:650 .55rem var(--font-mono),monospace">$84.00</span></div>
+<div style="display:flex;gap:11px;padding:12px;border-bottom:1px solid #b9bab4;border-left:6px double #181a19;align-items:center"><div style="flex:1"><div style="font-size:.9rem">Amina S.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.55;margin-top:3px">Shipped · 2 days</div></div><span style="font:650 .55rem var(--font-mono),monospace">$156.00</span></div>
+<div style="display:flex;gap:11px;padding:12px;border-left:6px solid #dcdbd4;opacity:.55;align-items:center"><div style="flex:1"><div style="font-size:.9rem;text-decoration:line-through">Ngozi K.</div><div style="font:650 .5rem var(--font-mono),monospace;opacity:.7;margin-top:3px">Cancelled · out of stock</div></div><span style="font:650 .55rem var(--font-mono),monospace">$45.00</span></div>
+</div>
+<p style="margin:0;font-size:.8rem;line-height:1.5;opacity:.6">No pill at all — the row itself is the status. Frees the right side for money.</p>
+</div>
+
+</div></div></div>
+
+<div class="dv-opt" id="1i"><div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Progress strip — three placements for the same three steps</div>
+<div class="dv-card"><div style="padding:32px;display:flex;gap:26px;align-items:flex-start">
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">A · dark band under the header</div>
+<div style="width:300px;height:430px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 16px 12px;font-size:1.3rem;letter-spacing:-.05em;font-weight:520">Catalog</div>
+<div style="background:#201f1d;color:#fff;padding:12px 16px;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;justify-content:space-between"><span style="font:650 .52rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.6">getting started · 1 of 3</span><span style="opacity:.55">✕</span></div>
+<div style="display:flex;gap:7px"><div style="flex:1;display:flex;flex-direction:column;gap:5px"><div style="height:3px;border-radius:999px;background:#fafaf7"></div><span style="font:650 .5rem var(--font-mono),monospace;text-transform:uppercase">Add a product</span></div><div style="flex:1;display:flex;flex-direction:column;gap:5px"><div style="height:3px;border-radius:999px;background:rgba(255,255,255,.2)"></div><span style="font:650 .5rem var(--font-mono),monospace;text-transform:uppercase;opacity:.5">Take an order</span></div><div style="flex:1;display:flex;flex-direction:column;gap:5px"><div style="height:3px;border-radius:999px;background:rgba(255,255,255,.2)"></div><span style="font:650 .5rem var(--font-mono),monospace;text-transform:uppercase;opacity:.5">Share link</span></div></div>
+</div>
+<div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:11px;align-items:center"><div style="width:48px;height:48px;background:#d9d8d2;border-radius:8px"></div><div style="flex:1"><div style="font-size:.88rem">Oat Linen Shirt</div><div style="font:650 .52rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$68.00 · 12 in stock</div></div></div>
+<div style="border:1px dashed #b9bab4;border-radius:12px;flex:1;display:flex;align-items:center;justify-content:center;font:650 .55rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">+ Add another</div>
+</div>
+</div></div>
+<p style="margin:0;font-size:.8rem;line-height:1.5;opacity:.6;max-width:34ch">Impossible to miss, costs 70px of a small screen until dismissed.</p>
+</div>
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">B · first card in the list</div>
+<div style="width:300px;height:430px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 16px 12px;font-size:1.3rem;letter-spacing:-.05em;font-weight:520">Catalog</div>
+<div style="padding:0 16px 14px"><div style="border:1px solid #181a19;border-radius:10px;background:#fafaf7;padding:13px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:.95rem;letter-spacing:-.025em;font-weight:520">Next: take an order</span><span style="font:650 .5rem var(--font-mono),monospace;opacity:.5">2 of 3</span></div>
+<div style="margin-top:10px;display:flex;flex-direction:column;gap:7px;font:650 .55rem var(--font-mono),monospace;letter-spacing:.05em">
+<div style="display:flex;gap:8px;align-items:center;opacity:.55"><span>✓</span><span style="text-decoration:line-through">Add a product</span></div>
+<div style="display:flex;gap:8px;align-items:center"><span>◉</span><span>Take an order</span><span style="margin-left:auto;background:#181a19;color:#faf8f4;border:1px solid #181a19;border-radius:10px;padding:4px 7px;letter-spacing:.06em;text-transform:uppercase">Start</span></div>
+<div style="display:flex;gap:8px;align-items:center;opacity:.5"><span>◌</span><span>Share your link</span></div>
+</div>
+<div style="margin-top:11px;border-top:1px solid #b9bab4;padding-top:9px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5">Hide this</div>
+</div></div>
+<div style="flex:1;padding:0 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:11px;align-items:center;border-top:1px solid #b9bab4;padding-top:12px"><div style="width:48px;height:48px;background:#d9d8d2;border-radius:8px"></div><div style="flex:1"><div style="font-size:.88rem">Oat Linen Shirt</div><div style="font:650 .52rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$68.00 · 12 in stock</div></div></div>
+</div>
+</div></div>
+<p style="margin:0;font-size:.8rem;line-height:1.5;opacity:.6;max-width:34ch">Scrolls away with the content and can hold a real action per step.</p>
+</div>
+
+<div style="width:300px;flex:none;display:flex;flex-direction:column;gap:9px">
+<div style="font:650 .58rem var(--font-mono),monospace;letter-spacing:.09em;text-transform:uppercase;opacity:.5">C · thin bar above the tab bar</div>
+<div style="width:300px;height:430px;background:#201f1d;border-radius:26px;padding:8px 7px"><div style="height:100%;background:#f1f0eb;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;color:#181a19;font-family:var(--font-sans),sans-serif">
+<div style="padding:14px 16px 12px;font-size:1.3rem;letter-spacing:-.05em;font-weight:520">Catalog</div>
+<div style="flex:1;padding:0 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:11px;align-items:center;border-top:1px solid #b9bab4;padding-top:12px"><div style="width:48px;height:48px;background:#d9d8d2;border-radius:8px"></div><div style="flex:1"><div style="font-size:.88rem">Oat Linen Shirt</div><div style="font:650 .52rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$68.00 · 12 in stock</div></div></div>
+<div style="display:flex;gap:11px;align-items:center;border-top:1px solid #b9bab4;padding-top:12px"><div style="width:48px;height:48px;background:#d9d8d2;border-radius:8px"></div><div style="flex:1"><div style="font-size:.88rem">Ribbed Tank — Black</div><div style="font:650 .52rem var(--font-mono),monospace;opacity:.6;margin-top:3px">$32.00 · 24 in stock</div></div></div>
+</div>
+<div style="border-top:1px solid #181a19;background:#181a19;color:#faf8f4;padding:9px 16px;display:flex;justify-content:space-between;align-items:center"><span style="font:650 .52rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase">Step 2 of 3 · take an order</span><span style="font:650 .52rem var(--font-mono),monospace">→</span></div>
+<div style="display:flex;padding:10px 0 15px;font:650 .5rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;background:#f1f0eb"><div style="flex:1;text-align:center;padding:7px 0;opacity:.45">Orders</div><div style="flex:1;text-align:center;padding:7px 0;border-radius:999px;background:#181a19;color:#faf8f4">Catalog</div><div style="flex:1;text-align:center;padding:7px 0;opacity:.45">Link</div></div>
+</div></div>
+<p style="margin:0;font-size:.8rem;line-height:1.5;opacity:.6;max-width:34ch">One line, always in thumb reach, never competes with the page title.</p>
+</div>
+
+</div></div></div>
+
+</div>
+<p class="dv-next">Try next: "combine <a class="dv-oid" href="#1f">1f</a>B with the pills from <a class="dv-oid" href="#1h">1h</a>C" · "make the share link page in <a class="dv-oid" href="#1e">1e</a> feel more like a real storefront" · "add the error and empty states"</p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script></script>
+</body>
+</html>

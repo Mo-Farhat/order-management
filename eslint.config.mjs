@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Imported design reference material — not part of the app build.
+    "design/**",
+    "drizzle/**",
   ]),
 ]);
 

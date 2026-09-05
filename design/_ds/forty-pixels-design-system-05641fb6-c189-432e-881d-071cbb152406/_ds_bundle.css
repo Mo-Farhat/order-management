@@ -1,0 +1,169 @@
+/* ===== fonts.css ===== */
+/* Self-hosted Geist, variable weight 100–900. Both faces are latin subsets and load
+   with font-display:swap, matching how the agency site serves them. */
+/* @ds-font-face-dropped: unresolvable src */
+/* @ds-font-face-dropped: unresolvable src */
+
+/* ===== tokens.css ===== */
+/* Forty Pixels design tokens. Every colour, rhythm and type decision resolves to one of these. */
+:root{
+ /* Brand */
+ --lime:#b9ff66;   /* the single accent — hover fills, highlights, active states */
+ --ink:#181a19;    /* body text on light ground */
+ --dark:#201f1d;   /* dark section ground */
+ --paper:#f1f0eb;  /* default page ground */
+ --white:#fafaf7;  /* raised surfaces (cards, browser frames) */
+ --line:#b9bab4;   /* hairline rules and borders */
+
+ /* Rhythm */
+ --pad:clamp(1rem,3vw,3.4rem);            /* horizontal gutter, scales with viewport */
+ --section-pad:clamp(5rem,9vw,9rem);      /* vertical section rhythm */
+ --nav:74px;                              /* fixed nav height, used for scroll offsets */
+
+ /* Type */
+ --font-sans:"Geist",system-ui,-apple-system,Arial,sans-serif;
+ --font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+ /* Display sizes — all fluid, all tight-tracked */
+ --step-display:clamp(3rem,7vw,8rem);
+ --step-h2:clamp(2.4rem,5vw,5rem);
+ --step-h3:2rem;
+ --step-label:.65rem;   /* mono uppercase markers */
+}
+
+/* ===== base.css ===== */
+/* Minimal ground the components assume: the page colours, the sans stack, and
+   square-cornered inheriting controls. */
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans),Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+button,input,textarea,select{font:inherit;color:inherit}
+
+/* Section rhythm — the standard page block. */
+.section-pad{padding:var(--section-pad) var(--pad)}
+
+/* ===== components.css ===== */
+/* Component styles. Rules are carried over from the agency site, with page-context
+   coupling (absolute positioning inside page sections, scroll-driven state) removed so
+   every component renders correctly on its own. */
+
+/* --- Arrow ------------------------------------------------------------------ */
+.ui-arrow{display:inline-grid;place-items:center;width:1rem;height:1rem;vertical-align:middle;transition:transform .25s;flex:0 0 auto}
+.ui-arrow>i{position:relative;display:block;width:.72rem;height:.72rem}
+.ui-arrow>i::before{content:"";position:absolute;left:-.02rem;top:50%;width:.78rem;height:1.5px;background:currentColor;transform:translateY(-50%) rotate(-45deg);transform-origin:center}
+.ui-arrow>i::after{content:"";position:absolute;right:0;top:0;width:.38rem;height:.38rem;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor}
+
+/* --- Words ------------------------------------------------------------------ */
+/* Static by default. A motion driver may animate [data-words] .word; without one the
+   words simply render in place. */
+.clip{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.word{display:inline-block}
+
+/* --- LineLink --------------------------------------------------------------- */
+.line-link{display:inline-flex;align-items:center;gap:1rem;padding-bottom:.55rem;text-transform:uppercase;font:650 .67rem var(--font-mono),monospace;letter-spacing:.07em;position:relative;color:inherit;text-decoration:none;cursor:pointer}
+.line-link::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.line-link:hover::after{transform:scaleX(1)}
+.line-link:hover .ui-arrow{transform:translateX(.25rem)}
+
+/* --- Button ----------------------------------------------------------------- */
+.fp-button{display:inline-flex;align-items:center;justify-content:center;gap:.9rem;height:52px;padding:0 1.5rem;border:1px solid currentColor;background:transparent;color:inherit;text-transform:uppercase;font:650 .68rem var(--font-mono),monospace;letter-spacing:.08em;text-decoration:none;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.fp-button:hover{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.fp-button:hover .ui-arrow{transform:translateX(.25rem)}
+.fp-button-solid{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.fp-button-solid:hover{background:var(--ink);color:var(--lime);border-color:var(--ink)}
+.fp-button:disabled{opacity:.45;cursor:not-allowed}
+.fp-button:disabled:hover{background:transparent;color:inherit;border-color:currentColor}
+
+/* --- FaqAccordion ----------------------------------------------------------- */
+.faq-accordion{width:100%;border-bottom:1px solid var(--line)}
+.faq-item{border-top:1px solid var(--line)}
+.faq-trigger{width:100%;padding:1.5rem 0;background:none;border:0;display:flex;justify-content:space-between;align-items:center;gap:2rem;text-align:left;font-size:1.1rem;color:inherit;cursor:pointer}
+.faq-plus{font-size:1.5rem;line-height:1;transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+.faq-item.is-open .faq-plus{transform:rotate(45deg)}
+.faq-answer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.34,1.56,.64,1)}
+.faq-item.is-open .faq-answer{grid-template-rows:1fr}
+.faq-answer>div{overflow:hidden}
+.faq-answer p{margin:0;padding-bottom:1.5rem;max-width:56ch;line-height:1.55;opacity:.7}
+
+/* --- BrowserFrame ----------------------------------------------------------- */
+.browser-frame{width:100%;height:100%;min-height:220px;background:var(--white);border:1px solid #0003;box-shadow:0 24px 55px #0003;display:grid;grid-template-rows:auto 1fr;position:relative;overflow:hidden}
+.browser-frame>div:first-child{display:flex;align-items:center;gap:.4rem;height:30px;padding:0 .7rem;border-bottom:1px solid #0000001a;background:#00000008}
+.browser-frame>div:first-child>i{width:8px;height:8px;border-radius:50%;background:#0000002e;flex:0 0 auto}
+.browser-frame>div:first-child>small{margin-left:.6rem;font:600 .58rem var(--font-mono),monospace;letter-spacing:.04em;opacity:.55}
+.browser-frame img{place-self:center;max-width:62%;max-height:70%;object-fit:contain}
+
+/* --- ProjectCard ------------------------------------------------------------ */
+.project-card{display:flex;flex-direction:column;min-height:620px;color:#171817;padding:1.25rem;overflow:hidden;background:var(--paper)}
+.project-card.lime{background:#dcf5a8}
+.project-card.blue{background:#cfe0f2}
+.project-card.rose{background:#f2d9dd}
+.project-card.sand{background:#e8e1d2}
+.project-card.is-large{min-height:720px}
+.project-card-top{display:flex;justify-content:space-between;gap:1rem;font:600 .62rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+.project-stage{flex:1 1 auto;display:grid;place-items:center;padding:2.5rem 1rem}
+.project-stage .browser-frame{width:88%;height:72%}
+.project-card-bottom{display:flex;flex-direction:column;gap:1.5rem}
+.project-card-bottom h3{margin:0 0 .6rem;font-size:2rem;letter-spacing:-.04em;font-weight:520}
+.project-card-bottom p{margin:0;max-width:46ch;line-height:1.5;opacity:.7}
+.project-actions{display:flex;flex-wrap:wrap;gap:1.5rem}
+.project-link{display:inline-flex;align-items:center;gap:.8rem;text-transform:uppercase;font:650 .65rem var(--font-mono),monospace;letter-spacing:.07em;color:inherit;text-decoration:none}
+.project-link:hover .ui-arrow{transform:translateX(.25rem)}
+
+/* --- PriceRow --------------------------------------------------------------- */
+.pricing-row{display:grid;grid-template-columns:52px minmax(180px,.85fr) minmax(280px,1.35fr) auto;gap:clamp(1rem,2.5vw,3rem);align-items:center;min-height:150px;padding:1.5rem 0;border-bottom:1px solid var(--line);position:relative;isolation:isolate}
+.pricing-row-index{align-self:start;padding-top:.5rem;font:650 .62rem var(--font-mono),monospace;opacity:.55}
+.pricing-row h3{margin:0;font-size:1.6rem;letter-spacing:-.035em;font-weight:520}
+.pricing-row-copy{max-width:560px}
+.pricing-row-copy p{margin:0;line-height:1.5;opacity:.7}
+.pricing-row-copy span{display:inline-block;margin-top:.5rem;font:600 .6rem var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;opacity:.5}
+.pricing-price{white-space:nowrap;text-align:right;font-size:clamp(2.1rem,4vw,4.6rem);font-weight:520;letter-spacing:-.06em}
+.pricing-price small{font-size:.32em;letter-spacing:0;opacity:.6}
+.pricing-quote{white-space:nowrap;text-align:right;font-size:clamp(1.4rem,2.4vw,2.6rem);font-weight:520;letter-spacing:-.05em;opacity:.55}
+
+/* --- MetricGrid ------------------------------------------------------------- */
+.case-metrics{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}
+.case-metrics article{min-height:280px;border-right:1px solid var(--line);padding:2rem;display:flex;flex-direction:column;justify-content:space-between}
+.case-metrics article:last-child{border-right:0}
+.case-metrics strong{font-size:clamp(2.6rem,5vw,4.4rem);font-weight:520;letter-spacing:-.055em;line-height:1}
+.case-metrics span{font:600 .62rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6}
+
+/* --- Field / project-form --------------------------------------------------- */
+.project-form{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.project-form label{display:flex;flex-direction:column;gap:.6rem}
+.project-form label.full{grid-column:1/-1}
+.project-form label>span{font:650 .62rem var(--font-mono),monospace;letter-spacing:.07em;text-transform:uppercase;opacity:.6}
+.project-form input,.project-form textarea,.project-form select{width:100%;padding:.85rem 0;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;font-size:1rem;outline:none;transition:border-color .2s}
+.project-form input:focus,.project-form textarea:focus,.project-form select:focus{border-bottom-color:var(--lime)}
+.project-form textarea{resize:vertical;min-height:8rem}
+
+/* --- ContactBand ------------------------------------------------------------ */
+.contact-band{background:var(--dark);color:#fff;padding:clamp(5rem,10vw,10rem) var(--pad) 8rem;position:relative}
+.contact-band>span{display:block;font:650 .62rem var(--font-mono),monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.5}
+.contact-band h2{margin:2rem 0 0;font-size:var(--step-display);line-height:.93;letter-spacing:-.065em;font-weight:520;max-width:16ch}
+.contact-band>*+*:not(h2){margin-top:2.5rem}
+
+/* --- ProcessVisual ---------------------------------------------------------- */
+/* On the site this is absolutely positioned inside a process card; here it is a plain
+   block so it renders standalone. */
+.process-visual{position:relative;width:100%;max-width:420px;color:currentColor;opacity:.85}
+.process-visual svg{width:100%;height:auto;display:block;overflow:visible}
+/* The base rule uses an attribute selector, so every rule that overrides it must match
+   its specificity (0,2,1) or higher — hence the `svg` in each selector below. Without it
+   fill:none / stroke:currentColor win and the lime accents disappear entirely. */
+.process-visual svg [class^="pv-"],.process-visual svg [class*=" pv-"]{stroke:currentColor;stroke-width:1.5;fill:none;vector-effect:non-scaling-stroke}
+.process-visual svg .pv-a{opacity:.9}
+.process-visual svg .pv-b{opacity:.6}
+.process-visual svg .pv-c{opacity:.35}
+.process-visual svg .pv-accent{stroke:var(--lime);opacity:1}
+.process-visual svg .pv-build-light,.process-visual svg .pv-live-dot{fill:currentColor;stroke:none}
+.process-visual svg .pv-dot{fill:var(--lime);stroke:none;opacity:1}
+.process-visual svg .pv-build-row,.process-visual svg .pv-live-track{fill:currentColor;opacity:.18;stroke:none}
+.process-visual svg .pv-live-progress{fill:var(--lime);opacity:1;stroke:none}
+.process-visual svg .pv-row-3{fill:var(--lime);opacity:1;stroke:none}
+.process-visual svg .pv-live-text{fill:currentColor;stroke:none;font:700 9px var(--font-mono),monospace;letter-spacing:.12em;text-anchor:middle}
+.process-visual svg .pv-live-badge{stroke:currentColor;opacity:.4}
+
+/* --- Motion ----------------------------------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
