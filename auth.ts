@@ -27,6 +27,14 @@ async function loadMembership(userId: string) {
   return tenant ? { tenantId: tenant.id, tenantSlug: tenant.slug, role: row.role } : null;
 }
 
+async function loadPasswordChangedAt(userId: string): Promise<number> {
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { passwordChangedAt: true },
+  });
+  return dbUser?.passwordChangedAt?.getTime() ?? 0;
+}
+
 export const {
   handlers,
   auth,
@@ -35,6 +43,7 @@ export const {
   unstable_update: updateSession,
 } = NextAuth({
   ...authConfig,
+  trustHost: true,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
@@ -78,29 +87,42 @@ export const {
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger }) {
-      // On first sign-in `user` is set; on `update()` calls we re-resolve.
-      if (user?.id) token.sub = user.id;
+      // Initial sign-in: `user` is set. Snapshot everything into the token.
+      if (user?.id) {
+        token.sub = user.id;
+        const membership = await loadMembership(user.id);
+        token.tenantId = membership?.tenantId ?? null;
+        token.tenantSlug = membership?.tenantSlug ?? null;
+        token.role = membership?.role ?? null;
+        token.pwdAt = await loadPasswordChangedAt(user.id);
+        return token;
+      }
 
-      if (user || trigger === "update" || token.tenantId === undefined) {
-        const userId = token.sub;
-        if (userId) {
-          const membership = await loadMembership(userId);
-          token.tenantId = membership?.tenantId ?? null;
-          token.tenantSlug = membership?.tenantSlug ?? null;
-          token.role = membership?.role ?? null;
+      if (!token.sub) return token;
 
-          // FR-2: reject tokens issued before the last password change.
-          const dbUser = await db.query.users.findFirst({
-            where: eq(users.id, userId),
-            columns: { passwordChangedAt: true },
-          });
-          const changedAt = dbUser?.passwordChangedAt?.getTime();
-          const issuedAt = (token.iat as number | undefined) ?? 0;
-          if (changedAt && issuedAt * 1000 < changedAt) {
-            // Returning null invalidates the session.
-            return null;
-          }
-        }
+      // `updateSession()` after onboarding — re-resolve the membership.
+      if (trigger === "update") {
+        const membership = await loadMembership(token.sub);
+        token.tenantId = membership?.tenantId ?? null;
+        token.tenantSlug = membership?.tenantSlug ?? null;
+        token.role = membership?.role ?? null;
+        return token;
+      }
+
+      // Every subsequent request: FR-2 — if the password changed after this
+      // token was issued, invalidate it.
+      const changedAt = await loadPasswordChangedAt(token.sub);
+      const snapshot = typeof token.pwdAt === "number" ? token.pwdAt : 0;
+      if (changedAt > snapshot) return null;
+
+      // While the user has no tenant (the onboarding window), keep checking on
+      // every request so the token picks up the membership the moment it's
+      // created — even if the explicit `updateSession()` call was missed.
+      if (token.tenantId == null) {
+        const membership = await loadMembership(token.sub);
+        token.tenantId = membership?.tenantId ?? null;
+        token.tenantSlug = membership?.tenantSlug ?? null;
+        token.role = membership?.role ?? null;
       }
       return token;
     },

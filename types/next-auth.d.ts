@@ -17,5 +17,7 @@ declare module "next-auth/jwt" {
     tenantId?: string | null;
     tenantSlug?: string | null;
     role?: Role | null;
+    /** Epoch ms of `users.password_changed_at` captured at sign-in (FR-2). */
+    pwdAt?: number;
   }
 }
