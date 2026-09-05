@@ -32,6 +32,18 @@ export const planStatusEnum = pgEnum("plan_status", [
   "cancelled",
 ]);
 
+export const orderStatusEnum = pgEnum("order_status", [
+  "draft",
+  "confirmed",
+  "packed",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "returned",
+]);
+
+export const discountTypeEnum = pgEnum("discount_type", ["none", "flat", "percent"]);
+
 export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [
   "initial", // set when the product is created
   "manual_adjustment", // quick stock editor / edit form
@@ -58,6 +70,10 @@ export const tenants = pgTable("tenants", {
   // Billing (schema now, UI in Phase 5).
   planStatus: planStatusEnum("plan_status").notNull().default("trialing"),
   trialEndsAt: timestamp("trial_ends_at", { mode: "date", withTimezone: true }),
+
+  // Per-tenant human-readable order numbering (FR-8). Incremented in the
+  // create-order transaction.
+  nextOrderNumber: integer("next_order_number").notNull().default(1),
 
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -176,6 +192,108 @@ export const stockMovements = pgTable(
   (t) => [index("stock_movements_product_idx").on(t.productId, t.createdAt)],
 );
 
+// --- Order Desk (Phase 3) --------------------------------------------
+
+/**
+ * Customers are created automatically from orders (FR-13), keyed on phone
+ * number within a tenant. There is no standalone "add customer" flow.
+ */
+export const customers = pgTable(
+  "customers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    phone: text("phone").notNull(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("customers_tenant_phone_uq").on(t.tenantId, t.phone)],
+);
+
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    orderNumber: integer("order_number").notNull(),
+    customerId: uuid("customer_id")
+      .notNull()
+      .references(() => customers.id, { onDelete: "restrict" }),
+
+    status: orderStatusEnum("status").notNull().default("draft"),
+
+    // Money — all snapshot at their moment; editing a product later never
+    // changes an existing order (FR-10).
+    deliveryFee: numeric("delivery_fee", { precision: 12, scale: 2 }).notNull().default("0"),
+    discountType: discountTypeEnum("discount_type").notNull().default("none"),
+    discountValue: numeric("discount_value", { precision: 12, scale: 2 }).notNull().default("0"),
+    subtotal: numeric("subtotal", { precision: 12, scale: 2 }).notNull().default("0"),
+    total: numeric("total", { precision: 12, scale: 2 }).notNull().default("0"),
+
+    note: text("note"),
+
+    // True once stock has been decremented for this order (on Confirm). Drives
+    // whether Cancel/Return restores stock (FR-5).
+    stockCommitted: boolean("stock_committed").notNull().default(false),
+
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("orders_tenant_number_uq").on(t.tenantId, t.orderNumber),
+    index("orders_tenant_status_idx").on(t.tenantId, t.status, t.updatedAt),
+    index("orders_customer_idx").on(t.customerId),
+  ],
+);
+
+export const orderItems = pgTable(
+  "order_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    // Product may later be archived; kept for reordering/analytics. Never null
+    // in v1 because deletion is blocked once ordered (FR-6).
+    productId: uuid("product_id").references(() => products.id, { onDelete: "set null" }),
+    nameSnapshot: text("name_snapshot").notNull(),
+    priceSnapshot: numeric("price_snapshot", { precision: 12, scale: 2 }).notNull(),
+    quantity: integer("quantity").notNull(),
+    lineTotal: numeric("line_total", { precision: 12, scale: 2 }).notNull(),
+  },
+  (t) => [index("order_items_order_idx").on(t.orderId)],
+);
+
+/** Append-only timeline: one row per status change or note edit (FR-11). */
+export const orderEvents = pgTable(
+  "order_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    fromStatus: orderStatusEnum("from_status"),
+    toStatus: orderStatusEnum("to_status"),
+    kind: text("kind").notNull(), // "created" | "status" | "note" | "edited"
+    note: text("note"),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("order_events_order_idx").on(t.orderId, t.createdAt)],
+);
+
 // --- Audit log ----------------------------------------------------------
 
 export const auditLog = pgTable(
@@ -247,3 +365,9 @@ export type Product = typeof products.$inferSelect;
 export type ProductPhoto = typeof productPhotos.$inferSelect;
 export type StockMovement = typeof stockMovements.$inferSelect;
 export type StockMovementReason = (typeof stockMovementReasonEnum.enumValues)[number];
+export type Customer = typeof customers.$inferSelect;
+export type Order = typeof orders.$inferSelect;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type OrderEvent = typeof orderEvents.$inferSelect;
+export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
+export type DiscountType = (typeof discountTypeEnum.enumValues)[number];

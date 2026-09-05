@@ -15,6 +15,13 @@
       "when": 1788631382857,
       "tag": "0001_chilly_marvex",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788632651427,
+      "tag": "0002_plain_raza",
+      "breakpoints": true
     }
   ]
 }
