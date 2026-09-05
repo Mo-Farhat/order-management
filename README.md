@@ -32,7 +32,8 @@ URLs print to the dev-server console.
 
 - **Phase 1** — schema, tenancy, auth, RBAC skeleton ✅
 - **Phase 2** — catalog (products, stock ledger, CSV import; photos pending R2) ✅
-- **Phase 3** — order desk — next
+- **Phase 3** — order desk (customers, order flow, pipeline, board, CSV export) ✅
+- **Phase 4** — public share link — next
 
 See PRD §11 for the full rollout plan.
 

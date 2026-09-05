@@ -15,10 +15,13 @@ app/                     App Router routes
   (auth)/                login, signup, verify-request  (public)
   onboarding/business/   business-basics step           (auth, no tenant yet)
   desk/                  the authed app                 (auth + tenant)
-    layout.tsx           header + tab nav (Orders / Catalog / Share)
-    page.tsx             orders (Phase 3 placeholder)
+    layout.tsx           header + tab nav + CSV export links
+    page.tsx             order list (status tabs, search)
+    orders/              new-order flow, [id] detail, [id]/edit
+    board/               pipeline board (tap-to-advance)
     catalog/             product list, new, [id] edit, import
-  actions/               server actions (auth, onboarding, session, catalog)
+    export/[entity]/     CSV download route handler
+  actions/               server actions (auth, onboarding, session, catalog, orders)
   api/auth/[...nextauth] Auth.js route handlers
 auth.ts                  full Auth.js config (Node runtime)
 auth.config.ts           edge-safe subset used by proxy.ts
@@ -64,6 +67,33 @@ atomically. CSV import (FR-7) is all-or-nothing: `buildPreview` validates every
 row first; `commitImport` throws (writing nothing) if any row has an error.
 Hard delete is blocked once a product has an `order_confirmed` / `order_cancelled`
 movement — archive instead.
+
+### Order Desk (Phase 3)
+
+| Table | Purpose |
+|---|---|
+| `customers` | one row per `(tenant, phone)`. Created/updated automatically inside `createOrder` — no standalone add flow (FR-13). |
+| `orders` | per-tenant `order_number` (from `tenants.next_order_number`), status enum, money columns all snapshot, `stock_committed` flag. |
+| `order_items` | `name_snapshot` + `price_snapshot` + qty + `line_total` — frozen at create/edit time (FR-10). |
+| `order_events` | append-only timeline: `kind` ∈ created/status/note/edited (FR-11). |
+
+`lib/orders.ts` is the engine. `lib/money.ts` does all arithmetic in integer
+cents. Every write path runs in one `withTenant()` transaction:
+
+- **createOrder** — resolve/create customer → price items from the live catalog →
+  allocate order number → insert order + items + `created` event → if `confirm`,
+  decrement stock (`order_confirmed` movements) and set `stock_committed`.
+- **pipeline** (`advanceOrder` / `cancelOrder` / `returnOrder`) — the only legal
+  moves are `MAIN_NEXT[from] === to`, `to === cancelled && from ∈ {draft…shipped}`,
+  or `to === returned && from === delivered`. Anything else throws
+  `OrderTransitionError`. Entering Confirmed commits stock; leaving to
+  Cancelled/Returned restores exactly what was outstanding (nets committed vs.
+  already-restored movements).
+- **editOrder** — owner-only past Draft (FR-12); reprices, and if the order was
+  stock-committed it restores then re-commits so the ledger stays correct.
+
+`app/desk/export/[entity]/route.ts` streams CSV for orders / customers /
+products (FR-14), tenant-scoped, no support request.
 
 Roles: `owner` \| `staff` \| `viewer` (`role` enum). Plan status:
 `trialing` \| `active` \| `past_due` \| `read_only` \| `cancelled`.

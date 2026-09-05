@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
@@ -43,13 +42,14 @@ export default async function DeskLayout({
 
       <main className="flex flex-1 flex-col px-5 py-6">{children}</main>
 
-      <footer className="px-5 pb-6 pt-2 text-xs text-muted">
-        Phase 2 (catalog) is live. Orders and the share link come next.{" "}
-        <Link href="/desk/catalog/import" className="underline underline-offset-2">
-          Import a CSV
-        </Link>
-        .
+      {/* eslint-disable @next/next/no-html-link-for-pages -- these are CSV download endpoints, not pages */}
+      <footer className="flex flex-wrap gap-x-4 gap-y-1 px-5 pb-6 pt-2 text-xs text-muted">
+        <span>Export CSV:</span>
+        <a href="/desk/export/orders" className="underline underline-offset-2">Orders</a>
+        <a href="/desk/export/customers" className="underline underline-offset-2">Customers</a>
+        <a href="/desk/export/products" className="underline underline-offset-2">Products</a>
       </footer>
+      {/* eslint-enable @next/next/no-html-link-for-pages */}
     </div>
   );
 }
