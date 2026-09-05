@@ -25,8 +25,8 @@ auth.config.ts           edge-safe subset used by proxy.ts
 proxy.ts                 route protection (Next 16's renamed middleware)
 db/
   schema.ts              Drizzle schema — single source of DB truth
-  index.ts               `db` — neon-http client (no session state)
-  tenant.ts              `withTenant()` — pooled client + per-tx tenant GUC
+  index.ts               `db` — neon-http client (no transactions)
+  tenant.ts              `pooledDb()` + `withTenant()` — WebSocket pool, transactions
 lib/
   rbac.ts                capability matrix + can()/assertCan()
   session.ts             requireUser / requireActive / requireCapability

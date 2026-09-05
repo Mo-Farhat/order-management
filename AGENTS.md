@@ -19,9 +19,10 @@ Order-and-catalog SaaS for DM-based sellers. Read `docs/PRD.md` first, then
   `middleware`). Server Actions for mutations, not route handlers.
 - **Drizzle ORM + Neon Postgres.** No Prisma. Schema is `db/schema.ts` — the
   single source of DB truth; change it, then `npm run db:generate`.
-- **`db` (`db/index.ts`)** is neon-http, for auth and non-tenant queries.
-  **Tenant-scoped data goes through `withTenant()` (`db/tenant.ts`)** so RLS
-  applies.
+- **`db` (`db/index.ts`)** is neon-http — one HTTP request per statement,
+  **no transaction support**. For atomic multi-statement writes use
+  `pooledDb()` (no tenant context) or **`withTenant()`** (tenant-scoped, sets
+  the RLS GUC) — both from `db/tenant.ts`.
 - **Auth.js v5**, JWT sessions. Full config `auth.ts` (Node), edge subset
   `auth.config.ts` (used by `proxy.ts` — keep it free of DB/bcrypt imports).
 - **Every mutation** resolves `tenantId` first, then calls

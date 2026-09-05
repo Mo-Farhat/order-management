@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { updateSession } from "@/auth";
 import { db } from "@/db";
+import { pooledDb } from "@/db/tenant";
 import { auditLog, memberships, tenants } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { businessBasicsSchema, slugify } from "@/lib/validation";
@@ -55,7 +56,8 @@ export async function saveBusinessBasics(
   const slug = await resolveSlug(parsed.data.name);
   const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
 
-  const tenantId = await db.transaction(async (tx) => {
+  // neon-http has no transaction support; use the pooled (WebSocket) client.
+  const tenantId = await pooledDb().transaction(async (tx) => {
     const [tenant] = await tx
       .insert(tenants)
       .values({

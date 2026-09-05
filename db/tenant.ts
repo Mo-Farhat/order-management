@@ -4,17 +4,17 @@ import { sql } from "drizzle-orm";
 import * as schema from "./schema";
 
 /**
- * Tenant-scoped database access.
+ * Pooled (WebSocket) database access — the only path that supports real
+ * transactions. The default `db` export (`db/index.ts`) is neon-http, which
+ * issues each statement as a separate HTTP request and has NO transaction
+ * support ("No transactions support in neon-http driver").
  *
- * The primary isolation mechanism is application code: every tenant table is
- * queried with `tenantId` as the first predicate. As a second line of defence
- * (NFR "multi-tenant isolation"), Postgres row-level security policies key off
- * `current_setting('app.current_tenant')`. Those policies only take effect
- * inside a transaction that has set that GUC, which is what `withTenant` does.
+ * Use `pooledDb` for any multi-statement write that must be atomic but has no
+ * tenant context yet (e.g. creating the first tenant + membership).
  *
- * neon-http (the default `db` export) issues each statement as a separate HTTP
- * request and cannot hold `SET LOCAL` state, so tenant-scoped work uses a
- * pooled WebSocket connection instead.
+ * Use `withTenant(tenantId, fn)` for tenant-scoped work: it opens a transaction
+ * and sets `app.current_tenant` (transaction-local) so the Postgres RLS policies
+ * from `scripts/apply-rls.ts` apply as a second line of defence.
  */
 
 // Node 22+ ships a global WebSocket; wire it up for the serverless driver.
@@ -38,6 +38,11 @@ function getClient(): NeonDatabase<typeof schema> {
   return client;
 }
 
+/** Lazily-created pooled client. Access via the getter so it isn't built at import time. */
+export function pooledDb(): NeonDatabase<typeof schema> {
+  return getClient();
+}
+
 type Tx = Parameters<Parameters<NeonDatabase<typeof schema>["transaction"]>[0]>[0];
 
 export async function withTenant<T>(
@@ -50,3 +55,5 @@ export async function withTenant<T>(
     return fn(tx);
   });
 }
+
+export type { Tx };

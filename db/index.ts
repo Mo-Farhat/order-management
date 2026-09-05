@@ -12,6 +12,11 @@ if (!connectionString) {
 
 const sql = neon(connectionString);
 
+/**
+ * neon-http client: one HTTP request per statement, fast, stateless.
+ * It has NO transaction support — for atomic multi-statement writes use
+ * `pooledDb()` or `withTenant()` from `db/tenant.ts`.
+ */
 export const db = drizzle(sql, { schema, casing: "snake_case" });
 
 export { schema };
