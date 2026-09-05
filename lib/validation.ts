@@ -70,6 +70,50 @@ export const stockAdjustSchema = z.object({
   note: z.string().trim().max(200).optional().or(z.literal("")),
 });
 
+// --- Order Desk (Phase 3) ---------------------------------------------
+
+export const phoneSchema = z
+  .string()
+  .trim()
+  .min(6, { error: "Enter a valid phone number." })
+  .max(24)
+  .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." });
+
+export const customerSchema = z.object({
+  name: z.string().trim().min(1, { error: "Customer name is required." }).max(80),
+  phone: phoneSchema,
+});
+
+const money2 = z
+  .string()
+  .trim()
+  .regex(/^\d+(\.\d{1,2})?$/, { error: "Enter an amount like 250 or 250.50." });
+
+export const orderDraftSchema = z.object({
+  customerId: z.uuid().optional(),
+  customerName: z.string().trim().max(80).optional(),
+  customerPhone: z.string().trim().max(24).optional(),
+  items: z
+    .array(
+      z.object({
+        productId: z.uuid(),
+        quantity: z.number().int().min(1).max(100000),
+      }),
+    )
+    .min(1, { error: "Add at least one item." }),
+  deliveryFee: z.union([z.literal(""), money2]).optional(),
+  discountType: z.enum(["none", "flat", "percent"]).default("none"),
+  discountValue: z.union([z.literal(""), money2]).optional(),
+  note: z.string().trim().max(2000).optional(),
+  confirm: z.boolean().default(false),
+});
+
+export type OrderDraftInput = z.infer<typeof orderDraftSchema>;
+
+export const orderNoteSchema = z.object({
+  note: z.string().trim().max(2000),
+});
+
 /** Turns "Aisha's Kitchen" into "aishas-kitchen". */
 export function slugify(input: string): string {
   return (
