@@ -20,7 +20,14 @@ export default async function SharePage() {
   const host = h.get("host") ?? "localhost:3000";
   const proto = host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https";
   const url = `${proto}://${host}/s/${ctx.tenantSlug}`;
-  const qr = await QRCode.toDataURL(url, { margin: 1, width: 240 });
+
+  // SVG output is pure-JS (no PNG/zlib) — safe on the Workers runtime.
+  let qrSvg: string | null = null;
+  try {
+    qrSvg = await QRCode.toString(url, { type: "svg", margin: 1 });
+  } catch {
+    qrSvg = null;
+  }
 
   return (
     <>
@@ -59,12 +66,13 @@ export default async function SharePage() {
         <Card title="Your link">
           <div className="flex flex-col gap-3">
             <CopyLink url={url} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={qr}
-              alt="QR code for your storefront link"
-              className="mx-auto size-40 rounded-lg border border-line"
-            />
+            {qrSvg && (
+              <div
+                className="mx-auto size-40 rounded-lg border border-line [&>svg]:size-full"
+                aria-label="QR code for your storefront link"
+                dangerouslySetInnerHTML={{ __html: qrSvg }}
+              />
+            )}
             <p className="text-center text-xs text-muted">
               Print the QR for your counter or business cards.
             </p>

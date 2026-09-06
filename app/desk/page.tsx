@@ -6,7 +6,9 @@ import type { OrderStatus } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { dashboardMetrics } from "@/lib/dashboard";
 import { listOrders } from "@/lib/orders";
+import { upsellState } from "@/lib/upsell";
 import { StatusPill, relativeTime } from "@/components/orders/status-pill";
+import { UpsellBanner } from "@/components/desk/upsell-banner";
 import { PageHeader, Card, StatCard, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 
 const PIPELINE: { status: OrderStatus; label: string }[] = [
@@ -19,15 +21,18 @@ const PIPELINE: { status: OrderStatus; label: string }[] = [
 
 export default async function DashboardPage() {
   const ctx = await requireActive();
-  const [m, recent, tenant] = await Promise.all([
+  const [m, recent, tenant, upsell] = await Promise.all([
     dashboardMetrics(ctx),
     listOrders(ctx, {}),
     db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
+    upsellState(ctx),
   ]);
   const currency = tenant?.currency ?? "";
 
   return (
     <>
+      {upsell.show && <UpsellBanner reason={upsell.reason} />}
+
       <PageHeader
         title="Dashboard"
         subtitle={`Overview for ${tenant?.name ?? "your shop"}`}
