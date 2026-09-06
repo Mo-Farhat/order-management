@@ -8,6 +8,10 @@ import type { NextAuthConfig } from "next-auth";
  * (providers, Drizzle adapter, enrichment) lives in `auth.ts`.
  */
 export const authConfig = {
+  // Self-hosted (Cloudflare Workers, not Vercel) — trust the deployment host
+  // instead of requiring AUTH_URL. The proxy builds its NextAuth instance from
+  // this config, so it must be set here too, not only in auth.ts.
+  trustHost: true,
   pages: {
     signIn: "/login",
     verifyRequest: "/verify-request",
