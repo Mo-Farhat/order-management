@@ -6,7 +6,9 @@
  * for primary actions and links, amber for "new / attention", clay-red for
  * destructive. Tuned against the OrderCast reference (docs/ux, image.png).
  */
+/* Light only — the console does not follow the OS dark-mode setting. */
 :root {
+  color-scheme: light;
   --background: #eaeeec;
   --foreground: #14201d;
 
@@ -56,29 +58,6 @@
   --color-sidebar-active-fg: var(--sidebar-active-fg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0e1614;
-    --foreground: #e6edea;
-    --paper: #16211e;
-    --card: #16211e;
-    --surface: #1c2825;
-    --ink: #e6edea;
-    --muted: #93a39d;
-    --line: #2b3a36;
-    --accent: #3bb7a3;
-    --accent-fg: #05221d;
-    --accent-weak: #14322d;
-    --lime: #2f7367;
-    --warn: #d8933f;
-    --danger: #d4695a;
-    --sidebar: #0a2f2c;
-    --sidebar-fg: #cfe0db;
-    --sidebar-muted: #6f938c;
-    --sidebar-active: #124842;
-  }
 }
 
 body {
