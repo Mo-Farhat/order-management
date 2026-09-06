@@ -16,7 +16,8 @@ export function MarketingNav() {
 
   return (
     <div className="pointer-events-none sticky top-3 z-50 px-3">
-      <nav className="mkt-nav pointer-events-auto mx-auto flex max-w-3xl items-center justify-between gap-3 rounded-lg py-2 pl-4 pr-2 text-white">
+     <div className="relative mx-auto max-w-3xl">
+      <nav className="mkt-nav pointer-events-auto flex items-center justify-between gap-3 rounded-lg py-2 pl-4 pr-2 text-white">
         <Link href="/" className="flex items-center gap-2">
           <span className="grid size-6 place-items-center rounded-md bg-accent text-[11px] font-bold text-accent-fg">
             {APP_NAME.charAt(0)}
@@ -57,36 +58,44 @@ export function MarketingNav() {
         </button>
       </nav>
 
-      {open && (
-        <div className="mkt-nav pointer-events-auto mx-auto mt-2 max-w-3xl rounded-lg p-4 text-white md:hidden">
-          <div className="flex flex-col gap-1 text-sm">
-            {LINKS.map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-2 py-2 text-white/80 hover:bg-white/10"
-              >
-                {label}
-              </a>
-            ))}
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link
-                href="/login"
-                className="rounded-md border border-white/20 py-2 text-center text-[12px] uppercase tracking-[0.14em]"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="mkt-btn mkt-btn-light py-2 text-center text-[12px] uppercase tracking-[0.14em]"
-              >
-                Start free
-              </Link>
-            </div>
+      {/* mobile dropdown — absolutely positioned so opening it never changes
+          layout height (no white strip) and it can transition smoothly */}
+      <div
+        aria-hidden={!open}
+        className={`mkt-nav absolute inset-x-0 top-[calc(100%+0.5rem)] origin-top rounded-lg p-4 text-white transition-[opacity,transform] duration-300 ease-out md:hidden ${
+          open
+            ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none -translate-y-2 scale-[0.97] opacity-0"
+        }`}
+      >
+        <div className="flex flex-col gap-1 text-sm">
+          {LINKS.map(([label, href]) => (
+            <a
+              key={href}
+              href={href}
+              onClick={() => setOpen(false)}
+              className="rounded-md px-2 py-2 text-white/80 transition-colors hover:bg-white/10"
+            >
+              {label}
+            </a>
+          ))}
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Link
+              href="/login"
+              className="rounded-md border border-white/20 py-2 text-center text-[12px] uppercase tracking-[0.14em]"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              className="mkt-btn mkt-btn-light py-2 text-center text-[12px] uppercase tracking-[0.14em]"
+            >
+              Start free
+            </Link>
           </div>
         </div>
-      )}
+      </div>
+     </div>
     </div>
   );
 }
