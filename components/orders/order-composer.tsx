@@ -14,7 +14,7 @@ type Product = {
   photoUrl: string | null;
 };
 
-type Line = { productId: string; quantity: number };
+type Line = { productId: string; quantity: number; note?: string };
 type PaymentStatus = "unpaid" | "partial" | "paid";
 type DiscountType = "none" | "flat" | "percent";
 
@@ -91,9 +91,15 @@ export function OrderComposer({
 
   function setQty(productId: string, quantity: number) {
     setLines((prev) => {
+      const existing = prev.find((l) => l.productId === productId);
       const others = prev.filter((l) => l.productId !== productId);
-      return quantity > 0 ? [...others, { productId, quantity }] : others;
+      return quantity > 0
+        ? [...others, { productId, quantity, note: existing?.note }]
+        : others;
     });
+  }
+  function setLineNote(productId: string, note: string) {
+    setLines((prev) => prev.map((l) => (l.productId === productId ? { ...l, note } : l)));
   }
   const qtyOf = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
 
@@ -273,13 +279,22 @@ export function OrderComposer({
               const p = byId.get(l.productId);
               if (!p) return null;
               return (
-                <li key={l.productId} className="flex items-center gap-2 p-2 text-sm">
-                  <span className="flex-1 truncate">{p.name}</span>
-                  <span className="text-xs text-muted">{currency} {p.price}</span>
-                  <button type="button" onClick={() => setQty(l.productId, l.quantity - 1)} className="size-6 rounded border border-line">−</button>
-                  <span className="w-6 text-center">{l.quantity}</span>
-                  <button type="button" onClick={() => setQty(l.productId, l.quantity + 1)} className="size-6 rounded border border-line">+</button>
-                  <button type="button" onClick={() => setQty(l.productId, 0)} className="ml-1 text-xs text-danger">remove</button>
+                <li key={l.productId} className="flex flex-col gap-1.5 p-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <span className="text-xs text-muted">{currency} {p.price}</span>
+                    <button type="button" onClick={() => setQty(l.productId, l.quantity - 1)} className="size-6 rounded border border-line">−</button>
+                    <span className="w-6 text-center">{l.quantity}</span>
+                    <button type="button" onClick={() => setQty(l.productId, l.quantity + 1)} className="size-6 rounded border border-line">+</button>
+                    <button type="button" onClick={() => setQty(l.productId, 0)} className="ml-1 text-xs text-danger">remove</button>
+                  </div>
+                  <input
+                    value={l.note ?? ""}
+                    onChange={(e) => setLineNote(l.productId, e.target.value)}
+                    maxLength={200}
+                    placeholder="Note for this item (size, colour, name…)"
+                    className="h-8 w-full rounded border border-line bg-surface px-2 text-xs outline-none focus:border-accent"
+                  />
                 </li>
               );
             })}

@@ -92,6 +92,7 @@ export const productSchema = z.object({
     .union([z.literal(""), z.coerce.number().int().min(0).max(1_000_000)])
     .optional(),
   sku: z.string().trim().max(60).optional().or(z.literal("")),
+  storefrontHidden: z.boolean().optional().default(false),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
@@ -130,6 +131,7 @@ export const orderDraftSchema = z.object({
       z.object({
         productId: z.uuid(),
         quantity: z.number().int().min(1).max(100000),
+        note: z.string().trim().max(200).optional(),
       }),
     )
     .min(1, { error: "Add at least one item." }),

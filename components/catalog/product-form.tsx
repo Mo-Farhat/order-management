@@ -26,6 +26,7 @@ export function ProductForm({
     category?: string | null;
     lowStockThreshold?: string | number | null;
     sku?: string | null;
+    storefrontHidden?: boolean;
   };
 }) {
   const [state, formAction] = useActionState<CatalogState, FormData>(action, undefined);
@@ -148,6 +149,22 @@ export function ProductForm({
           />
         </div>
       )}
+
+      <label className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3 py-3">
+        <span className="text-sm">
+          <span className="font-medium">Hide from storefront</span>
+          <span className="block text-xs text-muted">
+            Keeps it in your catalog and usable for DM orders, but customers
+            won&apos;t see it on your share link.
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          name="storefrontHidden"
+          defaultChecked={defaults?.storefrontHidden ?? false}
+          className="size-5 accent-[var(--color-accent)]"
+        />
+      </label>
 
       <SubmitButton>{submitLabel}</SubmitButton>
     </form>

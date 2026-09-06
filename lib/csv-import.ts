@@ -54,6 +54,7 @@ const COLUMN_ALIASES: Record<keyof ProductInput, string[]> = {
   category: ["category", "cat"],
   lowStockThreshold: ["low stock threshold", "low stock", "reorder level", "threshold"],
   sku: ["sku", "code"],
+  storefrontHidden: [], // not importable — always defaults to visible
 };
 
 export type PreviewRow = {

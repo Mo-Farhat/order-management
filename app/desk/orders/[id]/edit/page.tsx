@@ -59,7 +59,11 @@ export default async function EditOrderPage({
           },
           deliveryAddress: order.deliveryAddress ?? "",
           courier: order.courier ?? "",
-          items: items.map((it) => ({ productId: it.productId ?? "", quantity: it.quantity })),
+          items: items.map((it) => ({
+            productId: it.productId ?? "",
+            quantity: it.quantity,
+            note: it.note ?? undefined,
+          })),
           deliveryFee: order.deliveryFee,
           discountType: order.discountType,
           discountValue: order.discountValue,

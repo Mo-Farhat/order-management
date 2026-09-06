@@ -73,7 +73,10 @@ export default async function InvoicePage({
           {order.items.map((it, i) => (
             <tr key={it.id} className="border-b border-neutral-200">
               <td className="py-2">{i + 1}</td>
-              <td className="py-2">{it.name}</td>
+              <td className="py-2">
+                {it.name}
+                {it.note && <span className="block text-xs text-neutral-500">{it.note}</span>}
+              </td>
               <td className="py-2 text-right">{it.quantity}</td>
               <td className="py-2 text-right">{cur} {it.unitPrice}</td>
               <td className="py-2 text-right">{cur} {it.lineTotal}</td>

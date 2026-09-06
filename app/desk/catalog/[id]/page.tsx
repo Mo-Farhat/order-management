@@ -52,6 +52,7 @@ export default async function ProductPage({
           category: product.category,
           lowStockThreshold: product.lowStockThreshold,
           sku: product.sku,
+          storefrontHidden: product.storefrontHidden,
         }}
       />
 

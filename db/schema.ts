@@ -161,6 +161,9 @@ export const products = pgTable(
     // Soft delete (FR-6): archived products leave the public page and the
     // new-order grid but stay attached to historical orders.
     archivedAt: timestamp("archived_at", { withTimezone: true }),
+    // Hidden from the public storefront only — still fully usable for internal
+    // (DM/WhatsApp) orders. Independent of archive.
+    storefrontHidden: boolean("storefront_hidden").notNull().default(false),
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -303,6 +306,8 @@ export const orderItems = pgTable(
     priceSnapshot: numeric("price_snapshot", { precision: 12, scale: 2 }).notNull(),
     quantity: integer("quantity").notNull(),
     lineTotal: numeric("line_total", { precision: 12, scale: 2 }).notNull(),
+    // Per-line request — custom sizing, colour, "for Sara", etc.
+    note: text("note"),
   },
   (t) => [index("order_items_order_idx").on(t.orderId)],
 );

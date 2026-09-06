@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { productPhotos, products, shareCarts, tenants } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import { computeTotals, fromCents, toCents } from "@/lib/money";
+import { normalizePhone } from "@/lib/phone";
 import type { ActiveContext } from "@/lib/session";
 
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -75,7 +76,7 @@ export async function getStorefront(
   const rows = await db
     .select()
     .from(products)
-    .where(and(eq(products.tenantId, tenant.id), isNull(products.archivedAt)))
+    .where(and(eq(products.tenantId, tenant.id), isNull(products.archivedAt), eq(products.storefrontHidden, false)))
     .orderBy(asc(products.name));
 
   const photos = rows.length
@@ -140,6 +141,7 @@ export async function getStorefrontProduct(
       eq(products.id, productId),
       eq(products.tenantId, tenant.id),
       isNull(products.archivedAt),
+      eq(products.storefrontHidden, false),
     ),
   });
   if (!product) return null;
@@ -200,7 +202,7 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
   const catalog = await db
     .select()
     .from(products)
-    .where(and(eq(products.tenantId, tenant.id), isNull(products.archivedAt)));
+    .where(and(eq(products.tenantId, tenant.id), isNull(products.archivedAt), eq(products.storefrontHidden, false)));
   const byId = new Map(catalog.map((p) => [p.id, p]));
 
   const lines = clean.map((i) => {
@@ -239,7 +241,7 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
         })),
         note: input.note?.trim() || null,
         customerName: input.customerName.trim(),
-        customerPhone: input.customerPhone.trim(),
+        customerPhone: normalizePhone(input.customerPhone) ?? input.customerPhone.trim(),
         customerAddress: input.deliveryAddress.trim(),
         subtotal,
       });

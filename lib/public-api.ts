@@ -29,7 +29,7 @@ export async function getApiCatalog(tenantId: string): Promise<{
   const rows = await db
     .select()
     .from(products)
-    .where(and(eq(products.tenantId, tenantId), isNull(products.archivedAt)))
+    .where(and(eq(products.tenantId, tenantId), isNull(products.archivedAt), eq(products.storefrontHidden, false)))
     .orderBy(asc(products.name));
 
   const photos = rows.length

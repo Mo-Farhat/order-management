@@ -46,6 +46,7 @@ function toInput(formData: FormData) {
     category: formData.get("category") ?? "",
     lowStockThreshold: formData.get("lowStockThreshold") ?? "",
     sku: formData.get("sku") ?? "",
+    storefrontHidden: formData.get("storefrontHidden") === "on",
   };
 }
 

@@ -19,6 +19,7 @@ import {
 } from "@/db/schema";
 import { can } from "@/lib/rbac";
 import { computeTotals, fromCents, toCents, type DiscountType } from "@/lib/money";
+import { normalizePhone } from "@/lib/phone";
 import {
   TERMINAL,
   shouldHoldStock,
@@ -167,7 +168,14 @@ export type OrderDetail = {
   dispatchedAt: string | null;
   deliveredAt: string | null;
   customer: { name: string; phone: string | null; address: string | null } | null;
-  items: { id: string; name: string; unitPrice: string; quantity: number; lineTotal: string }[];
+  items: {
+    id: string;
+    name: string;
+    unitPrice: string;
+    quantity: number;
+    lineTotal: string;
+    note: string | null;
+  }[];
   subtotal: string;
   discountType: string;
   discountValue: string;
@@ -201,6 +209,7 @@ export async function getOrderDetail(ctx: ActiveContext, id: string): Promise<Or
       unitPrice: it.priceSnapshot,
       quantity: it.quantity,
       lineTotal: it.lineTotal,
+      note: it.note,
     })),
     subtotal: order.subtotal,
     discountType: order.discountType,
@@ -256,7 +265,7 @@ async function resolveCustomer(
     return existing.id;
   }
 
-  const phone = input.customerPhone?.trim() || null;
+  const phone = normalizePhone(input.customerPhone);
   const name = input.customerName?.trim();
   if (!name) throw new Error("Enter a customer name.");
 
@@ -287,12 +296,13 @@ type PricedItem = {
   nameSnapshot: string;
   priceCents: number;
   quantity: number;
+  note: string | null;
 };
 
 async function priceItems(
   tx: Tx,
   ctx: ActiveContext,
-  items: { productId: string; quantity: number }[],
+  items: { productId: string; quantity: number; note?: string }[],
 ): Promise<PricedItem[]> {
   const ids = [...new Set(items.map((i) => i.productId))];
   const rows = await tx
@@ -309,6 +319,7 @@ async function priceItems(
       nameSnapshot: p.name,
       priceCents: toCents(p.price),
       quantity: i.quantity,
+      note: i.note?.trim() || null,
     };
   });
 }
@@ -455,6 +466,7 @@ export async function createOrder(
         priceSnapshot: fromCents(p.priceCents),
         quantity: p.quantity,
         lineTotal: fromCents(totals.lineTotalsCents[i]),
+        note: p.note,
       })),
     );
 
@@ -681,6 +693,7 @@ export async function editOrder(
         priceSnapshot: fromCents(p.priceCents),
         quantity: p.quantity,
         lineTotal: fromCents(totals.lineTotalsCents[i]),
+        note: p.note,
       })),
     );
 

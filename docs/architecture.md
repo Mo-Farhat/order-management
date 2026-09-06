@@ -72,6 +72,10 @@ vitest.config.ts         unit tests — lib/**/*.test.ts
 |---|---|
 | `products` | name, price (`numeric`), `stock_qty`, plus optional description / category / `low_stock_threshold` / sku. `archived_at` is the soft-delete marker (FR-6). No variants. |
 | `product_photos` | up to 4 per product (`MAX_PHOTOS`), each ≤ 3 MB; stores the R2 object `key`, public URL derived at read time. |
+
+`products.storefront_hidden` — hide from the public storefront + read API while
+keeping the product fully usable for internal orders (independent of archive).
+`order_items.note` — per-line request text (custom sizing, colour, "for Sara").
 | `stock_movements` | append-only ledger (FR-5). Every `stock_qty` change writes a row: `delta`, `balance_after`, `reason` enum, actor, optional note / `order_id` (FK wired in Phase 3). |
 
 Catalog reads use `db` with an explicit `tenantId` filter. Every mutation that
@@ -86,7 +90,7 @@ movement — archive instead.
 
 | Table | Purpose |
 |---|---|
-| `customers` | created automatically inside `createOrder` (FR-13). Name, phone and delivery address are **required** to place an order (internal and storefront); `phone` stays nullable in the schema (legacy rows) and dedupes by `(tenant, phone)` when present. |
+| `customers` | created automatically inside `createOrder` (FR-13). Name, phone and delivery address are **required** to place an order. Phone is run through `lib/phone.ts#normalizePhone` (Sri Lanka canonical form) before dedupe on `(tenant, phone)`, so `+94 77…` / `077…` / `77…` resolve to one record. |
 | `orders` | per-tenant `order_number`; three independent status axes; money columns snapshot; `stock_committed` flag; `delivery_address`, `courier`, `dispatched_at`, `delivered_at`, `amount_paid`. |
 | `order_items` | `name_snapshot` + `price_snapshot` + qty + `line_total` — frozen at create/edit time (FR-10). |
 | `order_events` | append-only timeline: `kind` ∈ created / status / delivery / payment / note / edited. |

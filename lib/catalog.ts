@@ -38,6 +38,7 @@ function normalize(input: ProductInput) {
         ? null
         : Number(input.lowStockThreshold),
     sku: input.sku?.trim() || null,
+    storefrontHidden: input.storefrontHidden ?? false,
   };
 }
 
@@ -92,6 +93,7 @@ export async function distinctCategories(ctx: ActiveContext): Promise<string[]> 
       and(
         eq(products.tenantId, ctx.tenantId),
         isNull(products.archivedAt),
+        eq(products.storefrontHidden, false),
         sql`${products.category} is not null and ${products.category} <> ''`,
       ),
     )

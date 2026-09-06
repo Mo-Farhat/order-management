@@ -90,7 +90,10 @@ export function OrderDetailBody({
             {order.items.map((it, i) => (
               <tr key={it.id}>
                 <Td className="text-muted">{i + 1}</Td>
-                <Td>{it.name}</Td>
+                <Td>
+                  {it.name}
+                  {it.note && <span className="block text-xs text-muted">{it.note}</span>}
+                </Td>
                 <Td className="text-right tabular-nums">{it.quantity}</Td>
                 <Td className="text-right tabular-nums">{cur} {it.unitPrice}</Td>
                 <Td className="text-right tabular-nums">{cur} {it.lineTotal}</Td>

@@ -97,6 +97,9 @@ export default async function CatalogPage({
                           {p.archivedAt && (
                             <span className="font-mono text-[10px] uppercase text-muted">archived</span>
                           )}
+                          {p.storefrontHidden && !p.archivedAt && (
+                            <span className="font-mono text-[10px] uppercase text-muted">storefront-hidden</span>
+                          )}
                           {p.isLowStock && (
                             <span className="rounded bg-warn/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-warn">
                               low stock
