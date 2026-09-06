@@ -72,6 +72,9 @@ export const tenants = pgTable("tenants", {
   accentColor: text("accent_color"),
   logoKey: text("logo_key"),
   sharePolicyText: text("share_policy_text"),
+  // Ordered list of category names shown as filter chips on the storefront.
+  // Null = fall back to every distinct product category.
+  storefrontCategories: jsonb("storefront_categories").$type<string[]>(),
 
   // Billing (schema now, UI in Phase 5).
   planStatus: planStatusEnum("plan_status").notNull().default("trialing"),
@@ -330,6 +333,7 @@ export const shareCarts = pgTable(
     note: text("note"),
     customerName: text("customer_name"),
     customerPhone: text("customer_phone"),
+    customerAddress: text("customer_address"),
     subtotal: numeric("subtotal", { precision: 12, scale: 2 }).notNull().default("0"),
     status: text("status").notNull().default("pending"), // "pending" | "imported"
     importedOrderId: uuid("imported_order_id"),

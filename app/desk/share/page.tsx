@@ -5,15 +5,17 @@ import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { recentShareCarts } from "@/lib/share";
+import { distinctCategories } from "@/lib/catalog";
 import { PageHeader, Card, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 import { ShareSettingsForm } from "@/components/share/share-settings-form";
 import { CopyLink } from "@/components/share/copy-link";
 
 export default async function SharePage() {
   const ctx = await requireActive();
-  const [tenant, carts, h] = await Promise.all([
+  const [tenant, carts, allCategories, h] = await Promise.all([
     db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
     recentShareCarts(ctx),
+    distinctCategories(ctx),
     headers(),
   ]);
 
@@ -56,6 +58,9 @@ export default async function SharePage() {
         <div className="lg:col-span-2">
           <Card title="Settings">
             <ShareSettingsForm
+              whatsappNumber={tenant?.whatsappNumber ?? ""}
+              allCategories={allCategories}
+              chosenCategories={tenant?.storefrontCategories ?? null}
               accentColor={tenant?.accentColor ?? null}
               sharePolicyText={tenant?.sharePolicyText ?? null}
               paused={tenant?.publicPagePaused ?? false}

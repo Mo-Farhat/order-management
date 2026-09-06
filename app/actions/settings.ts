@@ -31,7 +31,6 @@ export async function saveBusinessSettings(
   const ctx = await requireCapability("catalog:edit");
   const parsed = businessSettingsSchema.safeParse({
     name: formData.get("name"),
-    whatsappNumber: formData.get("whatsappNumber"),
     currency: formData.get("currency"),
     deliveryFeeDefault: formData.get("deliveryFeeDefault") ?? "",
     stockTrackingEnabled: formData.get("stockTrackingEnabled") === "on",
@@ -44,7 +43,6 @@ export async function saveBusinessSettings(
     .update(tenants)
     .set({
       name: parsed.data.name,
-      whatsappNumber: parsed.data.whatsappNumber,
       currency: parsed.data.currency,
       deliveryFeeDefault: parsed.data.deliveryFeeDefault || null,
       stockTrackingEnabled: parsed.data.stockTrackingEnabled,
@@ -58,9 +56,7 @@ export async function saveBusinessSettings(
     action: "tenant.settings_updated",
     entity: "tenant",
     entityId: ctx.tenantId,
-    before: before
-      ? { name: before.name, currency: before.currency, whatsappNumber: before.whatsappNumber }
-      : null,
+    before: before ? { name: before.name, currency: before.currency } : null,
     after: { name: parsed.data.name, currency: parsed.data.currency },
   });
 

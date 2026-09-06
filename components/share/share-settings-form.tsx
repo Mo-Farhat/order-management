@@ -6,16 +6,38 @@ import { FormError } from "@/components/form";
 import { Btn } from "@/components/desk/ui";
 
 export function ShareSettingsForm({
+  whatsappNumber,
   accentColor,
   sharePolicyText,
   paused,
+  allCategories,
+  chosenCategories,
 }: {
+  whatsappNumber: string;
   accentColor: string | null;
   sharePolicyText: string | null;
   paused: boolean;
+  allCategories: string[];
+  chosenCategories: string[] | null;
 }) {
   const [state, action] = useActionState(saveShareSettings, undefined);
   const [color, setColor] = useState(accentColor || "#0f7b6c");
+
+  // ordered list of shown chips; unshown = allCategories not in `order`
+  const [order, setOrder] = useState<string[]>(
+    (chosenCategories && chosenCategories.length
+      ? chosenCategories.filter((c) => allCategories.includes(c))
+      : allCategories) ?? [],
+  );
+  const unused = allCategories.filter((c) => !order.includes(c));
+
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= order.length) return;
+    const next = [...order];
+    [next[i], next[j]] = [next[j], next[i]];
+    setOrder(next);
+  };
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -40,6 +62,23 @@ export function ShareSettingsForm({
 
       <label className="flex flex-col gap-1.5">
         <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          WhatsApp number
+        </span>
+        <input
+          name="whatsappNumber"
+          defaultValue={whatsappNumber}
+          inputMode="tel"
+          placeholder="+94771234567"
+          className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent sm:w-56"
+        />
+        <span className="text-xs text-muted">Storefront orders are sent here.</span>
+        {state?.fieldErrors?.whatsappNumber?.map((m) => (
+          <span key={m} className="text-xs text-danger">{m}</span>
+        ))}
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
           Accent colour
         </span>
         <div className="flex items-center gap-2">
@@ -60,6 +99,50 @@ export function ShareSettingsForm({
           <span key={m} className="text-xs text-danger">{m}</span>
         ))}
       </label>
+
+      <div className="flex flex-col gap-1.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          Category chips
+        </span>
+        <span className="text-xs text-muted">
+          The filter buttons at the top of your storefront, in this order. Names must match a
+          product&apos;s category.
+        </span>
+        <input type="hidden" name="storefrontCategories" value={JSON.stringify(order)} />
+        {allCategories.length === 0 ? (
+          <p className="text-xs text-muted">Add a category to a product first.</p>
+        ) : (
+          <>
+            <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
+              {order.map((c, i) => (
+                <li key={c} className="flex items-center gap-2 px-3 py-2 text-sm">
+                  <span className="flex-1">{c}</span>
+                  <button type="button" onClick={() => move(i, -1)} className="size-6 rounded border border-line text-xs disabled:opacity-30" disabled={i === 0}>↑</button>
+                  <button type="button" onClick={() => move(i, 1)} className="size-6 rounded border border-line text-xs disabled:opacity-30" disabled={i === order.length - 1}>↓</button>
+                  <button type="button" onClick={() => setOrder(order.filter((x) => x !== c))} className="text-xs text-danger">remove</button>
+                </li>
+              ))}
+              {order.length === 0 && (
+                <li className="px-3 py-2 text-xs text-muted">No chips — the storefront shows every category.</li>
+              )}
+            </ul>
+            {unused.length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {unused.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setOrder([...order, c])}
+                    className="rounded-full border border-line px-2.5 py-1 text-xs text-muted hover:border-accent/50"
+                  >
+                    + {c}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       <label className="flex flex-col gap-1.5">
         <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">

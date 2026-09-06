@@ -44,12 +44,6 @@ export const businessSettingsSchema = z.object({
     .trim()
     .min(2, { error: "Business name must be at least 2 characters." })
     .max(80, { error: "Keep the business name under 80 characters." }),
-  whatsappNumber: z
-    .string()
-    .trim()
-    .min(6, { error: "Enter a valid WhatsApp number." })
-    .max(24, { error: "Enter a valid WhatsApp number." })
-    .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
   currency: z
     .string()
     .trim()
@@ -128,8 +122,9 @@ const money2 = z
 
 export const orderDraftSchema = z.object({
   customerId: z.uuid().optional(),
-  customerName: z.string().trim().max(80).optional(),
-  customerPhone: z.string().trim().max(24).optional(),
+  // Customer details are required to fulfil an order.
+  customerName: z.string().trim().min(1, { error: "Customer name is required." }).max(80),
+  customerPhone: phoneSchema,
   items: z
     .array(
       z.object({
@@ -141,7 +136,11 @@ export const orderDraftSchema = z.object({
   deliveryFee: z.union([z.literal(""), money2]).optional(),
   discountType: z.enum(["none", "flat", "percent"]).default("none"),
   discountValue: z.union([z.literal(""), money2]).optional(),
-  deliveryAddress: z.string().trim().max(500).optional(),
+  deliveryAddress: z
+    .string()
+    .trim()
+    .min(5, { error: "Delivery address is required." })
+    .max(500),
   paymentStatus: z.enum(["unpaid", "partial", "paid"]).default("unpaid"),
   amountPaid: z.union([z.literal(""), money2]).optional(),
   note: z.string().trim().max(2000).optional(),
@@ -167,6 +166,13 @@ export const shareSettingsSchema = z.object({
     .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #0f7b6c." })])
     .optional(),
   sharePolicyText: z.string().trim().max(500).optional().or(z.literal("")),
+  whatsappNumber: z
+    .string()
+    .trim()
+    .min(6, { error: "Enter a valid WhatsApp number." })
+    .max(24)
+    .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
+  storefrontCategories: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
   paused: z.boolean().default(false),
 });
 
@@ -181,8 +187,13 @@ export const shareHandoffSchema = z.object({
     )
     .min(1, { error: "Add at least one item." }),
   note: z.string().trim().max(500).optional(),
-  customerName: z.string().trim().max(80).optional(),
-  customerPhone: z.string().trim().max(24).optional(),
+  customerName: z.string().trim().min(1, { error: "Enter your name." }).max(80),
+  customerPhone: phoneSchema,
+  deliveryAddress: z
+    .string()
+    .trim()
+    .min(5, { error: "Enter your delivery address." })
+    .max(500),
 });
 
 /** Turns "Aisha's Kitchen" into "aishas-kitchen". */

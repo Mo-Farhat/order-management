@@ -26,18 +26,43 @@ export type StorefrontProduct = {
   stockState: "in" | "low" | "out";
 };
 
+export type StorefrontTenant = {
+  name: string;
+  slug: string;
+  currency: string;
+  whatsappNumber: string | null;
+  accentColor: string | null;
+  logoUrl: string | null;
+  sharePolicyText: string | null;
+};
+
 export type Storefront = {
-  tenant: {
-    name: string;
-    slug: string;
-    currency: string;
-    whatsappNumber: string | null;
-    accentColor: string | null;
-    logoUrl: string | null;
-    sharePolicyText: string | null;
-  };
+  tenant: StorefrontTenant;
+  categories: string[];
   products: StorefrontProduct[];
 };
+
+function stockStateOf(
+  p: { stockQty: number; lowStockThreshold: number | null },
+  tracking: boolean,
+): "in" | "low" | "out" {
+  if (!tracking) return "in";
+  if (p.stockQty <= 0) return "out";
+  if (p.lowStockThreshold != null && p.stockQty <= p.lowStockThreshold) return "low";
+  return "in";
+}
+
+/** Ordered chip list: the owner's picks (that still have products), else distinct. */
+function storefrontChips(
+  configured: string[] | null,
+  productCategories: (string | null)[],
+): string[] {
+  const present = new Set(productCategories.filter((c): c is string => !!c));
+  if (configured && configured.length) {
+    return configured.filter((c) => present.has(c));
+  }
+  return [...present].sort();
+}
 
 /** Public read for `/s/{slug}`. `paused` when the owner switched the page off. */
 export async function getStorefront(
@@ -65,6 +90,66 @@ export async function getStorefront(
     if (!firstPhoto.has(ph.productId)) firstPhoto.set(ph.productId, publicUrlForKey(ph.key));
   }
 
+  const tenantOut: StorefrontTenant = {
+    name: tenant.name,
+    slug: tenant.slug,
+    currency: tenant.currency,
+    whatsappNumber: tenant.whatsappNumber,
+    accentColor: tenant.accentColor,
+    logoUrl: tenant.logoKey ? publicUrlForKey(tenant.logoKey) : null,
+    sharePolicyText: tenant.sharePolicyText,
+  };
+
+  return {
+    tenant: tenantOut,
+    categories: storefrontChips(tenant.storefrontCategories, rows.map((r) => r.category)),
+    products: rows.map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      photoUrl: firstPhoto.get(p.id) ?? null,
+      stockState: stockStateOf(p, tenant.stockTrackingEnabled),
+    })),
+  };
+}
+
+export type StorefrontProductDetail = {
+  tenant: StorefrontTenant;
+  product: {
+    id: string;
+    name: string;
+    price: string;
+    description: string | null;
+    category: string | null;
+    stockState: "in" | "low" | "out";
+    photos: string[];
+  };
+};
+
+/** Public read for `/s/{slug}/{id}` — the per-product page. */
+export async function getStorefrontProduct(
+  slug: string,
+  productId: string,
+): Promise<StorefrontProductDetail | null> {
+  const tenant = await db.query.tenants.findFirst({ where: eq(tenants.slug, slug) });
+  if (!tenant || tenant.publicPagePaused) return null;
+
+  const product = await db.query.products.findFirst({
+    where: and(
+      eq(products.id, productId),
+      eq(products.tenantId, tenant.id),
+      isNull(products.archivedAt),
+    ),
+  });
+  if (!product) return null;
+
+  const photos = await db
+    .select()
+    .from(productPhotos)
+    .where(eq(productPhotos.productId, product.id))
+    .orderBy(productPhotos.sortOrder);
+
   return {
     tenant: {
       name: tenant.name,
@@ -75,20 +160,15 @@ export async function getStorefront(
       logoUrl: tenant.logoKey ? publicUrlForKey(tenant.logoKey) : null,
       sharePolicyText: tenant.sharePolicyText,
     },
-    products: rows.map((p) => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      category: p.category,
-      photoUrl: firstPhoto.get(p.id) ?? null,
-      stockState: !tenant.stockTrackingEnabled
-        ? "in"
-        : p.stockQty <= 0
-          ? "out"
-          : p.lowStockThreshold != null && p.stockQty <= p.lowStockThreshold
-            ? "low"
-            : "in",
-    })),
+    product: {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      description: product.description,
+      category: product.category,
+      stockState: stockStateOf(product, tenant.stockTrackingEnabled),
+      photos: photos.map((ph) => publicUrlForKey(ph.key)),
+    },
   };
 }
 
@@ -96,8 +176,9 @@ export type HandoffInput = {
   slug: string;
   items: { productId: string; quantity: number }[];
   note?: string;
-  customerName?: string;
-  customerPhone?: string;
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
 };
 
 export type HandoffResult = {
@@ -157,8 +238,9 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
           quantity,
         })),
         note: input.note?.trim() || null,
-        customerName: input.customerName?.trim() || null,
-        customerPhone: input.customerPhone?.trim() || null,
+        customerName: input.customerName.trim(),
+        customerPhone: input.customerPhone.trim(),
+        customerAddress: input.deliveryAddress.trim(),
         subtotal,
       });
       break;
@@ -173,6 +255,10 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     ...lines.map((l) => `• ${l.quantity} × ${l.nameSnapshot} (${cur} ${l.priceSnapshot})`),
     ``,
     `Subtotal: ${cur} ${subtotal}`,
+    ``,
+    `Name: ${input.customerName.trim()}`,
+    `Phone: ${input.customerPhone.trim()}`,
+    `Address: ${input.deliveryAddress.trim()}`,
     input.note?.trim() ? `Note: ${input.note.trim()}` : ``,
     `Reference: ${code}`,
   ]
@@ -202,6 +288,7 @@ export async function getShareCartByCode(ctx: ActiveContext, rawCode: string) {
     note: cart.note ?? "",
     customerName: cart.customerName ?? "",
     customerPhone: cart.customerPhone ?? "",
+    deliveryAddress: cart.customerAddress ?? "",
     items: cart.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
     createdAt: cart.createdAt,
   };

@@ -14,14 +14,14 @@ Auth.js v5, deployed to Cloudflare, no Prisma.
 app/                     App Router routes
   (auth)/                login, signup, verify-request  (public)
   onboarding/business/   business-basics step           (auth, no tenant yet)
-  s/[slug]/              public storefront              (public, no auth)
+  s/[slug]/              public storefront + [id] product page (public, no auth)
   api/v1/                read API — products, catalog   (public, bearer key)
   desk/                  the authed app                 (auth + tenant)
     layout.tsx           sidebar + topbar shell + CSV export links
     page.tsx             Dashboard (metrics, recent orders)
     orders/              order list (inline status), new-order flow, [id] detail, [id]/edit
     catalog/             product list, new, [id] edit, import
-    share/               storefront settings (accent, pause, QR)
+    share/               storefront settings (WhatsApp #, accent, category chips, pause, QR)
     settings/            business settings + change password
     export/[entity]/     CSV download route handler
 components/desk/         shell nav + shared UI packaging (Card, Table, Btn…)
@@ -70,7 +70,7 @@ vitest.config.ts         unit tests — lib/**/*.test.ts
 | Table | Purpose |
 |---|---|
 | `products` | name, price (`numeric`), `stock_qty`, plus optional description / category / `low_stock_threshold` / sku. `archived_at` is the soft-delete marker (FR-6). No variants. |
-| `product_photos` | up to 6 per product; stores the R2 object `key`, public URL derived at read time. |
+| `product_photos` | up to 4 per product (`MAX_PHOTOS`), each ≤ 3 MB; stores the R2 object `key`, public URL derived at read time. |
 | `stock_movements` | append-only ledger (FR-5). Every `stock_qty` change writes a row: `delta`, `balance_after`, `reason` enum, actor, optional note / `order_id` (FK wired in Phase 3). |
 
 Catalog reads use `db` with an explicit `tenantId` filter. Every mutation that
@@ -85,7 +85,7 @@ movement — archive instead.
 
 | Table | Purpose |
 |---|---|
-| `customers` | created automatically inside `createOrder` (FR-13). `phone` is **nullable** — an order needs only a name; when a phone is given it dedupes by `(tenant, phone)`. |
+| `customers` | created automatically inside `createOrder` (FR-13). Name, phone and delivery address are **required** to place an order (internal and storefront); `phone` stays nullable in the schema (legacy rows) and dedupes by `(tenant, phone)` when present. |
 | `orders` | per-tenant `order_number`, status enum, money columns all snapshot, `stock_committed` flag, plus `delivery_address`, `payment_status` (unpaid/partial/paid) and `amount_paid`. |
 | `order_items` | `name_snapshot` + `price_snapshot` + qty + `line_total` — frozen at create/edit time (FR-10). |
 | `order_events` | append-only timeline: `kind` ∈ created/status/note/edited (FR-11). |
@@ -138,21 +138,28 @@ layout once orders ≥ 50, products ≥ 30, or account age ≥ 90 days; dismissi
 
 | Table | Purpose |
 |---|---|
-| `share_carts` | a public visitor's frozen selection + short reference `code` (unique per tenant). `status` ∈ pending/imported; `imported_order_id` set when the owner pulls it into a Draft. |
+| `share_carts` | a public visitor's frozen selection + short reference `code` (unique per tenant), plus their name / phone / address / note. `status` ∈ pending/imported. |
 
-`tenants` gains `accent_color` / `logo_key` / `share_policy_text` for the
-storefront's presentation (`public_page_paused` already existed).
+`tenants` gains `accent_color`, `logo_key`, `share_policy_text`,
+`storefront_categories` (ordered chip list, null = every distinct category);
+`whatsapp_number` is the storefront's contact number (edited here, not in
+account settings). `public_page_paused` already existed.
 
-- **Public page** `app/s/[slug]/page.tsx` (matched by `proxy.ts` `/s/` prefix, no
-  auth). `lib/share.ts#getStorefront` returns the in-stock catalog (stock shown
-  as in/low/out, never a count) or a paused/empty placeholder.
-- **Handoff** — `components/share/storefront.tsx` builds a cart client-side; the
-  `startShareHandoff` server action (unauthenticated) freezes it into
-  `share_carts`, returns a `wa.me` deep-link body + reference code.
-- **Import** — `/desk/orders/new?code=XXXX` calls `getShareCartByCode`, pre-fills
-  the composer; `createOrderAction` marks the cart `imported` on success.
-- **Settings** — `app/desk/share/page.tsx`: accent colour, policy text, pause
-  toggle (`saveShareSettings`), copyable link + server-rendered QR (`qrcode`).
+- **Catalog page** `app/s/[slug]/page.tsx` — `getStorefront` returns the catalog
+  (stock as in/low/out, never a count), the ordered chip list, and tenant
+  presentation. Product tiles link to…
+- **Product page** `app/s/[slug]/[id]/page.tsx` — `getStorefrontProduct`: photo
+  gallery, full description, add-to-cart.
+- **Cart** — `components/share/use-cart.ts` persists to `localStorage` keyed by
+  slug so it survives navigating between the two pages.
+- **Handoff** — `startShareHandoff` (unauthenticated) validates required
+  name/phone/address, freezes the cart into `share_carts`, returns a `wa.me`
+  deep-link body (with the customer details) + reference code.
+- **Import** — `/desk/orders/new?code=XXXX` pre-fills the composer (incl.
+  address); `createOrderAction` marks the cart `imported`.
+- **Settings** — `app/desk/share/page.tsx`: WhatsApp number, accent colour,
+  category-chip picker (reorderable), policy text, pause toggle
+  (`saveShareSettings`), copyable link + server-rendered SVG QR (`qrcode`).
 
 ## Desk shell (dashboard console)
 

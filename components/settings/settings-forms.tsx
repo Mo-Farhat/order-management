@@ -50,13 +50,11 @@ function LabeledInput({
 
 export function BusinessSettingsForm({
   name,
-  whatsappNumber,
   currency,
   deliveryFeeDefault,
   stockTrackingEnabled,
 }: {
   name: string;
-  whatsappNumber: string;
   currency: string;
   deliveryFeeDefault: string;
   stockTrackingEnabled: boolean;
@@ -66,14 +64,9 @@ export function BusinessSettingsForm({
     <form action={action} className="flex flex-col gap-4">
       <Note state={state} />
       <LabeledInput label="Business name" name="name" defaultValue={name} errors={state?.fieldErrors?.name} />
-      <LabeledInput
-        label="WhatsApp number"
-        name="whatsappNumber"
-        defaultValue={whatsappNumber}
-        inputMode="tel"
-        hint="Where storefront orders are sent. Include the country code."
-        errors={state?.fieldErrors?.whatsappNumber}
-      />
+      <p className="text-xs text-muted">
+        Your WhatsApp number moved to <span className="font-medium">Storefront → Share link</span>.
+      </p>
       <div className="grid grid-cols-2 gap-3">
         <LabeledInput
           label="Currency"

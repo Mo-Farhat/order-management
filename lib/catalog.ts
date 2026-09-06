@@ -284,7 +284,7 @@ export async function setArchived(
   });
 }
 
-export const MAX_PHOTOS = 6;
+export const MAX_PHOTOS = 4;
 
 export async function addProductPhotoKey(
   ctx: ActiveContext,

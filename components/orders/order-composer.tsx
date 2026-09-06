@@ -95,14 +95,18 @@ export function OrderComposer({
   }
   const qtyOf = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
 
-  const detailsReady = custName.trim().length >= 1 && lines.length > 0;
+  const detailsReady =
+    custName.trim().length >= 1 &&
+    custPhone.trim().length >= 6 &&
+    address.trim().length >= 5 &&
+    lines.length > 0;
 
   function payload(confirm: boolean) {
     return JSON.stringify({
       customerId: initial?.customer.id || undefined,
       customerName: custName.trim(),
-      customerPhone: custPhone.trim() || undefined,
-      deliveryAddress: address.trim() || undefined,
+      customerPhone: custPhone.trim(),
+      deliveryAddress: address.trim(),
       items: lines,
       deliveryFee: deliveryFee || "",
       discountType,
@@ -146,7 +150,7 @@ export function OrderComposer({
             </label>
             <label className="flex flex-col gap-1.5">
               <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
-                Phone <span className="normal-case text-muted/70">(optional)</span>
+                Phone
               </span>
               <input
                 value={custPhone}
@@ -161,7 +165,7 @@ export function OrderComposer({
 
           <label className="flex flex-col gap-1.5">
             <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
-              Delivery address <span className="normal-case text-muted/70">(optional)</span>
+              Delivery address
             </span>
             <textarea
               value={address}

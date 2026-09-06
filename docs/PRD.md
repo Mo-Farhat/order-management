@@ -86,7 +86,7 @@ Each item has acceptance criteria. Anything not listed here is out of scope — 
 Enforcement is server-side on every mutation, filtered by `tenant_id` before any other predicate. No exceptions, including for internal support access (impersonation only, time-boxed, logged, visible to the Owner).
 
 ### 7.2 Catalog
-- **FR-4:** Owner can create a product with name, price, stock quantity, and up to 6 photos. *AC: product appears in list and on the public share-link page within one save action.*
+- **FR-4:** Owner can create a product with name, price, stock quantity, and up to 4 photos (≤ 3 MB each). *AC: product appears in list and on the public share-link page — including its own product page — within one save action.*
 - **FR-5:** Stock decrements automatically on order confirmation, restores on cancellation. *AC: verified by a StockMovement audit row per change, attributing actor and reason.*
 - **FR-6:** Owner can archive (not hard-delete) a product that has order history. *AC: archived products disappear from the public page and new-order grid, remain visible in historical orders, delete button disabled with an inline explanation if order history exists.*
 - **FR-7:** Owner can bulk import products via CSV with a preview-before-commit step. *AC: no partial imports — either the whole batch commits or none does.*

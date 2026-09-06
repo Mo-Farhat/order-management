@@ -44,7 +44,8 @@ const ALLOWED = new Map<string, string>([
   ["image/webp", "webp"],
 ]);
 
-export const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
+export const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
+export const MAX_PHOTO_MB = 3;
 
 export function publicUrlForKey(key: string): string {
   return `${publicBaseUrl!.replace(/\/$/, "")}/${key}`;
@@ -56,7 +57,9 @@ export async function uploadProductPhoto(
 ): Promise<{ key: string }> {
   const ext = ALLOWED.get(file.type);
   if (!ext) throw new Error("Photos must be JPEG, PNG, or WebP.");
-  if (file.size > MAX_PHOTO_BYTES) throw new Error("Each photo must be under 6 MB.");
+  if (file.size > MAX_PHOTO_BYTES) {
+    throw new Error(`Each photo must be under ${MAX_PHOTO_MB} MB.`);
+  }
 
   const key = `${tenantId}/products/${crypto.randomUUID()}.${ext}`;
   const body = new Uint8Array(await file.arrayBuffer());

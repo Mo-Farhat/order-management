@@ -43,7 +43,7 @@ export default async function NewOrderPage({
       const items = cart.items.filter((i) => known.has(i.productId));
       initial = {
         customer: { id: null, name: cart.customerName, phone: cart.customerPhone },
-        deliveryAddress: "",
+        deliveryAddress: cart.deliveryAddress,
         items,
         deliveryFee: "",
         discountType: "none",

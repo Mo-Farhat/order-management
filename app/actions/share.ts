@@ -28,9 +28,21 @@ export async function saveShareSettings(
   formData: FormData,
 ): Promise<ShareState> {
   const ctx = await requireCapability("catalog:edit");
+  const rawCats = String(formData.get("storefrontCategories") ?? "");
+  let categories: string[] = [];
+  try {
+    const arr = JSON.parse(rawCats);
+    if (Array.isArray(arr)) categories = arr.map(String);
+  } catch {
+    // also accept a comma-separated fallback
+    categories = rawCats.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+
   const parsed = shareSettingsSchema.safeParse({
     accentColor: formData.get("accentColor") ?? "",
     sharePolicyText: formData.get("sharePolicyText") ?? "",
+    whatsappNumber: formData.get("whatsappNumber") ?? "",
+    storefrontCategories: categories,
     paused: formData.get("paused") === "on",
   });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
@@ -40,6 +52,10 @@ export async function saveShareSettings(
     .set({
       accentColor: parsed.data.accentColor || null,
       sharePolicyText: parsed.data.sharePolicyText || null,
+      whatsappNumber: parsed.data.whatsappNumber,
+      storefrontCategories: parsed.data.storefrontCategories.length
+        ? parsed.data.storefrontCategories
+        : null,
       publicPagePaused: parsed.data.paused,
       updatedAt: new Date(),
     })

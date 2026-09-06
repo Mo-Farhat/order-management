@@ -43,6 +43,13 @@
       "when": 1788692926717,
       "tag": "0005_needy_shriek",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788694143480,
+      "tag": "0006_dazzling_rogue",
+      "breakpoints": true
     }
   ]
 }
