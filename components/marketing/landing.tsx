@@ -73,7 +73,7 @@ export function Landing() {
         </div>
 
         {/* tilted app mockup that fades into the page */}
-        <Reveal delay={120} className="mx-auto mt-16 max-w-4xl">
+        <Reveal delay={120} className="mx-auto mt-10 max-w-4xl sm:mt-16">
           <div className="mkt-hero-fade mkt-tilt">
             <DashboardMock />
           </div>

@@ -155,8 +155,12 @@ body {
   mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
 }
 .mkt-tilt {
-  transform: perspective(1600px) rotateX(4deg);
   transform-origin: 50% 0%;
+}
+@media (min-width: 768px) {
+  .mkt-tilt {
+    transform: perspective(1600px) rotateX(4deg);
+  }
 }
 
 /* ---- Detached floating nav ------------------------------------------------ */

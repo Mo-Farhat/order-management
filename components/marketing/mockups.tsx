@@ -32,7 +32,7 @@ export function DashboardMock() {
         <span className="ml-3 text-[10px] text-muted">sfdesk.app/desk</span>
       </div>
 
-      <div className="grid grid-cols-[128px_1fr] text-[11px]">
+      <div className="grid grid-cols-1 text-[11px] sm:grid-cols-[128px_1fr]">
         {/* sidebar */}
         <div className="hidden flex-col gap-1 border-r border-line bg-surface p-3 sm:flex">
           <span className="mkt-serif mb-1 text-sm text-ink">SFDesk</span>
@@ -49,7 +49,7 @@ export function DashboardMock() {
         </div>
 
         {/* body */}
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-col gap-3 p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-ink">Dashboard</span>
             <span className="rounded-md bg-accent px-2 py-1 text-[10px] font-semibold text-accent-fg">
