@@ -6,7 +6,8 @@ const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
   throw new Error(
-    "DATABASE_URL is not set. Copy .env.example to .env.local and add your Neon connection string (see GUIDE.md).",
+    "DATABASE_URL is not set. Copy .env.example to .env.local and add your Neon connection string (see GUIDE.md). " +
+      "It must also be present at build time (Cloudflare: add it as a build variable).",
   );
 }
 
