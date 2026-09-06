@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { APP_NAME } from "@/lib/constants";
 
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
@@ -14,12 +15,10 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-// Placeholder product name — see PRD §14 "Open decisions".
-const APP_NAME = process.env.APP_NAME ?? "Storefront Desk";
-
 export const metadata: Metadata = {
-  title: APP_NAME,
-  description: "Take orders from your DMs without losing track of them.",
+  title: `${APP_NAME} — take orders from your DMs`,
+  description:
+    "A mini storefront plus an order desk for sellers on Instagram and WhatsApp. Customers browse and send their order straight to your DMs; you track it to delivery.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

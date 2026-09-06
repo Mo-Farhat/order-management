@@ -64,3 +64,25 @@ body {
   color: var(--foreground);
   font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
 }
+
+/* ---- Marketing site (/) ------------------------------------------------- *
+ * Same palette as the app — orange accent, green for positive — but a soft
+ * warm haze instead of the reference's blue sky. */
+.mkt-haze {
+  background:
+    radial-gradient(60% 55% at 50% -10%, #ffe6d2 0%, rgba(255, 242, 232, 0) 60%),
+    radial-gradient(45% 40% at 85% 0%, #ffedd9 0%, rgba(255, 242, 232, 0) 55%),
+    radial-gradient(40% 45% at 10% 5%, #fdeadf 0%, rgba(255, 242, 232, 0) 55%),
+    var(--background);
+}
+.mkt-haze-soft {
+  background:
+    radial-gradient(50% 60% at 50% 100%, #fff2e8 0%, rgba(255, 242, 232, 0) 70%),
+    var(--background);
+}
+.mkt-cta-band {
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 55%, #fb923c 100%);
+}
+.mkt-scroll {
+  scroll-margin-top: 5rem;
+}
