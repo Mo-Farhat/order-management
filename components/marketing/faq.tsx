@@ -35,21 +35,35 @@ export function Faq() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col divide-y divide-line rounded-2xl border border-line bg-card">
-      {ITEMS.map(([q, a], i) => (
-        <div key={q}>
-          <button
-            onClick={() => setOpen(open === i ? null : i)}
-            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-            aria-expanded={open === i}
-          >
-            <span className="text-sm font-medium">{q}</span>
-            <span className="grid size-6 shrink-0 place-items-center rounded-full border border-line text-muted">
-              {open === i ? "–" : "+"}
-            </span>
-          </button>
-          {open === i && <p className="px-5 pb-5 text-sm text-muted">{a}</p>}
-        </div>
-      ))}
+      {ITEMS.map(([q, a], i) => {
+        const isOpen = open === i;
+        return (
+          <div key={q}>
+            <button
+              onClick={() => setOpen(isOpen ? null : i)}
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-surface/50"
+              aria-expanded={isOpen}
+            >
+              <span className="text-sm font-medium">{q}</span>
+              <span
+                className={`grid size-6 shrink-0 place-items-center rounded-full border border-line text-muted transition-transform duration-300 ${
+                  isOpen ? "rotate-45" : ""
+                }`}
+              >
+                +
+              </span>
+            </button>
+            <div
+              className="grid transition-all duration-300 ease-out"
+              style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+            >
+              <div className="overflow-hidden">
+                <p className="px-5 pb-5 text-sm text-muted">{a}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

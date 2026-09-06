@@ -14,19 +14,19 @@ export function Pricing() {
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className="inline-flex rounded-md border border-line bg-card p-1 text-sm">
+      <div className="inline-flex rounded-full border border-line bg-card p-1 text-sm">
         <button
           onClick={() => setAnnual(false)}
-          className={`rounded-[5px] px-4 py-1.5 font-medium transition-colors ${
-            !annual ? "bg-accent text-accent-fg" : "text-muted"
+          className={`rounded-full px-4 py-1.5 font-medium transition-all duration-300 ${
+            !annual ? "bg-accent text-accent-fg shadow-sm" : "text-muted hover:text-ink"
           }`}
         >
           Monthly
         </button>
         <button
           onClick={() => setAnnual(true)}
-          className={`rounded-[5px] px-4 py-1.5 font-medium transition-colors ${
-            annual ? "bg-accent text-accent-fg" : "text-muted"
+          className={`rounded-full px-4 py-1.5 font-medium transition-all duration-300 ${
+            annual ? "bg-accent text-accent-fg shadow-sm" : "text-muted hover:text-ink"
           }`}
         >
           Annual <span className="text-xs opacity-80">· 2 months free</span>
@@ -35,7 +35,7 @@ export function Pricing() {
 
       <div className="grid w-full max-w-3xl gap-5 sm:grid-cols-2">
         {/* Starter — the live plan */}
-        <div className="flex flex-col rounded-2xl border-2 border-accent bg-card p-6 shadow-[0_2px_24px_rgba(30,64,175,0.12)]">
+        <div className="mkt-card flex flex-col rounded-2xl border-2 border-accent bg-card p-6 shadow-[0_2px_24px_rgba(30,64,175,0.12)]">
           <p className="mkt-eyebrow mkt-amber text-[11px]">Starter</p>
           <p className="mkt-serif mt-3 text-4xl">
             LKR {fmt(shown)}
@@ -61,7 +61,7 @@ export function Pricing() {
           </ul>
           <Link
             href="/signup"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-accent px-5 text-[11px] font-bold uppercase tracking-[0.16em] text-accent-fg hover:bg-accent/90"
+            className="mkt-btn mkt-btn-primary mt-6 h-11 px-5 text-[11px] uppercase tracking-[0.16em]"
           >
             Start free
           </Link>

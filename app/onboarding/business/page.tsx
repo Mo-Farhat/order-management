@@ -29,7 +29,7 @@ export default function BusinessBasicsPage() {
             label="Business name"
             name="name"
             required
-            placeholder="Aisha's Kitchen"
+            placeholder="Marlowe Studio"
             hint="Becomes your storefront address — we'll pick a free one for you."
             errors={state?.fieldErrors?.name}
           />
