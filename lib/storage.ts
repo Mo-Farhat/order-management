@@ -3,17 +3,17 @@ import { PutObjectCommand, DeleteObjectCommand, S3Client } from "@aws-sdk/client
 /**
  * Object storage for product photos over the S3-compatible API.
  *
- * Default provider: **Supabase Storage** (free tier, no card required — see
- * GUIDE.md step 4a). Any S3-compatible store works: point STORAGE_ENDPOINT at
- * Supabase, Backblaze B2, MinIO, R2, etc.
+ * Provider: **Cloudflare R2** (see GUIDE.md step 4a). The client is
+ * provider-agnostic — any S3-compatible store works by repointing STORAGE_*
+ * (endpoint, region, key/secret, bucket, public base URL).
  *
  * If STORAGE_* isn't set, `isStorageConfigured()` is false and the catalog UI
  * hides photo upload — products still save without photos (FR-4 says "up to 6",
  * not "at least one").
  */
 
-const endpoint = process.env.STORAGE_ENDPOINT; // e.g. https://xxxx.supabase.co/storage/v1/s3
-const region = process.env.STORAGE_REGION ?? "us-east-1";
+const endpoint = process.env.STORAGE_ENDPOINT; // e.g. https://<accountid>.r2.cloudflarestorage.com
+const region = process.env.STORAGE_REGION ?? "auto";
 const accessKeyId = process.env.STORAGE_ACCESS_KEY_ID;
 const secretAccessKey = process.env.STORAGE_SECRET_ACCESS_KEY;
 const bucket = process.env.STORAGE_BUCKET;
@@ -34,7 +34,7 @@ function getClient(): S3Client {
   client ??= new S3Client({
     region,
     endpoint,
-    forcePathStyle: true, // Supabase / MinIO need path-style addressing
+    forcePathStyle: true, // works for R2; required by Supabase / MinIO
     credentials: { accessKeyId: accessKeyId!, secretAccessKey: secretAccessKey! },
   });
   return client;

@@ -91,25 +91,27 @@ Cloudflare does not offer outbound SMTP, so email stays with a dedicated provide
 
 ---
 
-## 4a. Object storage — Supabase Storage  **[need from you: STORAGE_*]**
+## 4a. Object storage — Cloudflare R2  **[need from you: STORAGE_*]**
 
-Product photos. **Supabase's free tier needs no credit card** (unlike R2). Any
-S3-compatible store works; these steps are for Supabase.
+Product photos. The storage client is S3-compatible; these steps are for R2.
+(R2 has a generous always-free tier, but Cloudflare asks for a card on the
+account to enable R2 — it won't charge within the free limits.)
 
-1. <https://supabase.com> → **New project** (free plan, no card). Pick a region
-   near Sri Lanka. Note the project ref (the `xxxxxxxx` in `xxxxxxxx.supabase.co`).
-2. **Storage → New bucket** → name it `product-photos`, tick **Public bucket**.
-3. **Project Settings → Storage → S3 Connection**: enable it, note the
-   **endpoint** and **region**, then **New access key** → copy the key ID + secret.
-4. In `.env.local`:
+1. Cloudflare dashboard → **R2** → **Create bucket** (e.g. `storefront-desk-media`).
+2. **R2 → Manage API Tokens → Create API Token** — *Object Read & Write*, scoped
+   to that bucket. Copy the **Access Key ID** and **Secret Access Key**.
+3. Grab your **Account ID** (R2 overview page, or the dashboard right sidebar).
+4. Give the bucket a public URL: **bucket → Settings → Public access** — either
+   enable the `r2.dev` dev URL or attach a custom domain (`media.<yourdomain>`).
+5. In `.env.local`:
 
    ```
-   STORAGE_ENDPOINT="https://xxxxxxxx.supabase.co/storage/v1/s3"
-   STORAGE_REGION="<region from step 3>"
-   STORAGE_ACCESS_KEY_ID="<key id>"
-   STORAGE_SECRET_ACCESS_KEY="<secret>"
-   STORAGE_BUCKET="product-photos"
-   STORAGE_PUBLIC_BASE_URL="https://xxxxxxxx.supabase.co/storage/v1/object/public/product-photos"
+   STORAGE_ENDPOINT="https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
+   STORAGE_REGION="auto"
+   STORAGE_ACCESS_KEY_ID="<access key id>"
+   STORAGE_SECRET_ACCESS_KEY="<secret access key>"
+   STORAGE_BUCKET="storefront-desk-media"
+   STORAGE_PUBLIC_BASE_URL="https://<public bucket URL or custom domain>"
    ```
 
 Leave these unset and the app hides photo upload — products still save.
@@ -137,7 +139,7 @@ then everything uses the "Storefront Desk" placeholder and localhost.
 |---|---|---|
 | **Now** | `DATABASE_URL` | Neon (step 1) |
 | **Now** | run `RUNTIME_DB_PASSWORD=… npm run db:rls` → `DATABASE_URL_RUNTIME` | Neon (step 1a) |
-| Soon | `STORAGE_*` | Supabase Storage (step 4a) — no card |
+| Soon | `STORAGE_*` | Cloudflare R2 (step 4a) |
 | Soon | `EMAIL_SERVER_*` + `EMAIL_FROM` | Resend (step 3) |
 | Deploy | Cloudflare account access + chosen domain | step 4b/4c |
 

@@ -40,9 +40,9 @@ The desk is a sidebar-nav console: **Dashboard** (metrics + recent orders),
 Orders, Pipeline board, Catalog, Storefront, Settings. Teal palette, tuned
 against the OrderCast reference.
 
-Product photos use any S3-compatible store (default: **Supabase Storage** — free,
-no card; GUIDE.md step 4a). Postgres RLS is enforced on the write path once the
-`app_runtime` role is provisioned (GUIDE.md step 1a).
+Product photos go to **Cloudflare R2** (S3-compatible client — any S3 store works
+by repointing `STORAGE_*`; GUIDE.md step 4a). Postgres RLS is enforced on the
+write path once the `app_runtime` role is provisioned (GUIDE.md step 1a).
 
 See PRD §11 for the full rollout plan.
 

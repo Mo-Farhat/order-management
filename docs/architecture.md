@@ -41,7 +41,7 @@ lib/
   email.ts               magic-link sender (console in dev)
   catalog.ts             product CRUD + stock ledger (server-only)
   csv-import.ts          CSV parse / preview / all-or-nothing commit
-  storage.ts             S3-compatible upload — Supabase Storage (no-op + UI hidden when unconfigured)
+  storage.ts             S3-compatible upload — Cloudflare R2 (no-op + UI hidden when unconfigured)
   settings.ts (actions)  business settings + password change
 drizzle/                 generated migrations
 scripts/apply-rls.ts     installs row-level security policies
