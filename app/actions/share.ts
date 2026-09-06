@@ -53,9 +53,8 @@ export async function saveShareSettings(
       accentColor: parsed.data.accentColor || null,
       sharePolicyText: parsed.data.sharePolicyText || null,
       whatsappNumber: parsed.data.whatsappNumber,
-      storefrontCategories: parsed.data.storefrontCategories.length
-        ? parsed.data.storefrontCategories
-        : null,
+      // Store the array as-is: [] is a real choice ("no chips"), not "reset".
+      storefrontCategories: parsed.data.storefrontCategories,
       publicPagePaused: parsed.data.paused,
       updatedAt: new Date(),
     })

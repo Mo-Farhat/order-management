@@ -87,9 +87,9 @@ export function SidebarBrand({ appName }: { appName: string }) {
 
 export function DesktopSidebar({ appName }: { appName: string }) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col bg-sidebar md:flex">
+    <aside className="hidden h-full w-60 shrink-0 flex-col border-r border-black/10 bg-sidebar md:flex">
       <SidebarBrand appName={appName} />
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <NavList />
       </div>
     </aside>

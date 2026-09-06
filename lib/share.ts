@@ -58,9 +58,9 @@ function storefrontChips(
   productCategories: (string | null)[],
 ): string[] {
   const present = new Set(productCategories.filter((c): c is string => !!c));
-  if (configured && configured.length) {
-    return configured.filter((c) => present.has(c));
-  }
+  // null = never configured → show every distinct category.
+  // any array (incl. []) = an explicit choice, kept to categories that still exist.
+  if (configured) return configured.filter((c) => present.has(c));
   return [...present].sort();
 }
 

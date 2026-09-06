@@ -152,6 +152,10 @@ account settings). `public_page_paused` already existed.
   gallery, full description, add-to-cart.
 - **Cart** — `components/share/use-cart.ts` persists to `localStorage` keyed by
   slug so it survives navigating between the two pages.
+- **Cart sheet** — `components/share/cart-sheet.tsx`: a bottom-sheet with a cart
+  view (per-item steppers + remove, live subtotal) → checkout view (per-field
+  inline validation, touched/error states) → sending (spinner) → success
+  (reference code + Open WhatsApp). Errors surface in-sheet with retry.
 - **Handoff** — `startShareHandoff` (unauthenticated) validates required
   name/phone/address, freezes the cart into `share_carts`, returns a `wa.me`
   deep-link body (with the customer details) + reference code.
@@ -164,8 +168,8 @@ account settings). `public_page_paused` already existed.
 ## Desk shell (dashboard console)
 
 `app/desk/layout.tsx` is a sidebar + topbar shell (`components/desk/nav.tsx`):
-persistent nav rail (Dashboard / Orders / Catalog / Storefront), breadcrumbs,
-mobile drawer. `app/desk/page.tsx` is the **Dashboard** — stat tiles
+the nav rail and top bar are fixed (`h-[100dvh]` + `overflow-hidden`); only the
+content column scrolls. Breadcrumbs + a mobile drawer. `app/desk/page.tsx` is the **Dashboard** — stat tiles
 (`lib/dashboard.ts#dashboardMetrics`), pipeline counts, recent orders. The order
 list moved to `app/desk/orders/`. Shared packaging (PageHeader / Card / StatCard
 / Table / Btn) lives in `components/desk/ui.tsx`. Palette: teal accent on a warm

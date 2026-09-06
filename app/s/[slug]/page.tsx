@@ -16,10 +16,13 @@ export async function generateMetadata({
 
 export default async function StorefrontPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ cart?: string }>;
 }) {
   const { slug } = await params;
+  const { cart } = await searchParams;
   const data = await getStorefront(slug);
   if (!data) notFound();
 
@@ -43,5 +46,5 @@ export default async function StorefrontPage({
     );
   }
 
-  return <Storefront slug={slug} storefront={data} />;
+  return <Storefront slug={slug} storefront={data} openCart={cart === "1"} />;
 }

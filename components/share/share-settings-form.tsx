@@ -23,11 +23,12 @@ export function ShareSettingsForm({
   const [state, action] = useActionState(saveShareSettings, undefined);
   const [color, setColor] = useState(accentColor || "#0f7b6c");
 
-  // ordered list of shown chips; unshown = allCategories not in `order`
+  // ordered list of shown chips; unshown = allCategories not in `order`.
+  // null = never configured → default to all; [] = deliberately none.
   const [order, setOrder] = useState<string[]>(
-    (chosenCategories && chosenCategories.length
-      ? chosenCategories.filter((c) => allCategories.includes(c))
-      : allCategories) ?? [],
+    chosenCategories === null
+      ? allCategories
+      : chosenCategories.filter((c) => allCategories.includes(c)),
   );
   const unused = allCategories.filter((c) => !order.includes(c));
 
