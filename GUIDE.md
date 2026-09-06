@@ -118,46 +118,59 @@ Leave these unset and the app hides photo upload — products still save.
 
 ## 4b. Hosting — Cloudflare Workers (OpenNext)
 
-The repo is already scaffolded: `open-next.config.ts`, `wrangler.jsonc`, and
-`npm run cf:*` scripts. The adapter is `@opennextjs/cloudflare` (Pages'
-`next-on-pages` is deprecated). `npm run cf:preview` builds the Worker and runs
-it locally; `npm run build` is enough for CI/typecheck.
+The repo is scaffolded: `open-next.config.ts`, `wrangler.jsonc`, `npm run cf:*`
+scripts. Adapter is `@opennextjs/cloudflare` (Pages' `next-on-pages` is
+deprecated). `npm run cf:preview` builds + runs the Worker locally.
 
-**First deploy:**
+### Option A — connect the GitHub repo (auto-deploy on push)
 
-1. `npx wrangler login` (opens a browser; needs a Cloudflare account).
-2. Push secrets (once each — values from `.env.local`):
+1. **Workers & Pages → Create → Import a repository.** Authorise GitHub, pick the repo.
+2. Build settings — override the defaults:
+   - **Project name:** `storefront-desk` (must match `name` in `wrangler.jsonc`)
+   - **Build command:** `npx opennextjs-cloudflare build`
+   - **Deploy command:** `npx wrangler deploy`
+   - Root directory: leave `/`.
+3. **Variables and Secrets** — add all of these (tick "also available at build
+   time" for `DATABASE_URL` and `AUTH_SECRET` — the build imports the DB adapter):
+   `DATABASE_URL`, `DATABASE_URL_RUNTIME`, `AUTH_SECRET`, `APP_NAME`
+   (+ `EMAIL_SERVER_*`, `EMAIL_FROM`, `STORAGE_*` once you have them).
+4. **Save and Deploy.** First run: Cloudflare asks you to pick a
+   `*.workers.dev` subdomain for the account — do it.
+5. After it deploys, note the URL (`https://storefront-desk.<you>.workers.dev`),
+   add `AUTH_URL` = that URL as a variable, and redeploy (Retry deployment, or
+   push a commit). Sign-in won't work until `AUTH_URL` is set.
 
-   ```bash
-   for k in DATABASE_URL DATABASE_URL_RUNTIME AUTH_SECRET \
-            EMAIL_SERVER_HOST EMAIL_SERVER_PORT EMAIL_SERVER_USER \
-            EMAIL_SERVER_PASSWORD EMAIL_FROM \
-            STORAGE_ENDPOINT STORAGE_REGION STORAGE_ACCESS_KEY_ID \
-            STORAGE_SECRET_ACCESS_KEY STORAGE_BUCKET STORAGE_PUBLIC_BASE_URL; do
-     npx wrangler secret put "$k"
-   done
-   ```
+### Option B — deploy from your laptop
 
-   Non-secret vars (`APP_NAME`, `AUTH_URL` = the real https origin) go in the
-   `"vars"` block of `wrangler.jsonc` — safe to commit.
-3. `npm run cf:deploy`.
-4. In the Cloudflare dashboard: **Workers → storefront-desk → Settings → Domains
-   & Routes** → add `desk.<yourdomain>` (and the apex/`www` if the marketing site
-   lives elsewhere). DNS records are created for you.
-5. Set `AUTH_URL` to that final `https://desk.<yourdomain>` and redeploy.
+`npx wrangler login`, then `npx wrangler secret put <NAME>` for each value above,
+then `npm run cf:deploy`. `APP_NAME` / `AUTH_URL` can instead go in the `"vars"`
+block of `wrangler.jsonc`.
 
-**Free-plan note:** a Next 16 Worker bundle is ~4 MB gzipped, which is over the
-Workers **Free** plan limit (3 MB). If `cf:deploy` is rejected for size, the
-Workers **Paid** plan ($5/mo) raises it to 10 MB — reasonable for a product you
-charge for. (The bundle is mostly the Next runtime; the app's own code is small.)
+### After deploy
+
+- **Migrations** run from your machine against the production `DATABASE_URL`
+  (`npm run db:migrate && npm run db:rls`) — never from the Worker.
+- **Custom domain:** step 4c.
+
+**Free-plan size note:** a Next 16 Worker bundle is ~4 MB gzipped, over the
+Workers **Free** limit (3 MB). If the deploy is rejected for size, Workers
+**Paid** ($5/mo) raises it to 10 MB. (Mostly the Next runtime; the app code is small.)
 
 **Migrations** run from your machine against the production `DATABASE_URL`, not
 from the Worker: `npm run db:migrate && npm run db:rls` after each schema change.
 
 ### 4c. Domain
 
-The product needs its own name and domain before public signup (PRD §14). Until
-then everything uses the "Storefront Desk" placeholder and localhost.
+You can run on `*.workers.dev` indefinitely for the pilot. For a real domain:
+
+1. The domain must be **on Cloudflare** first: **Websites → Add a site** → enter
+   the domain → follow the steps to change its nameservers at your registrar
+   (takes a few minutes to a few hours to activate).
+2. Then **Workers & Pages → storefront-desk → Settings → Domains & Routes → Add →
+   Custom Domain** → `desk.<yourdomain>`. Cloudflare creates the DNS record.
+3. Update `AUTH_URL` to `https://desk.<yourdomain>` and redeploy.
+
+The product still needs its own name before public signup (PRD §14).
 
 ---
 
