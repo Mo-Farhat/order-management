@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   MAIN_NEXT,
   isLegalTransition,
+  legalMoves,
   canAdvance,
   canCancel,
   canReturn,
@@ -92,5 +93,18 @@ describe("predicates", () => {
 
   it("NEEDS_ACTION is confirmed + packed", () => {
     expect([...NEEDS_ACTION].sort()).toEqual(["confirmed", "packed"]);
+  });
+
+  it("legalMoves lists the inline status-picker options", () => {
+    expect(legalMoves("draft")).toEqual(["confirmed", "cancelled"]);
+    expect(legalMoves("confirmed")).toEqual(["packed", "cancelled"]);
+    expect(legalMoves("shipped")).toEqual(["delivered", "cancelled"]);
+    expect(legalMoves("delivered")).toEqual(["returned"]);
+    expect(legalMoves("cancelled")).toEqual([]);
+    expect(legalMoves("returned")).toEqual([]);
+    // every listed move must actually be legal
+    for (const from of ALL) {
+      for (const to of legalMoves(from)) expect(isLegalTransition(from, to)).toBe(true);
+    }
   });
 });

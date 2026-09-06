@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useActionState } from "react";
-import { searchCustomersAction, type OrderState } from "@/app/actions/orders";
+import type { OrderState } from "@/app/actions/orders";
 import { computeTotals, toCents } from "@/lib/money";
 import { FormError } from "@/components/form";
 
@@ -15,18 +15,21 @@ type Product = {
 };
 
 type Line = { productId: string; quantity: number };
+type PaymentStatus = "unpaid" | "partial" | "paid";
+type DiscountType = "none" | "flat" | "percent";
 
 export type ComposerInitial = {
   customer: { id: string | null; name: string; phone: string };
+  deliveryAddress: string;
   items: Line[];
   deliveryFee: string;
-  discountType: "none" | "flat" | "percent";
+  discountType: DiscountType;
   discountValue: string;
+  paymentStatus: PaymentStatus;
+  amountPaid: string;
   note: string;
   shareCode?: string;
 };
-
-type Match = { id: string; name: string; phone: string; lastOrderAt: string | null };
 
 export function OrderComposer({
   products,
@@ -46,30 +49,25 @@ export function OrderComposer({
   stockTracking?: boolean;
 }) {
   const [state, formAction] = useActionState<OrderState, FormData>(action, undefined);
-  const [step, setStep] = useState<"customer" | "items" | "review">(
-    mode === "edit" ? "items" : "customer",
-  );
+  const [step, setStep] = useState<"details" | "review">("details");
+  const lockCustomer = mode === "edit";
 
-  // customer
-  const [customerId, setCustomerId] = useState<string | null>(initial?.customer.id ?? null);
   const [custName, setCustName] = useState(initial?.customer.name ?? "");
   const [custPhone, setCustPhone] = useState(initial?.customer.phone ?? "");
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [searching, startSearch] = useTransition();
-
-  // items
+  const [address, setAddress] = useState(initial?.deliveryAddress ?? "");
   const [lines, setLines] = useState<Line[]>(initial?.items ?? []);
-  const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
-
-  // fees
   const [deliveryFee, setDeliveryFee] = useState(
     initial?.deliveryFee ?? deliveryFeeDefault ?? "",
   );
-  const [discountType, setDiscountType] = useState<"none" | "flat" | "percent">(
-    initial?.discountType ?? "none",
-  );
+  const [discountType, setDiscountType] = useState<DiscountType>(initial?.discountType ?? "none");
   const [discountValue, setDiscountValue] = useState(initial?.discountValue ?? "");
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(
+    initial?.paymentStatus ?? "unpaid",
+  );
+  const [amountPaid, setAmountPaid] = useState(initial?.amountPaid ?? "");
   const [note, setNote] = useState(initial?.note ?? "");
+
+  const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
   const totals = useMemo(() => {
     const items = lines
@@ -82,23 +80,12 @@ export function OrderComposer({
       items,
       deliveryFeeCents: toCents(deliveryFee || "0"),
       discountType,
-      discountValue: discountType === "percent" ? Number(discountValue || "0") : toCents(discountValue || "0"),
+      discountValue:
+        discountType === "percent" ? Number(discountValue || "0") : toCents(discountValue || "0"),
     });
   }, [lines, byId, deliveryFee, discountType, discountValue]);
 
-  function fmt(cents: number) {
-    return `${currency} ${(cents / 100).toFixed(2)}`;
-  }
-
-  function runSearch(term: string) {
-    setCustPhone(term);
-    setCustomerId(null);
-    if (term.trim().length < 2) {
-      setMatches([]);
-      return;
-    }
-    startSearch(async () => setMatches(await searchCustomersAction(term)));
-  }
+  const fmt = (cents: number) => `${currency} ${(cents / 100).toFixed(2)}`;
 
   function setQty(productId: string, quantity: number) {
     setLines((prev) => {
@@ -106,181 +93,140 @@ export function OrderComposer({
       return quantity > 0 ? [...others, { productId, quantity }] : others;
     });
   }
-  function qtyOf(productId: string) {
-    return lines.find((l) => l.productId === productId)?.quantity ?? 0;
-  }
+  const qtyOf = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
 
-  const customerReady =
-    !!customerId || (custName.trim().length >= 1 && custPhone.trim().length >= 6);
+  const detailsReady = custName.trim().length >= 1 && lines.length > 0;
 
   function payload(confirm: boolean) {
     return JSON.stringify({
-      customerId: customerId || undefined,
-      customerName: customerId ? undefined : custName.trim(),
-      customerPhone: customerId ? undefined : custPhone.trim(),
+      customerId: initial?.customer.id || undefined,
+      customerName: custName.trim(),
+      customerPhone: custPhone.trim() || undefined,
+      deliveryAddress: address.trim() || undefined,
       items: lines,
       deliveryFee: deliveryFee || "",
       discountType,
       discountValue: discountValue || "",
+      paymentStatus,
+      amountPaid: paymentStatus === "unpaid" ? "" : amountPaid || "",
       note: note.trim(),
       shareCode: initial?.shareCode,
       confirm,
     });
   }
 
+  const inputCls =
+    "h-11 w-full rounded-lg border border-line bg-surface px-3 text-base outline-none focus:border-accent disabled:opacity-60";
+
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <FormError message={state?.error} />
       {state?.fieldErrors &&
-        Object.values(state.fieldErrors).flat().map((m) => (
-          <p key={m} className="text-xs text-danger">{m}</p>
-        ))}
+        Object.values(state.fieldErrors)
+          .flat()
+          .map((m) => (
+            <p key={m} className="text-xs text-danger">{m}</p>
+          ))}
 
-      {/* STEP: customer */}
-      {step === "customer" && (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-base font-medium">Customer</h2>
-          <input
-            value={custPhone}
-            onChange={(e) => runSearch(e.target.value)}
-            placeholder="Phone number"
-            inputMode="tel"
-            className="h-11 w-full rounded-lg border border-line bg-surface px-3 text-base outline-none focus:border-ink"
-          />
-          {searching && <p className="text-xs text-muted">Searching…</p>}
-          {matches.length > 0 && (
-            <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
-              {matches.map((m) => (
-                <li key={m.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomerId(m.id);
-                      setCustName(m.name);
-                      setCustPhone(m.phone);
-                      setMatches([]);
-                    }}
-                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm"
-                  >
-                    <span>{m.name}</span>
-                    <span className="text-xs text-muted">
-                      {m.lastOrderAt
-                        ? `last order ${new Date(m.lastOrderAt).toLocaleDateString()}`
-                        : "no orders yet"}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {!customerId && (
-            <input
-              value={custName}
-              onChange={(e) => setCustName(e.target.value)}
-              placeholder="Customer name (new customer)"
-              className="h-11 w-full rounded-lg border border-line bg-surface px-3 text-base outline-none focus:border-ink"
+      {/* STEP: details */}
+      {step === "details" && (
+        <section className="flex flex-col gap-4 pb-24">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+                Customer name
+              </span>
+              <input
+                value={custName}
+                onChange={(e) => setCustName(e.target.value)}
+                placeholder="e.g. Nimali Perera"
+                disabled={lockCustomer}
+                className={inputCls}
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+                Phone <span className="normal-case text-muted/70">(optional)</span>
+              </span>
+              <input
+                value={custPhone}
+                onChange={(e) => setCustPhone(e.target.value)}
+                inputMode="tel"
+                placeholder="+94…"
+                disabled={lockCustomer}
+                className={inputCls}
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+              Delivery address <span className="normal-case text-muted/70">(optional)</span>
+            </span>
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={2}
+              placeholder="Street, city, notes for the courier"
+              className="rounded-lg border border-line bg-surface px-3 py-2 text-base outline-none focus:border-accent"
             />
-          )}
-          {customerId && (
-            <p className="text-sm">
-              Selected: <strong>{custName}</strong> · {custPhone}{" "}
-              <button
-                type="button"
-                onClick={() => setCustomerId(null)}
-                className="ml-1 text-xs text-muted underline"
-              >
-                change
-              </button>
-            </p>
-          )}
-          <button
-            type="button"
-            disabled={!customerReady}
-            onClick={() => setStep("items")}
-            className="mt-1 h-11 rounded-full bg-ink font-mono text-xs font-semibold uppercase tracking-widest text-paper disabled:opacity-40"
-          >
-            Next: items
-          </button>
-        </section>
-      )}
+          </label>
 
-      {/* STEP: items */}
-      {step === "items" && (
-        <section className="flex flex-col gap-3 pb-24">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-medium">Items</h2>
-            {mode === "new" && (
-              <button
-                type="button"
-                onClick={() => setStep("customer")}
-                className="text-xs text-muted underline"
-              >
-                ← customer
-              </button>
+          <div className="flex flex-col gap-2">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+              Items
+            </span>
+            {products.length === 0 && (
+              <p className="text-sm text-muted">No products in your catalog yet.</p>
             )}
-          </div>
-          {products.length === 0 && (
-            <p className="text-sm text-muted">No products in your catalog yet.</p>
-          )}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {products.map((p) => {
-              const q = qtyOf(p.id);
-              const out = stockTracking && p.stockQty <= 0;
-              return (
-                <div
-                  key={p.id}
-                  className={`flex flex-col rounded-lg border p-2 ${
-                    q > 0 ? "border-ink" : "border-line"
-                  } ${out ? "opacity-50" : ""}`}
-                >
-                  <button
-                    type="button"
-                    disabled={out && q === 0}
-                    onClick={() => setQty(p.id, q > 0 ? q : 1)}
-                    className="flex flex-1 flex-col items-start gap-1 text-left"
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {products.map((p) => {
+                const q = qtyOf(p.id);
+                const out = stockTracking && p.stockQty <= 0;
+                return (
+                  <div
+                    key={p.id}
+                    className={`flex flex-col rounded-lg border p-2 ${
+                      q > 0 ? "border-accent" : "border-line"
+                    } ${out ? "opacity-50" : ""}`}
                   >
-                    <span className="line-clamp-2 text-xs font-medium">{p.name}</span>
-                    <span className="text-xs text-muted">
-                      {currency} {p.price}
-                      {stockTracking && (out ? " · out of stock" : ` · ${p.stockQty} left`)}
-                    </span>
-                  </button>
-                  {q > 0 && (
-                    <div className="mt-2 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => setQty(p.id, q - 1)}
-                        className="flex size-7 items-center justify-center rounded border border-line"
-                      >
-                        −
-                      </button>
-                      <span className="text-sm">{q}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQty(p.id, q + 1)}
-                        className="flex size-7 items-center justify-center rounded border border-line"
-                      >
-                        +
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    <button
+                      type="button"
+                      disabled={out && q === 0}
+                      onClick={() => setQty(p.id, q > 0 ? q : 1)}
+                      className="flex flex-1 flex-col items-start gap-1 text-left"
+                    >
+                      <span className="line-clamp-2 text-xs font-medium">{p.name}</span>
+                      <span className="text-xs text-muted">
+                        {currency} {p.price}
+                        {stockTracking && (out ? " · out of stock" : ` · ${p.stockQty} left`)}
+                      </span>
+                    </button>
+                    {q > 0 && (
+                      <div className="mt-2 flex items-center justify-between">
+                        <button type="button" onClick={() => setQty(p.id, q - 1)} className="flex size-7 items-center justify-center rounded border border-line">−</button>
+                        <span className="text-sm">{q}</span>
+                        <button type="button" onClick={() => setQty(p.id, q + 1)} className="flex size-7 items-center justify-center rounded border border-line">+</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 border-t border-line bg-paper p-3">
-            <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
+          <div className="fixed inset-x-0 bottom-0 border-t border-line bg-card p-3">
+            <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-2">
               <span className="text-sm">
                 {lines.reduce((n, l) => n + l.quantity, 0)} items · {fmt(totals.subtotalCents)}
               </span>
               <button
                 type="button"
-                disabled={lines.length === 0}
+                disabled={!detailsReady}
                 onClick={() => setStep("review")}
-                className="h-10 rounded-full bg-ink px-5 font-mono text-xs font-semibold uppercase tracking-widest text-paper disabled:opacity-40"
+                className="h-10 rounded-full bg-accent px-5 font-mono text-[11px] font-semibold uppercase tracking-widest text-accent-fg disabled:opacity-40"
               >
-                Review
+                Review →
               </button>
             </div>
           </div>
@@ -290,15 +236,18 @@ export function OrderComposer({
       {/* STEP: review */}
       {step === "review" && (
         <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-medium">Review &amp; save</h2>
-            <button
-              type="button"
-              onClick={() => setStep("items")}
-              className="text-xs text-muted underline"
-            >
-              ← items
-            </button>
+          <button
+            type="button"
+            onClick={() => setStep("details")}
+            className="self-start text-xs text-muted underline"
+          >
+            ← back to details
+          </button>
+
+          <div className="rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+            <span className="font-medium">{custName || "—"}</span>
+            {custPhone && <span className="text-muted"> · {custPhone}</span>}
+            {address && <p className="mt-0.5 text-xs text-muted">{address}</p>}
           </div>
 
           <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
@@ -318,7 +267,7 @@ export function OrderComposer({
             })}
           </ul>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs">
               <span className="font-mono uppercase tracking-widest text-muted">Delivery fee</span>
               <input
@@ -326,7 +275,7 @@ export function OrderComposer({
                 onChange={(e) => setDeliveryFee(e.target.value)}
                 inputMode="decimal"
                 placeholder="0"
-                className="h-10 rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-ink"
+                className="h-10 rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs">
@@ -334,8 +283,8 @@ export function OrderComposer({
               <div className="flex gap-1">
                 <select
                   value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value as typeof discountType)}
-                  className="h-10 rounded-lg border border-line bg-surface px-2 text-sm outline-none focus:border-ink"
+                  onChange={(e) => setDiscountType(e.target.value as DiscountType)}
+                  className="h-10 rounded-lg border border-line bg-surface px-2 text-sm outline-none focus:border-accent"
                 >
                   <option value="none">None</option>
                   <option value="flat">{currency}</option>
@@ -347,10 +296,37 @@ export function OrderComposer({
                   disabled={discountType === "none"}
                   inputMode="decimal"
                   placeholder="0"
-                  className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-ink disabled:opacity-40"
+                  className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent disabled:opacity-40"
                 />
               </div>
             </label>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="font-mono uppercase tracking-widest text-muted">Payment</span>
+              <select
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value as PaymentStatus)}
+                className="h-10 rounded-lg border border-line bg-surface px-2 text-sm outline-none focus:border-accent"
+              >
+                <option value="unpaid">Unpaid</option>
+                <option value="partial">Partial</option>
+                <option value="paid">Paid</option>
+              </select>
+            </label>
+            {paymentStatus !== "unpaid" && (
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="font-mono uppercase tracking-widest text-muted">Amount paid</span>
+                <input
+                  value={amountPaid}
+                  onChange={(e) => setAmountPaid(e.target.value)}
+                  inputMode="decimal"
+                  placeholder={paymentStatus === "paid" ? fmt(totals.totalCents).replace(`${currency} `, "") : "0"}
+                  className="h-10 rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent"
+                />
+              </label>
+            )}
           </div>
 
           <label className="flex flex-col gap-1 text-xs">
@@ -360,7 +336,7 @@ export function OrderComposer({
               onChange={(e) => setNote(e.target.value)}
               rows={2}
               placeholder="e.g. wants it before Friday"
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-ink"
+              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
             />
           </label>
 
@@ -379,10 +355,10 @@ export function OrderComposer({
           {mode === "new" ? (
             <div className="flex gap-2">
               <SubmitAs label="Save as draft" confirm={false} build={payload} className="flex-1 border border-line" />
-              <SubmitAs label="Confirm order" confirm build={payload} className="flex-1 bg-ink text-paper" />
+              <SubmitAs label="Confirm order" confirm build={payload} className="flex-1 bg-accent text-accent-fg" />
             </div>
           ) : (
-            <SubmitAs label="Save changes" confirm={false} build={payload} className="bg-ink text-paper" />
+            <SubmitAs label="Save changes" confirm={false} build={payload} className="bg-accent text-accent-fg" />
           )}
         </section>
       )}

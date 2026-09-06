@@ -39,8 +39,9 @@ URLs print to the dev-server console.
 - **Phase 5** — billing — next
 
 The desk is a sidebar-nav console: **Dashboard** (metrics + recent orders),
-Orders, Pipeline board, Catalog, Storefront, Settings. Teal palette, tuned
-against the OrderCast reference.
+**Orders** (one list, inline status column, "+ New order" in the page),
+Catalog, Storefront, Settings. Teal palette, tuned against the OrderCast
+reference.
 
 Product photos go to **Cloudflare R2** (S3-compatible, signed with a tiny SigV4
 helper — no AWS SDK; GUIDE.md step 4a). Postgres RLS is enforced on the write

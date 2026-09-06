@@ -141,9 +141,17 @@ export const orderDraftSchema = z.object({
   deliveryFee: z.union([z.literal(""), money2]).optional(),
   discountType: z.enum(["none", "flat", "percent"]).default("none"),
   discountValue: z.union([z.literal(""), money2]).optional(),
+  deliveryAddress: z.string().trim().max(500).optional(),
+  paymentStatus: z.enum(["unpaid", "partial", "paid"]).default("unpaid"),
+  amountPaid: z.union([z.literal(""), money2]).optional(),
   note: z.string().trim().max(2000).optional(),
   shareCode: z.string().trim().max(12).optional(),
   confirm: z.boolean().default(false),
+});
+
+export const paymentUpdateSchema = z.object({
+  paymentStatus: z.enum(["unpaid", "partial", "paid"]),
+  amountPaid: z.union([z.literal(""), money2]).optional(),
 });
 
 export type OrderDraftInput = z.infer<typeof orderDraftSchema>;

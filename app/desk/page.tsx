@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card title="Pipeline" actions={<Link href="/desk/board" className="text-xs text-accent hover:underline">Board →</Link>}>
+      <Card title="Orders by status">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {PIPELINE.map((p) => (
             <Link

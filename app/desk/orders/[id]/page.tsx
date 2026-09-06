@@ -9,6 +9,7 @@ import { canAdvance, canCancel, canReturn, getOrder, TERMINAL } from "@/lib/orde
 import { StatusPill } from "@/components/orders/status-pill";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderNote } from "@/components/orders/order-note";
+import { PaymentEditor } from "@/components/orders/payment-editor";
 import { PageHeader, Card } from "@/components/desk/ui";
 
 const EVENT_LABEL: Record<
@@ -34,7 +35,7 @@ export default async function OrderDetailPage({
   const { order, customer, items, events } = data;
   const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
   const currency = tenant?.currency ?? "";
-  const wa = customer ? customer.phone.replace(/[^0-9]/g, "") : "";
+  const wa = customer?.phone ? customer.phone.replace(/[^0-9]/g, "") : "";
 
   const editable =
     !TERMINAL.includes(order.status) &&
@@ -103,6 +104,16 @@ export default async function OrderDetailPage({
             />
           </Card>
 
+          <Card title="Payment">
+            <PaymentEditor
+              orderId={order.id}
+              paymentStatus={order.paymentStatus}
+              amountPaid={order.amountPaid}
+              total={order.total}
+              currency={currency}
+            />
+          </Card>
+
           <Card title="Note">
             <OrderNote orderId={order.id} note={order.note ?? ""} />
           </Card>
@@ -112,20 +123,25 @@ export default async function OrderDetailPage({
           {customer && (
             <Card title="Customer">
               <p className="font-medium">{customer.name}</p>
-              <p className="text-sm text-muted">{customer.phone}</p>
-              <div className="mt-3 flex gap-3 text-xs">
-                <a href={`tel:${customer.phone}`} className="text-accent underline underline-offset-4">
-                  Call
-                </a>
-                <a
-                  href={`https://wa.me/${wa}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-accent underline underline-offset-4"
-                >
-                  WhatsApp
-                </a>
-              </div>
+              {customer.phone && <p className="text-sm text-muted">{customer.phone}</p>}
+              {order.deliveryAddress && (
+                <p className="mt-2 whitespace-pre-line text-sm text-muted">{order.deliveryAddress}</p>
+              )}
+              {customer.phone && (
+                <div className="mt-3 flex gap-3 text-xs">
+                  <a href={`tel:${customer.phone}`} className="text-accent underline underline-offset-4">
+                    Call
+                  </a>
+                  <a
+                    href={`https://wa.me/${wa}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-accent underline underline-offset-4"
+                  >
+                    WhatsApp
+                  </a>
+                </div>
+              )}
             </Card>
           )}
 

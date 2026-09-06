@@ -38,3 +38,13 @@ export function isLegalTransition(from: OrderStatus, to: OrderStatus): boolean {
     (to === "returned" && canReturn(from))
   );
 }
+
+/** The statuses an order can move to from `from` — for the inline status picker. */
+export function legalMoves(from: OrderStatus): OrderStatus[] {
+  const moves: OrderStatus[] = [];
+  const forward = MAIN_NEXT[from];
+  if (forward) moves.push(forward);
+  if (canCancel(from)) moves.push("cancelled");
+  if (canReturn(from)) moves.push("returned");
+  return moves;
+}

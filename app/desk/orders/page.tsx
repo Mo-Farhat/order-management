@@ -2,11 +2,12 @@ import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
-import type { OrderStatus } from "@/db/schema";
+import type { OrderStatus, PaymentStatus } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { listOrders, orderCountsByStatus, NEEDS_ACTION } from "@/lib/orders";
-import { StatusPill, relativeTime } from "@/components/orders/status-pill";
+import { relativeTime } from "@/components/orders/status-pill";
 import { OrderSearch } from "@/components/orders/order-search";
+import { OrderStatusSelect } from "@/components/orders/order-status-select";
 import { PageHeader, Card, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 
 const TABS: { key: string; label: string; statuses?: OrderStatus[] }[] = [
@@ -16,6 +17,12 @@ const TABS: { key: string; label: string; statuses?: OrderStatus[] }[] = [
   { key: "delivered", label: "Delivered", statuses: ["delivered"] },
   { key: "all", label: "All" },
 ];
+
+const PAY: Record<PaymentStatus, { label: string; cls: string }> = {
+  unpaid: { label: "Unpaid", cls: "text-muted" },
+  partial: { label: "Partial", cls: "text-warn" },
+  paid: { label: "Paid", cls: "text-accent" },
+};
 
 export default async function OrdersPage({
   searchParams,
@@ -70,7 +77,9 @@ export default async function OrdersPage({
         {rows.length === 0 ? (
           <div className="p-4">
             <EmptyState>
-              {sp.q ? "No orders match that." : "No orders here yet — your first one will show up here."}
+              {sp.q
+                ? "No orders match that."
+                : "No orders here yet. Hit “+ New order” to create one."}
             </EmptyState>
           </div>
         ) : (
@@ -81,6 +90,7 @@ export default async function OrdersPage({
                 <Th>Customer</Th>
                 <Th className="text-right">Items</Th>
                 <Th className="text-right">Total</Th>
+                <Th>Payment</Th>
                 <Th>Status</Th>
                 <Th className="text-right">Updated</Th>
               </tr>
@@ -89,14 +99,31 @@ export default async function OrdersPage({
               {rows.map((o) => (
                 <tr key={o.id} className="hover:bg-surface/60">
                   <Td>
-                    <Link href={`/desk/orders/${o.id}`} className="font-mono text-xs text-accent hover:underline">
+                    <Link
+                      href={`/desk/orders/${o.id}`}
+                      className="font-mono text-xs text-accent hover:underline"
+                    >
                       #{o.orderNumber}
                     </Link>
                   </Td>
-                  <Td className="font-medium">{o.customerName}</Td>
+                  <Td>
+                    <Link href={`/desk/orders/${o.id}`} className="font-medium hover:underline">
+                      {o.customerName}
+                    </Link>
+                    {o.customerPhone && (
+                      <span className="block text-xs text-muted">{o.customerPhone}</span>
+                    )}
+                  </Td>
                   <Td className="text-right tabular-nums text-muted">{o.itemCount}</Td>
                   <Td className="text-right tabular-nums">{currency} {o.total}</Td>
-                  <Td><StatusPill status={o.status} /></Td>
+                  <Td>
+                    <span className={`font-mono text-[10px] font-semibold uppercase tracking-wide ${PAY[o.paymentStatus].cls}`}>
+                      {PAY[o.paymentStatus].label}
+                    </span>
+                  </Td>
+                  <Td>
+                    <OrderStatusSelect orderId={o.id} status={o.status} />
+                  </Td>
                   <Td className="text-right text-xs text-muted">{relativeTime(o.updatedAt)}</Td>
                 </tr>
               ))}

@@ -14,6 +14,7 @@ import {
   tenants,
   type Order,
   type OrderStatus,
+  type PaymentStatus,
 } from "@/db/schema";
 import { can } from "@/lib/rbac";
 import { computeTotals, fromCents, toCents, type DiscountType } from "@/lib/money";
@@ -30,6 +31,7 @@ export {
   canCancel,
   canReturn,
   isLegalTransition,
+  legalMoves,
 } from "@/lib/pipeline";
 import { MAIN_NEXT, TERMINAL, isLegalTransition } from "@/lib/pipeline";
 
@@ -48,10 +50,11 @@ export type OrderListRow = {
   id: string;
   orderNumber: number;
   customerName: string;
-  customerPhone: string;
+  customerPhone: string | null;
   itemCount: number;
   total: string;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   updatedAt: Date;
 };
 
@@ -85,6 +88,7 @@ export async function listOrders(
       customerPhone: customers.phone,
       total: orders.total,
       status: orders.status,
+      paymentStatus: orders.paymentStatus,
       updatedAt: orders.updatedAt,
       itemCount: sql<number>`(select coalesce(sum(${orderItems.quantity}), 0) from ${orderItems} where ${orderItems.orderId} = ${orders.id})`,
     })
@@ -163,21 +167,24 @@ async function resolveCustomer(
     return existing.id;
   }
 
-  const phone = input.customerPhone?.trim();
+  const phone = input.customerPhone?.trim() || null;
   const name = input.customerName?.trim();
-  if (!phone || !name) throw new Error("Pick an existing customer or enter a name and phone.");
+  if (!name) throw new Error("Enter a customer name.");
 
-  const match = await tx.query.customers.findFirst({
-    where: and(eq(customers.tenantId, ctx.tenantId), eq(customers.phone, phone)),
-  });
-  if (match) {
-    if (match.name !== name) {
-      await tx
-        .update(customers)
-        .set({ name, updatedAt: new Date() })
-        .where(eq(customers.id, match.id));
+  // Dedupe by phone only when one was given.
+  if (phone) {
+    const match = await tx.query.customers.findFirst({
+      where: and(eq(customers.tenantId, ctx.tenantId), eq(customers.phone, phone)),
+    });
+    if (match) {
+      if (match.name !== name) {
+        await tx
+          .update(customers)
+          .set({ name, updatedAt: new Date() })
+          .where(eq(customers.id, match.id));
+      }
+      return match.id;
     }
-    return match.id;
   }
 
   const [created] = await tx
@@ -345,6 +352,9 @@ export async function createOrder(
             : fromCents(toCents(input.discountValue || "0")),
         subtotal: fromCents(totals.subtotalCents),
         total: fromCents(totals.totalCents),
+        deliveryAddress: input.deliveryAddress?.trim() || null,
+        paymentStatus: input.paymentStatus ?? "unpaid",
+        amountPaid: fromCents(toCents(input.amountPaid || "0")),
         note: input.note?.trim() || null,
         stockCommitted: commitOnConfirm,
         createdBy: ctx.userId,
@@ -489,6 +499,42 @@ export async function returnOrder(ctx: ActiveContext, id: string, reason?: strin
   await transition(ctx, id, "returned", reason);
 }
 
+/** Inline status picker in the list. `transition` rejects an illegal move. */
+export async function moveOrder(
+  ctx: ActiveContext,
+  id: string,
+  to: OrderStatus,
+  note?: string,
+) {
+  await transition(ctx, id, to, note);
+}
+
+export async function updatePayment(
+  ctx: ActiveContext,
+  id: string,
+  paymentStatus: PaymentStatus,
+  amountPaid: string,
+) {
+  await withTenant(ctx.tenantId, async (tx) => {
+    await loadForWrite(tx, ctx, id);
+    await tx
+      .update(orders)
+      .set({
+        paymentStatus,
+        amountPaid: fromCents(toCents(amountPaid || "0")),
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, id));
+    await tx.insert(orderEvents).values({
+      tenantId: ctx.tenantId,
+      orderId: id,
+      kind: "note",
+      note: `Payment set to ${paymentStatus}${Number(amountPaid) > 0 ? ` (${amountPaid} paid)` : ""}`,
+      actorUserId: ctx.userId,
+    });
+  });
+}
+
 export async function updateOrderNote(ctx: ActiveContext, id: string, note: string) {
   await withTenant(ctx.tenantId, async (tx) => {
     await loadForWrite(tx, ctx, id);
@@ -564,6 +610,9 @@ export async function editOrder(
             : fromCents(toCents(input.discountValue || "0")),
         subtotal: fromCents(totals.subtotalCents),
         total: fromCents(totals.totalCents),
+        deliveryAddress: input.deliveryAddress?.trim() || null,
+        paymentStatus: input.paymentStatus ?? order.paymentStatus,
+        amountPaid: fromCents(toCents(input.amountPaid || "0")),
         note: input.note?.trim() || null,
         updatedAt: new Date(),
       })

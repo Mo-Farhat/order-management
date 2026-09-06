@@ -8,13 +8,10 @@ type Item = { href: string; label: string; exact?: boolean; badge?: number };
 type Group = { heading?: string; items: Item[] };
 
 const GROUPS: Group[] = [
-  { items: [{ href: "/desk", label: "Dashboard", exact: true }] },
   {
-    heading: "Orders",
     items: [
-      { href: "/desk/orders", label: "All orders", exact: true },
-      { href: "/desk/board", label: "Pipeline board" },
-      { href: "/desk/orders/new", label: "New order" },
+      { href: "/desk", label: "Dashboard", exact: true },
+      { href: "/desk/orders", label: "Orders" },
     ],
   },
   {

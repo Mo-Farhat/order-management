@@ -19,8 +19,7 @@ app/                     App Router routes
   desk/                  the authed app                 (auth + tenant)
     layout.tsx           sidebar + topbar shell + CSV export links
     page.tsx             Dashboard (metrics, recent orders)
-    orders/              order list, new-order flow, [id] detail, [id]/edit
-    board/               pipeline board (tap-to-advance)
+    orders/              order list (inline status), new-order flow, [id] detail, [id]/edit
     catalog/             product list, new, [id] edit, import
     share/               storefront settings (accent, pause, QR)
     settings/            business settings + change password
@@ -86,8 +85,8 @@ movement — archive instead.
 
 | Table | Purpose |
 |---|---|
-| `customers` | one row per `(tenant, phone)`. Created/updated automatically inside `createOrder` — no standalone add flow (FR-13). |
-| `orders` | per-tenant `order_number` (from `tenants.next_order_number`), status enum, money columns all snapshot, `stock_committed` flag. |
+| `customers` | created automatically inside `createOrder` (FR-13). `phone` is **nullable** — an order needs only a name; when a phone is given it dedupes by `(tenant, phone)`. |
+| `orders` | per-tenant `order_number`, status enum, money columns all snapshot, `stock_committed` flag, plus `delivery_address`, `payment_status` (unpaid/partial/paid) and `amount_paid`. |
 | `order_items` | `name_snapshot` + `price_snapshot` + qty + `line_total` — frozen at create/edit time (FR-10). |
 | `order_events` | append-only timeline: `kind` ∈ created/status/note/edited (FR-11). |
 
@@ -97,12 +96,16 @@ cents. Every write path runs in one `withTenant()` transaction:
 - **createOrder** — resolve/create customer → price items from the live catalog →
   allocate order number → insert order + items + `created` event → if `confirm`,
   decrement stock (`order_confirmed` movements) and set `stock_committed`.
-- **pipeline** (`advanceOrder` / `cancelOrder` / `returnOrder`) — the only legal
-  moves are `MAIN_NEXT[from] === to`, `to === cancelled && from ∈ {draft…shipped}`,
-  or `to === returned && from === delivered`. Anything else throws
-  `OrderTransitionError`. Entering Confirmed commits stock; leaving to
-  Cancelled/Returned restores exactly what was outstanding (nets committed vs.
-  already-restored movements).
+- **pipeline** (`advanceOrder` / `moveOrder` / `cancelOrder` / `returnOrder`) —
+  legal moves are `MAIN_NEXT[from] === to`, `to === cancelled && from ∈
+  {draft…shipped}`, or `to === returned && from === delivered`; anything else
+  throws `OrderTransitionError`. The **orders list** has an inline status
+  `<select>` per row (`components/orders/order-status-select.tsx` +
+  `setOrderStatusAction`) offering exactly `legalMoves(status)` — there is no
+  separate board view. Entering Confirmed commits stock; leaving to
+  Cancelled/Returned restores what was outstanding.
+- **updatePayment** — sets `payment_status` / `amount_paid` from the order
+  detail's Payment card; writes a timeline note.
 - **editOrder** — owner-only past Draft (FR-12); reprices, and if the order was
   stock-committed it restores then re-commits so the ledger stays correct.
 

@@ -44,6 +44,8 @@ export const orderStatusEnum = pgEnum("order_status", [
 
 export const discountTypeEnum = pgEnum("discount_type", ["none", "flat", "percent"]);
 
+export const paymentStatusEnum = pgEnum("payment_status", ["unpaid", "partial", "paid"]);
+
 export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [
   "initial", // set when the product is created
   "manual_adjustment", // quick stock editor / edit form
@@ -212,7 +214,9 @@ export const customers = pgTable(
     tenantId: uuid("tenant_id")
       .notNull()
       .references(() => tenants.id, { onDelete: "cascade" }),
-    phone: text("phone").notNull(),
+    // Nullable: an order can be created with just a name. When a phone IS given
+    // it dedupes (Postgres unique index treats NULLs as distinct).
+    phone: text("phone"),
     name: text("name").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -241,6 +245,11 @@ export const orders = pgTable(
     discountValue: numeric("discount_value", { precision: 12, scale: 2 }).notNull().default("0"),
     subtotal: numeric("subtotal", { precision: 12, scale: 2 }).notNull().default("0"),
     total: numeric("total", { precision: 12, scale: 2 }).notNull().default("0"),
+
+    // Fulfilment + payment details captured on the order itself.
+    deliveryAddress: text("delivery_address"),
+    paymentStatus: paymentStatusEnum("payment_status").notNull().default("unpaid"),
+    amountPaid: numeric("amount_paid", { precision: 12, scale: 2 }).notNull().default("0"),
 
     note: text("note"),
 
@@ -438,3 +447,4 @@ export type ShareCart = typeof shareCarts.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];
+export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];

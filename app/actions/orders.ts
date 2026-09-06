@@ -12,11 +12,14 @@ import {
   cancelOrder,
   createOrder,
   editOrder,
+  moveOrder,
   returnOrder,
   searchCustomers,
   updateOrderNote,
+  updatePayment,
 } from "@/lib/orders";
-import { orderDraftSchema, orderNoteSchema } from "@/lib/validation";
+import { orderDraftSchema, orderNoteSchema, paymentUpdateSchema } from "@/lib/validation";
+import type { OrderStatus } from "@/db/schema";
 import { markShareCartImported } from "@/lib/share";
 
 export type OrderState =
@@ -126,6 +129,36 @@ async function runTransition(
 export async function advanceOrderAction(orderId: string): Promise<OrderState> {
   const ctx = await requireCapability("order:advance");
   return runTransition(orderId, (id) => advanceOrder(ctx, id));
+}
+
+/** Inline status picker in the orders list. */
+export async function setOrderStatusAction(
+  orderId: string,
+  to: OrderStatus,
+): Promise<OrderState> {
+  const ctx = await requireCapability("order:advance");
+  return runTransition(orderId, (id) => moveOrder(ctx, id, to));
+}
+
+export async function updatePaymentAction(
+  orderId: string,
+  _prev: OrderState,
+  formData: FormData,
+): Promise<OrderState> {
+  const ctx = await requireCapability("order:create");
+  const parsed = paymentUpdateSchema.safeParse({
+    paymentStatus: formData.get("paymentStatus"),
+    amountPaid: formData.get("amountPaid") ?? "",
+  });
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+  try {
+    await updatePayment(ctx, orderId, parsed.data.paymentStatus, parsed.data.amountPaid ?? "");
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Couldn't update payment." };
+  }
+  revalidatePath("/desk/orders");
+  revalidatePath(`/desk/orders/${orderId}`);
+  return { ok: "Payment updated." };
 }
 
 export async function cancelOrderAction(

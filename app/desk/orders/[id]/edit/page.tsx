@@ -54,14 +54,17 @@ export default async function EditOrderPage({
         action={editOrderAction.bind(null, id)}
         initial={{
           customer: {
-            id: customer?.id ?? "",
+            id: customer?.id ?? null,
             name: customer?.name ?? "",
             phone: customer?.phone ?? "",
           },
+          deliveryAddress: order.deliveryAddress ?? "",
           items: items.map((it) => ({ productId: it.productId ?? "", quantity: it.quantity })),
           deliveryFee: order.deliveryFee,
           discountType: order.discountType,
           discountValue: order.discountValue,
+          paymentStatus: order.paymentStatus,
+          amountPaid: order.amountPaid,
           note: order.note ?? "",
         }}
       />
