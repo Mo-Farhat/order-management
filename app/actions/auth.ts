@@ -65,18 +65,11 @@ export async function sendMagicLink(_prev: FormState, formData: FormData): Promi
   if (!parsed.success) {
     return { fieldErrors: z2fieldErrors(parsed.error) };
   }
-
-  try {
-    await signIn("nodemailer", {
-      email: parsed.data.email.toLowerCase(),
-      redirectTo: "/desk",
-    });
-  } catch (err) {
-    if (err instanceof AuthError) {
-      return { error: "Couldn't send the link. Check the address and try again." };
-    }
-    throw err;
-  }
+  // Magic-link sign-in is temporarily disabled (see auth.ts) — nodemailer doesn't
+  // run on Cloudflare Workers. Use email + password for now.
+  return {
+    error: "Magic-link sign-in isn't available yet. Sign in with your email and password.",
+  };
 }
 
 function z2fieldErrors(error: ZodError): Record<string, string[]> {

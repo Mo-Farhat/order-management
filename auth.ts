@@ -1,15 +1,20 @@
 import NextAuth from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Credentials from "next-auth/providers/credentials";
-import Nodemailer from "next-auth/providers/nodemailer";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 import { authConfig } from "@/auth.config";
 import { db } from "@/db";
 import { accounts, memberships, sessions, users, verificationTokens } from "@/db/schema";
-import { sendMagicLinkEmail } from "@/lib/email";
 import { credentialsSchema } from "@/lib/validation";
+
+/*
+ * Magic-link sign-in (the Nodemailer provider) is disabled: the `nodemailer`
+ * package pulls Node-only APIs (net/tls/dns) that don't run on Cloudflare
+ * Workers. Password auth covers the pilot; magic links return via an HTTP email
+ * provider (Resend API) later. See lib/email.ts.
+ */
 
 /**
  * Loads the caller's single membership. v1 is one-membership-per-user; when the
@@ -67,20 +72,6 @@ export const {
         if (!ok) return null;
 
         return { id: user.id, email: user.email, name: user.name };
-      },
-    }),
-    Nodemailer({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT ?? 587),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM ?? "Storefront Desk <onboarding@example.com>",
-      async sendVerificationRequest({ identifier, url }) {
-        await sendMagicLinkEmail(identifier, url);
       },
     }),
   ],
