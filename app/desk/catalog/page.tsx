@@ -57,9 +57,17 @@ export default async function CatalogPage({
       <Card bodyClassName="p-0">
         {items.length === 0 ? (
           <div className="p-4">
-            <EmptyState>
-              {sp.q || sp.category ? "Nothing matches that." : "No products yet. Add your first one."}
-            </EmptyState>
+            {sp.q || sp.category ? (
+              <EmptyState>Nothing matches that.</EmptyState>
+            ) : (
+              <EmptyState
+                title="No products yet"
+                action={<BtnLink href="/desk/catalog/new">Add your first product</BtnLink>}
+              >
+                Add what you sell — name, price, and a photo. Products show up on your
+                storefront and in the new-order screen.
+              </EmptyState>
+            )}
           </div>
         ) : (
           <Table>

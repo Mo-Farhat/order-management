@@ -104,7 +104,7 @@ type BtnProps = {
 
 function btnCls({ variant = "primary", size = "md" }: BtnProps) {
   const base =
-    "inline-flex items-center justify-center gap-1.5 rounded-full font-mono font-semibold uppercase tracking-widest transition-colors disabled:opacity-40";
+    "inline-flex items-center justify-center gap-1.5 rounded-md font-mono font-semibold uppercase tracking-widest transition-colors disabled:opacity-40";
   const sizes = { sm: "h-8 px-3 text-[10px]", md: "h-10 px-4 text-[11px]" };
   const variants = {
     primary: "bg-accent text-accent-fg hover:bg-accent/90",
@@ -142,10 +142,20 @@ export function Btn({
   );
 }
 
-export function EmptyState({ children }: { children: ReactNode }) {
+export function EmptyState({
+  children,
+  title,
+  action,
+}: {
+  children: ReactNode;
+  title?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <div className="rounded-xl border border-dashed border-line bg-card px-6 py-12 text-center text-sm text-muted">
-      {children}
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line bg-card px-6 py-12 text-center text-sm text-muted">
+      {title && <p className="text-base font-semibold text-ink">{title}</p>}
+      <div className="max-w-sm">{children}</div>
+      {action && <div className="mt-2">{action}</div>}
     </div>
   );
 }

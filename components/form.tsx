@@ -57,7 +57,7 @@ export function SubmitButton({ children }: { children: React.ReactNode }) {
     <button
       type="submit"
       disabled={pending}
-      className="mt-1 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg transition-opacity disabled:opacity-50"
+      className="mt-1 inline-flex h-12 items-center justify-center rounded-md bg-accent px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg transition-opacity disabled:opacity-50"
     >
       {pending ? "…" : children}
     </button>

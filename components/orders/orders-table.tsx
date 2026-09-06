@@ -81,7 +81,7 @@ export function OrdersTable({
                     {o.status === "pending" ? (
                       <button
                         onClick={() => setOpenId(o.id)}
-                        className="rounded-full border border-warn/50 bg-warn/10 px-2.5 py-1 text-xs font-medium text-warn"
+                        className="rounded-md border border-warn/50 bg-warn/10 px-2.5 py-1 text-xs font-medium text-warn"
                       >
                         Review
                       </button>

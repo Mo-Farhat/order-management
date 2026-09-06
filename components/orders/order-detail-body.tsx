@@ -50,7 +50,7 @@ export function OrderDetailBody({
           <div className="flex items-center gap-2">
             <span className="w-24 shrink-0 text-muted">Order status</span>
             {isPending ? (
-              <span className="rounded-full border border-warn/40 bg-warn/10 px-2 py-0.5 text-xs font-medium text-warn">
+              <span className="rounded-md border border-warn/40 bg-warn/10 px-2 py-0.5 text-xs font-medium text-warn">
                 Pending review
               </span>
             ) : (
@@ -315,7 +315,7 @@ function PaymentForm({
       {state?.error && <p className="text-xs text-danger">{state.error}</p>}
       <button
         disabled={pending}
-        className="self-start rounded-full border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
+        className="self-start rounded-md border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
       >
         {pending ? "…" : "Update payment"}
       </button>
@@ -353,7 +353,7 @@ function NoteForm({
       {value !== note && (
         <button
           disabled={pending}
-          className="self-start rounded-full border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
+          className="self-start rounded-md border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
         >
           {pending ? "…" : "Save note"}
         </button>
@@ -388,7 +388,7 @@ function PendingBar({ orderId, onDone }: { orderId: string; onDone?: () => void 
               else onDone?.();
             })
           }
-          className="rounded-full bg-ok px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-md bg-ok px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
         >
           {pending ? "…" : "Accept order"}
         </button>
@@ -409,7 +409,7 @@ function PendingBar({ orderId, onDone }: { orderId: string; onDone?: () => void 
           />
           <button
             disabled={pending}
-            className="rounded-full border border-danger/50 px-4 py-1.5 text-sm font-semibold text-danger disabled:opacity-50"
+            className="rounded-md border border-danger/50 px-4 py-1.5 text-sm font-semibold text-danger disabled:opacity-50"
           >
             Decline
           </button>

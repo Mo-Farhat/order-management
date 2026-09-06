@@ -33,6 +33,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
   ]);
   const currency = tenant?.currency ?? "";
+  const hasFilters = Boolean(
+    sp.q || sp.status || sp.delivery || sp.payment || sp.from || sp.to,
+  );
 
   return (
     <>
@@ -47,7 +50,17 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
       <Card bodyClassName="p-0">
         {rows.length === 0 ? (
           <div className="p-4">
-            <EmptyState>No orders match. Adjust the filters, or hit &ldquo;+ New order&rdquo;.</EmptyState>
+            {hasFilters ? (
+              <EmptyState>No orders match. Adjust the filters, or hit &ldquo;+ New order&rdquo;.</EmptyState>
+            ) : (
+              <EmptyState
+                title="No orders yet"
+                action={<BtnLink href="/desk/orders/new">Create an order</BtnLink>}
+              >
+                Add one by hand, or share your storefront link and let customers send
+                theirs straight to your DMs.
+              </EmptyState>
+            )}
           </div>
         ) : (
           <OrdersTable rows={rows} currency={currency} />

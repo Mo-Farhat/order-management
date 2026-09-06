@@ -8,7 +8,7 @@ import { dashboardMetrics } from "@/lib/dashboard";
 import { gettingStartedStatus } from "@/lib/onboarding";
 import { listOrders } from "@/lib/orders";
 import { upsellState } from "@/lib/upsell";
-import { GettingStarted } from "@/components/desk/getting-started";
+import { GettingStarted, DismissOnboarding } from "@/components/desk/getting-started";
 import { StatusPill, relativeTime } from "@/components/orders/status-pill";
 import { UpsellBanner } from "@/components/desk/upsell-banner";
 import { PageHeader, Card, StatCard, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
@@ -31,6 +31,7 @@ export default async function DashboardPage() {
     gettingStartedStatus(ctx),
   ]);
   const showOnboarding = !onboarding.dismissed && !onboarding.complete;
+  const showOnboardingDone = !onboarding.dismissed && onboarding.complete;
   const currency = tenant?.currency ?? "";
 
   return (
@@ -43,7 +44,19 @@ export default async function DashboardPage() {
         actions={<BtnLink href="/desk/orders/new">+ New order</BtnLink>}
       />
 
-      {showOnboarding && <GettingStarted steps={onboarding.steps} />}
+      {showOnboarding && (
+        <GettingStarted steps={onboarding.steps} storeUrl={onboarding.storeUrl} />
+      )}
+
+      {showOnboardingDone && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-ok/30 bg-ok/10 px-4 py-3 text-sm">
+          <span>
+            <strong>Your shop is set up.</strong> Share your storefront link and start
+            taking orders.
+          </span>
+          <DismissOnboarding />
+        </div>
+      )}
 
       {m.pendingReview > 0 && (
         <Link

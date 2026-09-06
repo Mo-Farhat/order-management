@@ -30,7 +30,7 @@ export default function BusinessBasicsPage() {
             name="name"
             required
             placeholder="Aisha's Kitchen"
-            hint="Becomes your share-link address — we'll pick a free one for you."
+            hint="Becomes your storefront address — we'll pick a free one for you."
             errors={state?.fieldErrors?.name}
           />
           <Field
@@ -40,7 +40,7 @@ export default function BusinessBasicsPage() {
             inputMode="tel"
             required
             placeholder="+94 77 123 4567"
-            hint="Where customers send their orders."
+            hint="Where storefront orders are sent. You can add Instagram later."
             errors={state?.fieldErrors?.whatsappNumber}
           />
           <SubmitButton>Continue</SubmitButton>

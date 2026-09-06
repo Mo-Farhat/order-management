@@ -246,7 +246,7 @@ export function OrderComposer({
                 type="button"
                 disabled={!detailsReady}
                 onClick={() => setStep("review")}
-                className="h-10 rounded-full bg-accent px-5 font-mono text-[11px] font-semibold uppercase tracking-widest text-accent-fg disabled:opacity-40"
+                className="h-10 rounded-md bg-accent px-5 font-mono text-[11px] font-semibold uppercase tracking-widest text-accent-fg disabled:opacity-40"
               >
                 Review →
               </button>
@@ -410,7 +410,7 @@ function SubmitBtn({ label, build }: { label: string; build: () => string }) {
         const el = document.getElementById("order-payload") as HTMLInputElement | null;
         if (el) el.value = build();
       }}
-      className="h-11 rounded-full bg-accent px-5 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
+      className="h-11 rounded-md bg-accent px-5 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
     >
       {label}
     </button>

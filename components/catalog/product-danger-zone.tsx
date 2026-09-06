@@ -28,7 +28,7 @@ export function ProductDangerZone({
         type="button"
         disabled={pending}
         onClick={() => start(() => archiveProductAction(productId, !archived))}
-        className="self-start rounded-full border border-line px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest disabled:opacity-50"
+        className="self-start rounded-md border border-line px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest disabled:opacity-50"
       >
         {archived ? "Unarchive" : "Archive"}
       </button>
@@ -50,7 +50,7 @@ export function ProductDangerZone({
                     if (res?.error) setError(res.error);
                   })
                 }
-                className="rounded-full bg-danger px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-white disabled:opacity-50"
+                className="rounded-md bg-danger px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-white disabled:opacity-50"
               >
                 Delete for good
               </button>
@@ -67,7 +67,7 @@ export function ProductDangerZone({
               type="button"
               disabled={!canHardDelete}
               onClick={() => setConfirming(true)}
-              className="self-start rounded-full border border-danger/50 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-danger disabled:cursor-not-allowed disabled:opacity-40"
+              className="self-start rounded-md border border-danger/50 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-danger disabled:cursor-not-allowed disabled:opacity-40"
             >
               Delete
             </button>

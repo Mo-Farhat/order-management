@@ -26,13 +26,13 @@ export default async function Home() {
         <div className="mt-8 flex flex-col gap-3">
           <Link
             href="/signup"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
+            className="inline-flex h-12 items-center justify-center rounded-md bg-accent px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
           >
             Start free — no card needed
           </Link>
           <Link
             href="/login"
-            className="inline-flex h-12 items-center justify-center rounded-full border border-line px-6 font-mono text-xs font-semibold uppercase tracking-widest"
+            className="inline-flex h-12 items-center justify-center rounded-md border border-line px-6 font-mono text-xs font-semibold uppercase tracking-widest"
           >
             Log in
           </Link>
