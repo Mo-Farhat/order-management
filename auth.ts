@@ -100,12 +100,15 @@ export const {
 
       if (!token.sub) return token;
 
-      // `updateSession()` after onboarding — re-resolve the membership.
+      // `updateSession()` after onboarding or a password change — re-resolve
+      // the membership and re-snapshot the password timestamp so the caller's
+      // own session survives (FR-2 invalidates *other* sessions only).
       if (trigger === "update") {
         const membership = await loadMembership(token.sub);
         token.tenantId = membership?.tenantId ?? null;
         token.tenantSlug = membership?.tenantSlug ?? null;
         token.role = membership?.role ?? null;
+        token.pwdAt = await loadPasswordChangedAt(token.sub);
         return token;
       }
 

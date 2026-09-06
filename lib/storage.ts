@@ -1,21 +1,26 @@
 import { PutObjectCommand, DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /**
- * Object storage for product photos (Cloudflare R2, S3-compatible API).
+ * Object storage for product photos over the S3-compatible API.
  *
- * If the R2_* env vars aren't set, `isStorageConfigured()` is false and the
- * catalog UI hides photo upload — products still save without photos (FR-4 says
- * "up to 6", not "at least one"). See GUIDE.md step 4a.
+ * Default provider: **Supabase Storage** (free tier, no card required — see
+ * GUIDE.md step 4a). Any S3-compatible store works: point STORAGE_ENDPOINT at
+ * Supabase, Backblaze B2, MinIO, R2, etc.
+ *
+ * If STORAGE_* isn't set, `isStorageConfigured()` is false and the catalog UI
+ * hides photo upload — products still save without photos (FR-4 says "up to 6",
+ * not "at least one").
  */
 
-const accountId = process.env.R2_ACCOUNT_ID;
-const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-const bucket = process.env.R2_BUCKET;
-const publicBaseUrl = process.env.R2_PUBLIC_BASE_URL;
+const endpoint = process.env.STORAGE_ENDPOINT; // e.g. https://xxxx.supabase.co/storage/v1/s3
+const region = process.env.STORAGE_REGION ?? "us-east-1";
+const accessKeyId = process.env.STORAGE_ACCESS_KEY_ID;
+const secretAccessKey = process.env.STORAGE_SECRET_ACCESS_KEY;
+const bucket = process.env.STORAGE_BUCKET;
+const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL;
 
 export function isStorageConfigured(): boolean {
-  return Boolean(accountId && accessKeyId && secretAccessKey && bucket && publicBaseUrl);
+  return Boolean(endpoint && accessKeyId && secretAccessKey && bucket && publicBaseUrl);
 }
 
 let client: S3Client | undefined;
@@ -23,12 +28,13 @@ let client: S3Client | undefined;
 function getClient(): S3Client {
   if (!isStorageConfigured()) {
     throw new Error(
-      "Object storage is not configured. Set R2_* in .env.local — see GUIDE.md step 4a.",
+      "Object storage is not configured. Set STORAGE_* in .env.local — see GUIDE.md step 4a.",
     );
   }
   client ??= new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    region,
+    endpoint,
+    forcePathStyle: true, // Supabase / MinIO need path-style addressing
     credentials: { accessKeyId: accessKeyId!, secretAccessKey: secretAccessKey! },
   });
   return client;

@@ -37,8 +37,12 @@ URLs print to the dev-server console.
 - **Phase 5** — billing — next
 
 The desk is a sidebar-nav console: **Dashboard** (metrics + recent orders),
-Orders, Pipeline board, Catalog, Storefront. Teal palette, tuned against the
-OrderCast reference.
+Orders, Pipeline board, Catalog, Storefront, Settings. Teal palette, tuned
+against the OrderCast reference.
+
+Product photos use any S3-compatible store (default: **Supabase Storage** — free,
+no card; GUIDE.md step 4a). Postgres RLS is enforced on the write path once the
+`app_runtime` role is provisioned (GUIDE.md step 1a).
 
 See PRD §11 for the full rollout plan.
 

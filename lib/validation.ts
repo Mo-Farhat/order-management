@@ -36,6 +36,43 @@ export const businessBasicsSchema = z.object({
     .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
 });
 
+// --- Settings ----------------------------------------------------------
+
+export const businessSettingsSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { error: "Business name must be at least 2 characters." })
+    .max(80, { error: "Keep the business name under 80 characters." }),
+  whatsappNumber: z
+    .string()
+    .trim()
+    .min(6, { error: "Enter a valid WhatsApp number." })
+    .max(24, { error: "Enter a valid WhatsApp number." })
+    .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
+  currency: z
+    .string()
+    .trim()
+    .min(1, { error: "Enter a currency code." })
+    .max(6, { error: "Use a short code like LKR or USD." })
+    .transform((v) => v.toUpperCase()),
+  deliveryFeeDefault: z
+    .union([z.literal(""), z.string().trim().regex(/^\d+(\.\d{1,2})?$/, { error: "Enter an amount like 350 or 350.00." })])
+    .optional(),
+  stockTrackingEnabled: z.boolean().default(true),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, { error: "Enter your current password." }),
+    newPassword: passwordSchema,
+    confirmPassword: z.string().min(1),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    error: "The new passwords don't match.",
+    path: ["confirmPassword"],
+  });
+
 // --- Catalog (Phase 2) ---------------------------------------------------
 
 const priceString = z

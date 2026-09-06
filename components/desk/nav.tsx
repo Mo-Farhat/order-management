@@ -28,6 +28,10 @@ const GROUPS: Group[] = [
     heading: "Storefront",
     items: [{ href: "/desk/share", label: "Share link" }],
   },
+  {
+    heading: "Account",
+    items: [{ href: "/desk/settings", label: "Settings" }],
+  },
 ];
 
 function isActive(pathname: string, item: Item) {
@@ -131,6 +135,7 @@ const CRUMB_LABELS: Record<string, string> = {
   catalog: "Catalog",
   board: "Board",
   share: "Share link",
+  settings: "Settings",
   import: "Import",
   new: "New",
   edit: "Edit",

@@ -22,6 +22,7 @@ app/                     App Router routes
     board/               pipeline board (tap-to-advance)
     catalog/             product list, new, [id] edit, import
     share/               storefront settings (accent, pause, QR)
+    settings/            business settings + change password
     export/[entity]/     CSV download route handler
 components/desk/         shell nav + shared UI packaging (Card, Table, Btn…)
   actions/               server actions (auth, onboarding, session, catalog, orders)
@@ -40,7 +41,8 @@ lib/
   email.ts               magic-link sender (console in dev)
   catalog.ts             product CRUD + stock ledger (server-only)
   csv-import.ts          CSV parse / preview / all-or-nothing commit
-  storage.ts             R2 upload (no-op + UI hidden when unconfigured)
+  storage.ts             S3-compatible upload — Supabase Storage (no-op + UI hidden when unconfigured)
+  settings.ts (actions)  business settings + password change
 drizzle/                 generated migrations
 scripts/apply-rls.ts     installs row-level security policies
 ```
@@ -153,13 +155,25 @@ additive.
 Two layers:
 
 1. **Application** — every tenant-scoped query filters by `tenantId` first. Non-negotiable.
-2. **Postgres RLS** — `scripts/apply-rls.ts` enables row-level security on `tenants`, `memberships`, `audit_log` with policies matching `current_setting('app.current_tenant')`. `db/tenant.ts#withTenant(tenantId, fn)` opens a pooled (WebSocket) connection, sets that GUC with `set_config(..., true)` (transaction-local), and runs `fn`.
+2. **Postgres RLS** — `scripts/apply-rls.ts` enables row-level security on every
+   tenant table (`tenants`, `memberships`, `audit_log`, `products`,
+   `product_photos`, `stock_movements`, `customers`, `orders`, `order_items`,
+   `order_events`, `share_carts`). Each policy has a `using` **and** a
+   `with check` clause keyed on `current_setting('app.current_tenant')`, so a bug
+   can neither read nor write across tenants. `db/tenant.ts#withTenant(tenantId,
+   fn)` opens a pooled (WebSocket) transaction, sets that GUC with
+   `set_config(..., true)` (transaction-local), and runs `fn`.
 
-**Phase 1 caveat:** `DATABASE_URL` is the Neon owner role, which owns the tables
-and bypasses non-forced RLS. Policies are installed now so Phase 2 — which adds a
-restricted runtime role and `FORCE ROW LEVEL SECURITY` on `products` / `orders` /
-`customers` / `stock_movements` — is additive rather than a retrofit. Until then,
-RLS is a latent safety net, and the application layer is the real guard.
+**Enforcement:** running `RUNTIME_DB_PASSWORD=… npm run db:rls` once provisions
+`app_runtime` — a `LOGIN NOBYPASSRLS` role with only DML privileges — and prints
+`DATABASE_URL_RUNTIME`. When that's set, `withTenant()` (every tenant-scoped
+*write*: catalog, CSV import, order create/edit/pipeline) runs as `app_runtime`
+and is genuinely subject to the policies; verified by a cross-tenant insert being
+rejected by Postgres. Onboarding uses the owner role via `pooledDb()` (no tenant
+context yet). Tenant-scoped **reads** still use the owner `db` (neon-http, which
+can't hold the GUC across its per-statement HTTP requests) with an explicit
+`tenantId` filter — the application layer remains the primary guard there;
+routing reads through a GUC-scoped pooled client is a follow-up.
 
 ## Commands
 
