@@ -35,11 +35,14 @@ function isActive(pathname: string, item: Item) {
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+function NavList({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin?: boolean }) {
   const pathname = usePathname();
+  const groups: Group[] = isAdmin
+    ? [...GROUPS, { heading: "Operator", items: [{ href: "/admin", label: "Platform admin" }] }]
+    : GROUPS;
   return (
     <nav className="flex flex-col gap-6 px-3 py-4">
-      {GROUPS.map((g, gi) => (
+      {groups.map((g, gi) => (
         <div key={gi} className="flex flex-col gap-1">
           {g.heading && (
             <p className="px-3 pb-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted">
@@ -85,18 +88,18 @@ export function SidebarBrand({ appName }: { appName: string }) {
   );
 }
 
-export function DesktopSidebar({ appName }: { appName: string }) {
+export function DesktopSidebar({ appName, isAdmin }: { appName: string; isAdmin?: boolean }) {
   return (
     <aside className="hidden h-full w-60 shrink-0 flex-col border-r border-black/10 bg-sidebar md:flex">
       <SidebarBrand appName={appName} />
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <NavList />
+        <NavList isAdmin={isAdmin} />
       </div>
     </aside>
   );
 }
 
-export function MobileNav({ appName }: { appName: string }) {
+export function MobileNav({ appName, isAdmin }: { appName: string; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -117,7 +120,7 @@ export function MobileNav({ appName }: { appName: string }) {
           <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-sidebar">
             <SidebarBrand appName={appName} />
             <div className="flex-1 overflow-y-auto">
-              <NavList onNavigate={() => setOpen(false)} />
+              <NavList onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
             </div>
           </div>
         </div>

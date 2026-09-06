@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
-import { requireActive } from "@/lib/session";
+import { requireActive, isPlatformAdmin } from "@/lib/session";
 import { APP_NAME } from "@/lib/constants";
 import { signOutAction } from "@/app/actions/session";
 import { DesktopSidebar, MobileNav, Breadcrumbs } from "@/components/desk/nav";
@@ -12,6 +12,7 @@ export default async function DeskLayout({
   children: React.ReactNode;
 }) {
   const ctx = await requireActive();
+  const admin = isPlatformAdmin(ctx.email);
   const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
   const trial = tenant?.trialEndsAt
     ? `Trial ends ${new Date(tenant.trialEndsAt).toLocaleDateString()}`
@@ -20,11 +21,11 @@ export default async function DeskLayout({
   return (
     <div className="flex h-[100dvh] overflow-hidden">
       {/* Fixed, full-height nav rail — never scrolls with the content. */}
-      <DesktopSidebar appName={APP_NAME} />
+      <DesktopSidebar appName={APP_NAME} isAdmin={admin} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="z-40 flex shrink-0 items-center gap-3 border-b border-line bg-card px-4 py-3 sm:px-6">
-          <MobileNav appName={APP_NAME} />
+          <MobileNav appName={APP_NAME} isAdmin={admin} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{tenant?.name ?? "Order Desk"}</p>
             <Breadcrumbs />

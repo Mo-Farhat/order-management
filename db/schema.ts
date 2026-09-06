@@ -473,3 +473,4 @@ export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type DeliveryStatus = (typeof deliveryStatusEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
+export type PlanStatus = (typeof planStatusEnum.enumValues)[number];

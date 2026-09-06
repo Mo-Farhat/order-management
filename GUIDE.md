@@ -182,6 +182,7 @@ The product still needs its own name before public signup (PRD §14).
 | **Now** | run `RUNTIME_DB_PASSWORD=… npm run db:rls` → `DATABASE_URL_RUNTIME` | Neon (step 1a) |
 | Soon | `STORAGE_*` | Cloudflare R2 (step 4a) |
 | Soon | `EMAIL_SERVER_*` + `EMAIL_FROM` | Resend (step 3) |
+| Optional | `ADMIN_EMAILS` (comma list) → `/admin` cross-tenant operator view | your email |
 | Deploy | Cloudflare account (`wrangler login`) + chosen domain | step 4b/4c |
 
 Paste them into `.env.local`. Never commit that file (it's gitignored).

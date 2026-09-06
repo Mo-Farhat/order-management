@@ -44,3 +44,22 @@ export async function requireCapability(capability: Capability): Promise<ActiveC
   assertCan(ctx.role, capability);
   return ctx;
 }
+
+/** Platform operators — the people who run the SaaS itself, set via ADMIN_EMAILS. */
+export function isPlatformAdmin(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const allow = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return allow.includes(email.toLowerCase());
+}
+
+/** Gate for `/admin`. A signed-in user whose email is in ADMIN_EMAILS. */
+export async function requirePlatformAdmin(): Promise<{ userId: string; email: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  const email = session.user.email ?? "";
+  if (!isPlatformAdmin(email)) redirect("/desk");
+  return { userId: session.user.id, email };
+}

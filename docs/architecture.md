@@ -198,6 +198,18 @@ Roles: `owner` \| `staff` \| `viewer` (`role` enum). Plan status:
 
 `proxy.ts` gates routes at the edge using only the decoded JWT: no session → `/login`; session but no tenant → `/onboarding/business`; otherwise through.
 
+## Platform admin (`/admin`)
+
+A cross-tenant operator view — **not** part of the shop product. Gated by
+`lib/session.ts#requirePlatformAdmin()` (email in `ADMIN_EMAILS`; own layout,
+redirects non-admins to `/desk`). `lib/admin.ts` reads every tenant via the
+owner `db` (bypasses RLS): `platformOverview` (shop count, signups, plan
+breakdown, GMV / collected / outstanding), `shopsTable` (per-shop orders / GMV
+/ last-active, range-scoped, client-sortable), `platformTrend` (daily
+orders / GMV / new-shops for the chart — `recharts`). Range selector
+(7 / 30 / 90 / all) via `?range`. The desk sidebar shows an "Operator" link
+only when the signed-in email is an admin.
+
 ## Authorization
 
 `lib/rbac.ts` holds the capability matrix from PRD §7.1. Every server action and
