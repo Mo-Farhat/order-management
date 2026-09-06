@@ -1,38 +1,42 @@
 /**
- * Outbound email. Phase 1 needs exactly one message: the magic-link sign-in.
+ * Outbound email over the Resend HTTP API (works on Cloudflare Workers — no
+ * SMTP / nodemailer). With no RESEND_API_KEY the message is logged to the
+ * server console so flows still work in local dev.
  *
- * With no SMTP configured (local dev, or before Cloudflare/Resend keys are in
- * place) the link is logged to the server console so you can still sign in.
- * See GUIDE.md for wiring up a real sender.
+ * Resend needs a verified sending domain for real deliverability; until then
+ * you can send from `onboarding@resend.dev` (their shared test address).
  */
+import { APP_NAME } from "@/lib/constants";
 
-const APP_NAME = process.env.APP_NAME ?? "Storefront Desk";
+type Mail = { to: string; subject: string; text: string; html?: string };
 
-export async function sendMagicLinkEmail(to: string, url: string): Promise<void> {
-  const host = process.env.EMAIL_SERVER_HOST;
+export async function sendEmail({ to, subject, text, html }: Mail): Promise<void> {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM ?? `${APP_NAME} <onboarding@resend.dev>`;
 
-  if (!host) {
-    console.info(
-      `\n[email:dev] Magic sign-in link for ${to}:\n${url}\n(Set EMAIL_SERVER_* in .env.local to send real email — see GUIDE.md)\n`,
-    );
+  if (!key) {
+    console.info(`\n[email:dev] to ${to}\nsubject: ${subject}\n${text}\n`);
     return;
   }
 
-  const nodemailer = await import("nodemailer");
-  const transport = nodemailer.createTransport({
-    host,
-    port: Number(process.env.EMAIL_SERVER_PORT ?? 587),
-    auth: {
-      user: process.env.EMAIL_SERVER_USER,
-      pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to, subject, text, html: html ?? text }),
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Email send failed (${res.status}): ${body.slice(0, 200)}`);
+  }
+}
 
-  await transport.sendMail({
+export async function sendPasswordResetEmail(to: string, url: string): Promise<void> {
+  await sendEmail({
     to,
-    from: process.env.EMAIL_FROM ?? `${APP_NAME} <onboarding@example.com>`,
-    subject: `Sign in to ${APP_NAME}`,
-    text: `Sign in to ${APP_NAME}:\n${url}\n\nThis link expires in 24 hours. If you didn't request it, ignore this email.`,
-    html: `<p>Sign in to <strong>${APP_NAME}</strong>:</p><p><a href="${url}">Sign in</a></p><p style="color:#666;font-size:13px">This link expires in 24 hours. If you didn't request it, ignore this email.</p>`,
+    subject: `Reset your ${APP_NAME} password`,
+    text: `Someone asked to reset the password for your ${APP_NAME} account.\n\nReset it here (expires in 1 hour):\n${url}\n\nIf this wasn't you, ignore this email — your password won't change.`,
+    html: `<p>Someone asked to reset the password for your <strong>${APP_NAME}</strong> account.</p>
+<p><a href="${url}">Reset your password</a> — this link expires in 1 hour.</p>
+<p style="color:#697386;font-size:13px">If this wasn't you, ignore this email — your password won't change.</p>`,
   });
 }

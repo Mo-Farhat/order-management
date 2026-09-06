@@ -9,6 +9,7 @@ import { tenants } from "@/db/schema";
 import { requireCapability } from "@/lib/session";
 import { shareHandoffSchema, shareSettingsSchema } from "@/lib/validation";
 import { createShareHandoff, type HandoffResult } from "@/lib/share";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export type ShareState =
   | { error?: string; fieldErrors?: Record<string, string[]>; ok?: string }
@@ -71,6 +72,11 @@ export async function saveShareSettings(
 export async function startShareHandoff(
   input: unknown,
 ): Promise<{ ok: true; result: HandoffResult } | { ok: false; error: string }> {
+  const limit = await rateLimit(`handoff:${await clientIp()}`, 12, 10 * 60);
+  if (!limit.ok) {
+    return { ok: false, error: "You've sent a lot of orders in a short time — try again shortly." };
+  }
+
   const parsed = shareHandoffSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Check your selection." };

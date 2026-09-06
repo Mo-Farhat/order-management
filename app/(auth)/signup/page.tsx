@@ -40,6 +40,12 @@ export default function SignupPage() {
         <SubmitButton>Create account</SubmitButton>
       </form>
 
+      <p className="text-xs text-muted">
+        By creating an account you agree to our{" "}
+        <Link href="/terms" className="underline">Terms</Link> and{" "}
+        <Link href="/privacy" className="underline">Privacy Policy</Link>.
+      </p>
+
       <p className="text-sm text-muted">
         Already have an account?{" "}
         <Link href="/login" className="text-ink underline underline-offset-4">

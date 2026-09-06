@@ -1,0 +1,51 @@
+name: DB backup
+
+on:
+  schedule:
+    - cron: "17 2 * * *" # 02:17 UTC daily
+  workflow_dispatch: {}
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dump database (pinned pg 17 client via docker)
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y-%m-%dT%H%M%SZ)
+          FILE="backup-$STAMP.sql.gz"
+          docker run --rm -e DATABASE_URL postgres:17-alpine \
+            pg_dump --no-owner --no-privileges --no-acl "$DATABASE_URL" \
+            | gzip -9 > "$FILE"
+          test -s "$FILE"
+          echo "FILE=$FILE" >> "$GITHUB_ENV"
+          echo "size: $(du -h "$FILE" | cut -f1)"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Keep as a GitHub artifact (30-day retention)
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: ${{ env.FILE }}
+          retention-days: 30
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Push to R2 (skipped automatically if STORAGE_* unset)
+        run: npx --yes tsx scripts/upload-backup.ts "$FILE"
+        env:
+          STORAGE_ENDPOINT: ${{ secrets.STORAGE_ENDPOINT }}
+          STORAGE_REGION: ${{ secrets.STORAGE_REGION }}
+          STORAGE_ACCESS_KEY_ID: ${{ secrets.STORAGE_ACCESS_KEY_ID }}
+          STORAGE_SECRET_ACCESS_KEY: ${{ secrets.STORAGE_SECRET_ACCESS_KEY }}
+          STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}

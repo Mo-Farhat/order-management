@@ -14,7 +14,6 @@ export const authConfig = {
   trustHost: true,
   pages: {
     signIn: "/login",
-    verifyRequest: "/verify-request",
     error: "/login",
   },
   session: {

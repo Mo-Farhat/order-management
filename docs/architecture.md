@@ -12,7 +12,8 @@ Auth.js v5, deployed to Cloudflare, no Prisma.
 
 ```
 app/                     App Router routes
-  (auth)/                login, signup, verify-request  (public)
+  (auth)/                login, signup, forgot/reset password  (public)
+  (legal)/               terms, privacy                 (public)
   onboarding/business/   business-basics step           (auth, no tenant yet)
   s/[slug]/              public storefront + [id] product page (public, no auth)
   api/v1/                read API — products, catalog   (public, bearer key)
@@ -20,11 +21,12 @@ app/                     App Router routes
     layout.tsx           sidebar + topbar shell + CSV export links
     page.tsx             Dashboard (metrics, recent orders)
     orders/              filterable list + modal, new-order flow, [id] detail, [id]/edit
-  (print)/invoice/[id]/  print-optimised invoice (outside the desk shell)
     catalog/             product list, new, [id] edit, import
     share/               storefront settings (WhatsApp #, accent, category chips, pause, QR)
     settings/            business settings + change password
     export/[entity]/     CSV download route handler
+  (print)/invoice/[id]/  print-optimised invoice (outside the desk shell)
+  admin/                 cross-tenant operator dashboard (ADMIN_EMAILS gate)
 components/desk/         shell nav + shared UI packaging (Card, Table, Btn…)
   actions/               server actions (auth, onboarding, session, catalog, orders)
   api/auth/[...nextauth] Auth.js route handlers
@@ -44,7 +46,8 @@ lib/
   upsell.ts              FR-23 "time for a website" banner logic
   session.ts             requireUser / requireActive / requireCapability
   validation.ts          zod schemas
-  email.ts               magic-link sender (console in dev)
+  email.ts               Resend HTTP API (console fallback in dev)
+  rate-limit.ts          fixed-window limiter (public unauthenticated endpoints)
   catalog.ts             product CRUD + stock ledger (server-only)
   csv-import.ts          CSV parse / preview / all-or-nothing commit
   storage.ts             S3-compatible upload (SigV4, no SDK) — Cloudflare R2
@@ -193,7 +196,7 @@ Roles: `owner` \| `staff` \| `viewer` (`role` enum). Plan status:
 
 1. **Signup** (`app/actions/auth.ts#signup`) → validate, hash password (bcrypt, cost 12), insert user with `passwordChangedAt = now`, `signIn("credentials")`, redirect to `/onboarding/business`.
 2. **Business basics** (`app/actions/onboarding.ts`) → create `tenant` + `owner` membership + audit row in one transaction, pick a free slug, set 14-day trial, `updateSession()` to refresh the JWT, redirect to `/desk`.
-3. **Login** → password or magic link. Magic link uses the Nodemailer provider; with no SMTP configured the link prints to the server console.
+3. **Login** → email + password only. **Forgot password** (`app/actions/password-reset.ts`): a single-use SHA-256-hashed token (1h) is emailed via Resend (`lib/email.ts`, console fallback); `reset-password` sets a new `hashed_password` + `password_changed_at` (invalidating other sessions per FR-2). Rate-limited per IP. Magic-link sign-in was removed (nodemailer does not run on Workers).
 4. **Session** → JWT, 30-day `maxAge`. The `jwt` callback loads the membership (tenantId, tenantSlug, role) and rejects any token whose `iat` predates `users.password_changed_at` (FR-2).
 
 `proxy.ts` gates routes at the edge using only the decoded JWT: no session → `/login`; session but no tenant → `/onboarding/business`; otherwise through.

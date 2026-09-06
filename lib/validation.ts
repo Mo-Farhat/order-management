@@ -17,9 +17,20 @@ export const signupSchema = z.object({
   password: passwordSchema,
 });
 
-export const magicLinkSchema = z.object({
+export const forgotPasswordSchema = z.object({
   email: emailSchema,
 });
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1),
+    password: passwordSchema,
+    confirmPassword: z.string().min(1),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    error: "The passwords don't match.",
+    path: ["confirmPassword"],
+  });
 
 // Business basics (PRD onboarding S2): name + WhatsApp number, nothing else.
 export const businessBasicsSchema = z.object({

@@ -41,6 +41,11 @@ export default async function Home() {
         <p className="mt-4 text-xs text-muted">
           14 days free. No card until you decide to keep it.
         </p>
+
+        <p className="mt-8 flex gap-4 text-xs text-muted">
+          <Link href="/terms" className="hover:text-ink">Terms</Link>
+          <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+        </p>
       </div>
     </main>
   );

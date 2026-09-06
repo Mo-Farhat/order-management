@@ -17,7 +17,10 @@ const { auth } = NextAuth(authConfig);
 const PUBLIC_PREFIXES = [
   "/login",
   "/signup",
-  "/verify-request",
+  "/forgot-password",
+  "/reset-password",
+  "/terms",
+  "/privacy",
   "/api/auth",
   "/api/v1", // public read API — authenticated by its own bearer key (FR-22)
   "/s/", // public share-link pages (Phase 4)

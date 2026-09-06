@@ -69,25 +69,32 @@ Rotating it signs everyone out. `AUTH_URL` should be the app's public origin
 
 ---
 
-## 3. Email / magic links  **[need from you: an email sender, when ready]**
+## 3. Email — Resend  **[need from you: RESEND_API_KEY]**
 
-Not required for local dev — sign-in links print to the terminal running
-`npm run dev`. For real email, easiest path is **Resend**:
+Used for transactional mail (password resets). Not required for local dev — the
+email body prints to the terminal running `npm run dev`.
 
-1. <https://resend.com> → add and verify a sending domain (or use their test domain to start).
-2. Create an API key.
-3. In `.env.local`:
+We call Resend's **HTTP API** (Cloudflare Workers can't do SMTP), so no
+nodemailer.
+
+1. <https://resend.com> → create an account (free tier, no card).
+2. **API Keys → Create** → copy `re_...`.
+3. Sending address:
+   - **To start / test:** leave `EMAIL_FROM` unset — mail sends from
+     `onboarding@resend.dev`. Fine for you to test with; may land in spam for
+     real users.
+   - **For production:** you need a **domain**. In Resend → **Domains → Add**,
+     then add the DNS records it shows (SPF, DKIM, DMARC) at your registrar or
+     Cloudflare DNS. Once verified, set `EMAIL_FROM="Name <hi@yourdomain.com>"`.
+4. In `.env.local` (and Cloudflare vars):
 
    ```
-   EMAIL_SERVER_HOST="smtp.resend.com"
-   EMAIL_SERVER_PORT="587"
-   EMAIL_SERVER_USER="resend"
-   EMAIL_SERVER_PASSWORD="re_xxxxxxxxxxxx"
-   EMAIL_FROM="Storefront Desk <login@yourdomain.com>"
+   RESEND_API_KEY="re_xxxxxxxx"
+   EMAIL_FROM="Name <hi@yourdomain.com>"   # optional until your domain is verified
    ```
 
-Cloudflare does not offer outbound SMTP, so email stays with a dedicated provider
-(Resend / Postmark / SES). Free tiers are ample for the 5-pilot validation phase.
+So: **yes, a verified domain is needed for good deliverability**, but the reset
+flow works today with the test address or the console fallback.
 
 ---
 
@@ -133,7 +140,7 @@ deprecated). `npm run cf:preview` builds + runs the Worker locally.
 3. **Variables and Secrets** — add all of these (tick "also available at build
    time" for `DATABASE_URL` and `AUTH_SECRET` — the build imports the DB adapter):
    `DATABASE_URL`, `DATABASE_URL_RUNTIME`, `AUTH_SECRET`, `APP_NAME`
-   (+ `EMAIL_SERVER_*`, `EMAIL_FROM`, `STORAGE_*` once you have them).
+   (+ `RESEND_API_KEY`, `EMAIL_FROM`, `STORAGE_*` once you have them).
 4. **Save and Deploy.** First run: Cloudflare asks you to pick a
    `*.workers.dev` subdomain for the account — do it.
 5. After it deploys, note the URL (`https://storefront-desk.<you>.workers.dev`),
@@ -181,7 +188,7 @@ The product still needs its own name before public signup (PRD §14).
 | **Now** | `DATABASE_URL` | Neon (step 1) |
 | **Now** | run `RUNTIME_DB_PASSWORD=… npm run db:rls` → `DATABASE_URL_RUNTIME` | Neon (step 1a) |
 | Soon | `STORAGE_*` | Cloudflare R2 (step 4a) |
-| Soon | `EMAIL_SERVER_*` + `EMAIL_FROM` | Resend (step 3) |
+| Soon | `RESEND_API_KEY` (+ `EMAIL_FROM` once domain verified) | Resend (step 3) |
 | Optional | `ADMIN_EMAILS` (comma list) → `/admin` cross-tenant operator view | your email |
 | Deploy | Cloudflare account (`wrangler login`) + chosen domain | step 4b/4c |
 

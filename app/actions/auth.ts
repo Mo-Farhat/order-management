@@ -8,11 +8,12 @@ import type { ZodError } from "zod";
 import { signIn } from "@/auth";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { magicLinkSchema, signupSchema } from "@/lib/validation";
+import { signupSchema } from "@/lib/validation";
 
 export type FormState = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
+  ok?: string;
 } | undefined;
 
 export async function signup(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -58,18 +59,6 @@ export async function loginWithPassword(_prev: FormState, formData: FormData): P
     }
     throw err;
   }
-}
-
-export async function sendMagicLink(_prev: FormState, formData: FormData): Promise<FormState> {
-  const parsed = magicLinkSchema.safeParse({ email: formData.get("email") });
-  if (!parsed.success) {
-    return { fieldErrors: z2fieldErrors(parsed.error) };
-  }
-  // Magic-link sign-in is temporarily disabled (see auth.ts) — nodemailer doesn't
-  // run on Cloudflare Workers. Use email + password for now.
-  return {
-    error: "Magic-link sign-in isn't available yet. Sign in with your email and password.",
-  };
 }
 
 function z2fieldErrors(error: ZodError): Record<string, string[]> {
