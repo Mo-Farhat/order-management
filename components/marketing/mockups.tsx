@@ -15,7 +15,7 @@ const BOUTIQUE = [
 function Bar({ h, on }: { h: number; on?: boolean }) {
   return (
     <div
-      className={`mkt-bar w-3 rounded-t ${on ? "bg-accent" : "bg-line"}`}
+      className={`w-3 rounded-t ${on ? "bg-accent" : "bg-line"}`}
       style={{ height: `${h}%` }}
     />
   );
@@ -29,13 +29,13 @@ export function DashboardMock() {
         <span className="size-2.5 rounded-full bg-line" />
         <span className="size-2.5 rounded-full bg-line" />
         <span className="size-2.5 rounded-full bg-line" />
-        <span className="ml-3 text-[10px] text-muted">pola.lk/desk</span>
+        <span className="ml-3 text-[10px] text-muted">sfdesk.app/desk</span>
       </div>
 
       <div className="grid grid-cols-[128px_1fr] text-[11px]">
         {/* sidebar */}
         <div className="hidden flex-col gap-1 border-r border-line bg-surface p-3 sm:flex">
-          <span className="mkt-serif mb-1 text-sm text-ink">Pola</span>
+          <span className="mkt-serif mb-1 text-sm text-ink">SFDesk</span>
           {["Dashboard", "Orders", "Catalog", "Storefront", "Settings"].map((x, i) => (
             <span
               key={x}
@@ -57,7 +57,7 @@ export function DashboardMock() {
             </span>
           </div>
 
-          <div className="mkt-pulse rounded-lg border border-[color:var(--amber)]/40 bg-[color:var(--amber-weak)] px-3 py-2 text-[color:var(--amber)]">
+          <div className="rounded-lg border border-[color:var(--amber)]/40 bg-[color:var(--amber-weak)] px-3 py-2 text-[color:var(--amber)]">
             <strong>3</strong> storefront orders awaiting review
           </div>
 
@@ -231,8 +231,8 @@ export function MiniExport() {
   return (
     <div className="rounded-md border border-line bg-surface p-2 font-mono text-[10px] text-muted">
       <p>name,phone,orders,spent</p>
-      <p className="text-ink">Nadeesha,077…,6,42800</p>
-      <p className="text-ink">Ishara,071…,3,15900</p>
+      <p className="text-ink">John Doe,•••• 4821,6,42800</p>
+      <p className="text-ink">Jane Doe,•••• 7390,3,15900</p>
     </div>
   );
 }

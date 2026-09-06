@@ -23,7 +23,7 @@ Everything an external storefront needs in one call.
 
 ```json
 {
-  "business": { "name": "Aisha's Kitchen", "slug": "aishas-kitchen", "currency": "LKR" },
+  "business": { "name": "Jane's Boutique", "slug": "janes-boutique", "currency": "LKR" },
   "categories": ["Bakery", "Drinks"],
   "products": [
     {

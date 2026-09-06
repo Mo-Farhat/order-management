@@ -245,54 +245,12 @@ body {
   transform: none;
 }
 
-@keyframes mkt-grow {
-  from {
-    transform: scaleY(0.15);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-@keyframes mkt-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-.mkt-reveal.is-in .mkt-bar {
-  transform-origin: bottom;
-  animation: mkt-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.mkt-float {
-  animation: mkt-float 6s ease-in-out infinite;
-}
-@keyframes mkt-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-  }
-}
-.mkt-pulse {
-  animation: mkt-pulse 2.4s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .mkt-reveal,
-  .mkt-reveal.is-in,
-  .mkt-reveal.is-in .mkt-bar {
+  .mkt-reveal.is-in {
     opacity: 1;
     transform: none;
     transition: none;
-    animation: none;
-  }
-  .mkt-float,
-  .mkt-pulse {
     animation: none;
   }
   .mkt-btn,

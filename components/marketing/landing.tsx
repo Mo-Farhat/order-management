@@ -72,12 +72,10 @@ export function Landing() {
           </Reveal>
         </div>
 
-        {/* floating, tilted app mockup that fades into the page */}
+        {/* tilted app mockup that fades into the page */}
         <Reveal delay={120} className="mx-auto mt-16 max-w-4xl">
           <div className="mkt-hero-fade mkt-tilt">
-            <div className="mkt-float">
-              <DashboardMock />
-            </div>
+            <DashboardMock />
           </div>
         </Reveal>
       </section>
@@ -147,9 +145,7 @@ export function Landing() {
             </ul>
           </Reveal>
           <Reveal delay={100}>
-            <div className="mkt-float">
-              <PhoneStorefrontMock />
-            </div>
+            <PhoneStorefrontMock />
           </Reveal>
         </div>
       </section>

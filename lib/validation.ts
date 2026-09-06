@@ -236,7 +236,7 @@ export const shareHandoffSchema = z.object({
     .max(500),
 });
 
-/** Turns "Aisha's Kitchen" into "aishas-kitchen". */
+/** Turns "Jane's Boutique" into "janes-boutique". */
 export function slugify(input: string): string {
   return (
     input
