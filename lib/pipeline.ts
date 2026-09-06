@@ -5,7 +5,10 @@ import type { OrderStatus, DeliveryStatus } from "@/db/schema";
  * (`lib/orders.ts`) and the test suite import from here.
  *
  * Three independent axes:
- *   - order status    — Confirmed / Completed / Cancelled / Returned (free choice)
+ *   - order status    — Confirmed / Completed / Cancelled / Returned (free choice).
+ *                       `pending` also exists (storefront orders awaiting Accept)
+ *                       but is NOT a free choice — it's set only at creation and
+ *                       left via acceptStorefrontOrder / declineStorefrontOrder.
  *   - delivery status — Pending → Dispatched → Delivered
  *   - payment status  — Unpaid / Partial / Paid (see lib/money + orders)
  */
@@ -35,6 +38,7 @@ export function shouldHoldStock(status: OrderStatus): boolean {
 
 /** Labels for UI. Legacy statuses map to their closest current label. */
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  pending: "Pending",
   draft: "Draft",
   confirmed: "Confirmed",
   packed: "Confirmed",

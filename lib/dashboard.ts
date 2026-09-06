@@ -14,6 +14,7 @@ export type DashboardMetrics = {
   outstandingValue: string; // total - amount_paid across non-paid orders
   customerCount: number;
   lowStockCount: number;
+  pendingReview: number; // storefront orders awaiting accept/decline
   countsByStatus: Record<string, number>;
 };
 
@@ -78,6 +79,7 @@ export async function dashboardMetrics(ctx: ActiveContext): Promise<DashboardMet
     outstandingValue: Number(outstandingAgg[0]?.value ?? 0).toFixed(2),
     customerCount: Number(customerAgg[0]?.n ?? 0),
     lowStockCount: Number(lowStockAgg[0]?.n ?? 0),
+    pendingReview: Number(countsByStatus.pending ?? 0),
     countsByStatus,
   };
 }

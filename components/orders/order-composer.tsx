@@ -29,7 +29,6 @@ export type ComposerInitial = {
   paymentStatus: PaymentStatus;
   amountPaid: string;
   note: string;
-  shareCode?: string;
 };
 
 export function OrderComposer({
@@ -123,7 +122,6 @@ export function OrderComposer({
       paymentStatus,
       amountPaid: paymentStatus === "unpaid" ? "" : amountPaid || "",
       note: note.trim(),
-      shareCode: initial?.shareCode,
     });
   }
 

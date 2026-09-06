@@ -8,8 +8,10 @@ import { requireActive, requireCapability } from "@/lib/session";
 import { ForbiddenError } from "@/lib/rbac";
 import {
   OrderTransitionError,
+  acceptStorefrontOrder,
   cancelOrder,
   createOrder,
+  declineStorefrontOrder,
   editOrder,
   getOrderDetail,
   returnOrder,
@@ -27,7 +29,6 @@ import {
   orderStatusUpdateSchema,
   paymentUpdateSchema,
 } from "@/lib/validation";
-import { markShareCartImported } from "@/lib/share";
 
 export type OrderState =
   | { error?: string; fieldErrors?: Record<string, string[]>; ok?: string }
@@ -89,14 +90,6 @@ export async function createOrderAction(
     return { error: err instanceof Error ? err.message : "Couldn't save the order." };
   }
 
-  if (parsed.data.shareCode) {
-    try {
-      await markShareCartImported(ctx, parsed.data.shareCode, result.id);
-    } catch {
-      /* non-fatal */
-    }
-  }
-
   revalidateOrder(result.id);
   revalidatePath("/desk/share");
   redirect(`/desk/orders/${result.id}`);
@@ -135,6 +128,25 @@ async function run(orderId: string, fn: (id: string) => Promise<void>): Promise<
   }
   revalidateOrder(orderId);
   return { ok: "Updated." };
+}
+
+export async function acceptOrderAction(orderId: string): Promise<OrderState> {
+  const ctx = await requireCapability("order:advance");
+  const r = await run(orderId, (id) => acceptStorefrontOrder(ctx, id));
+  revalidatePath("/desk/share");
+  return r?.error ? r : { ok: "Order accepted." };
+}
+
+export async function declineOrderAction(
+  orderId: string,
+  _prev: OrderState,
+  formData: FormData,
+): Promise<OrderState> {
+  const ctx = await requireCapability("order:advance");
+  const reason = String(formData.get("reason") ?? "");
+  const r = await run(orderId, (id) => declineStorefrontOrder(ctx, id, reason));
+  revalidatePath("/desk/share");
+  return r?.error ? r : { ok: "Order declined." };
 }
 
 export async function setOrderStatusAction(orderId: string, status: string): Promise<OrderState> {

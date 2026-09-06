@@ -9,6 +9,8 @@ import {
   updatePaymentAction,
   updateOrderNoteAction,
   setCourierAction,
+  acceptOrderAction,
+  declineOrderAction,
   type OrderState,
 } from "@/app/actions/orders";
 
@@ -34,8 +36,12 @@ export function OrderDetailBody({
   const balanceCents = toCents(order.total) - toCents(order.amountPaid);
   const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleDateString() : "—");
 
+  const isPending = order.status === "pending";
+
   return (
     <div className="flex flex-col gap-5">
+      {isPending && <PendingBar orderId={order.id} onDone={onChange} />}
+
       {/* top meta grid */}
       <div className="grid gap-4 text-sm sm:grid-cols-3">
         <div className="flex flex-col gap-1">
@@ -43,8 +49,17 @@ export function OrderDetailBody({
           <Meta k="Sale date" v={new Date(order.createdAt).toLocaleDateString()} />
           <div className="flex items-center gap-2">
             <span className="w-24 shrink-0 text-muted">Order status</span>
-            <StatusSelect orderId={order.id} kind="order" value={order.status} onDone={onChange} />
+            {isPending ? (
+              <span className="rounded-full border border-warn/40 bg-warn/10 px-2 py-0.5 text-xs font-medium text-warn">
+                Pending review
+              </span>
+            ) : (
+              <StatusSelect orderId={order.id} kind="order" value={order.status} onDone={onChange} />
+            )}
           </div>
+          {order.source === "storefront" && (
+            <Meta k="Source" v="From storefront" />
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -344,5 +359,62 @@ function NoteForm({
         </button>
       )}
     </form>
+  );
+}
+
+function PendingBar({ orderId, onDone }: { orderId: string; onDone?: () => void }) {
+  const [pending, start] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+  const decline = declineOrderAction.bind(null, orderId);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-warn/40 bg-warn/10 p-4">
+      <div>
+        <p className="text-sm font-semibold">This order is awaiting your review</p>
+        <p className="text-xs text-muted">
+          It came from your storefront. Accept to turn it into a confirmed order (stock is
+          committed), or decline it.
+        </p>
+      </div>
+      {err && <p className="text-xs text-danger">{err}</p>}
+      <div className="flex flex-wrap gap-2">
+        <button
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              setErr(null);
+              const res = await acceptOrderAction(orderId);
+              if (res?.error) setErr(res.error);
+              else onDone?.();
+            })
+          }
+          className="rounded-full bg-ok px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {pending ? "…" : "Accept order"}
+        </button>
+        <form
+          action={(fd) =>
+            start(async () => {
+              setErr(null);
+              const res = await decline(undefined, fd);
+              if (res?.error) setErr(res.error);
+              else onDone?.();
+            })
+          }
+        >
+          <input
+            name="reason"
+            placeholder="Reason (optional)"
+            className="mr-2 h-8 rounded-lg border border-line bg-surface px-2 text-xs outline-none focus:border-accent"
+          />
+          <button
+            disabled={pending}
+            className="rounded-full border border-danger/50 px-4 py-1.5 text-sm font-semibold text-danger disabled:opacity-50"
+          >
+            Decline
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }

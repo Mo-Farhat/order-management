@@ -65,7 +65,7 @@ export function BusinessSettingsForm({
       <Note state={state} />
       <LabeledInput label="Business name" name="name" defaultValue={name} errors={state?.fieldErrors?.name} />
       <p className="text-xs text-muted">
-        Your WhatsApp number moved to <span className="font-medium">Storefront → Share link</span>.
+        Your WhatsApp number moved to <span className="font-medium">Storefront</span>.
       </p>
       <div className="grid grid-cols-2 gap-3">
         <LabeledInput

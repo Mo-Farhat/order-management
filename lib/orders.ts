@@ -14,6 +14,7 @@ import {
   tenants,
   type Order,
   type OrderStatus,
+  type OrderSource,
   type DeliveryStatus,
   type PaymentStatus,
 } from "@/db/schema";
@@ -28,6 +29,9 @@ import {
 } from "@/lib/pipeline";
 import type { ActiveContext } from "@/lib/session";
 import type { OrderDraftInput } from "@/lib/validation";
+
+/** Enough context to write an order — the storefront has a tenant but no user. */
+type WriteCtx = { tenantId: string; userId: string | null };
 
 export {
   ORDER_STATUSES,
@@ -58,6 +62,7 @@ export type OrderListRow = {
   total: string;
   amountPaid: string;
   status: OrderStatus;
+  source: OrderSource;
   deliveryStatus: DeliveryStatus;
   paymentStatus: PaymentStatus;
   courier: string | null;
@@ -109,6 +114,7 @@ export async function listOrders(
       total: orders.total,
       amountPaid: orders.amountPaid,
       status: orders.status,
+      source: orders.source,
       deliveryStatus: orders.deliveryStatus,
       paymentStatus: orders.paymentStatus,
       courier: orders.courier,
@@ -161,6 +167,7 @@ export type OrderDetail = {
   id: string;
   orderNumber: number;
   status: OrderStatus;
+  source: OrderSource;
   deliveryStatus: DeliveryStatus;
   paymentStatus: PaymentStatus;
   courier: string | null;
@@ -194,6 +201,7 @@ export async function getOrderDetail(ctx: ActiveContext, id: string): Promise<Or
     id: order.id,
     orderNumber: order.orderNumber,
     status: order.status,
+    source: order.source,
     deliveryStatus: order.deliveryStatus,
     paymentStatus: order.paymentStatus,
     courier: order.courier,
@@ -254,7 +262,7 @@ export async function searchCustomers(ctx: ActiveContext, term: string) {
 
 async function resolveCustomer(
   tx: Tx,
-  ctx: ActiveContext,
+  ctx: WriteCtx,
   input: OrderDraftInput,
 ): Promise<string> {
   if (input.customerId) {
@@ -301,7 +309,7 @@ type PricedItem = {
 
 async function priceItems(
   tx: Tx,
-  ctx: ActiveContext,
+  ctx: WriteCtx,
   items: { productId: string; quantity: number; note?: string }[],
 ): Promise<PricedItem[]> {
   const ids = [...new Set(items.map((i) => i.productId))];
@@ -344,7 +352,7 @@ function money(input: {
 
 async function commitStock(
   tx: Tx,
-  ctx: ActiveContext,
+  ctx: WriteCtx,
   orderId: string,
   items: { productId: string; quantity: number }[],
 ) {
@@ -371,7 +379,7 @@ async function commitStock(
   }
 }
 
-async function restoreStock(tx: Tx, ctx: ActiveContext, orderId: string) {
+async function restoreStock(tx: Tx, ctx: WriteCtx, orderId: string) {
   const committed = await tx
     .select({ productId: stockMovements.productId, delta: stockMovements.delta })
     .from(stockMovements)
@@ -407,89 +415,108 @@ async function restoreStock(tx: Tx, ctx: ActiveContext, orderId: string) {
   }
 }
 
+type StorefrontOrderInput = {
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
+  items: { productId: string; quantity: number }[];
+  note?: string;
+};
+
+async function insertOrderRow(
+  tx: Tx,
+  ctx: WriteCtx,
+  input: OrderDraftInput,
+  status: OrderStatus,
+  source: OrderSource,
+): Promise<{ id: string; orderNumber: number; totalCents: number }> {
+  const customerId = await resolveCustomer(tx, ctx, input);
+  const priced = await priceItems(tx, ctx, input.items);
+  const totals = money({
+    priced,
+    deliveryFee: input.deliveryFee,
+    discountType: input.discountType,
+    discountValue: input.discountValue,
+  });
+
+  const [seq] = await tx
+    .update(tenants)
+    .set({ nextOrderNumber: sql`${tenants.nextOrderNumber} + 1` })
+    .where(eq(tenants.id, ctx.tenantId))
+    .returning({ orderNumber: tenants.nextOrderNumber });
+  const orderNumber = seq.orderNumber - 1;
+
+  const commit = status === "confirmed" && (await stockTrackingOn(tx, ctx.tenantId));
+
+  const [order] = await tx
+    .insert(orders)
+    .values({
+      tenantId: ctx.tenantId,
+      orderNumber,
+      customerId,
+      status,
+      source,
+      deliveryStatus: "pending",
+      courier: input.courier?.trim() || null,
+      deliveryFee: fromCents(toCents(input.deliveryFee || "0")),
+      discountType: input.discountType,
+      discountValue:
+        input.discountType === "percent"
+          ? String(Number(input.discountValue || "0"))
+          : fromCents(toCents(input.discountValue || "0")),
+      subtotal: fromCents(totals.subtotalCents),
+      total: fromCents(totals.totalCents),
+      deliveryAddress: input.deliveryAddress?.trim() || null,
+      paymentStatus: input.paymentStatus ?? "unpaid",
+      amountPaid: fromCents(toCents(input.amountPaid || "0")),
+      note: input.note?.trim() || null,
+      stockCommitted: commit,
+      createdBy: ctx.userId,
+    })
+    .returning();
+
+  await tx.insert(orderItems).values(
+    priced.map((p, i) => ({
+      tenantId: ctx.tenantId,
+      orderId: order.id,
+      productId: p.productId,
+      nameSnapshot: p.nameSnapshot,
+      priceSnapshot: fromCents(p.priceCents),
+      quantity: p.quantity,
+      lineTotal: fromCents(totals.lineTotalsCents[i]),
+      note: p.note,
+    })),
+  );
+
+  await tx.insert(orderEvents).values({
+    tenantId: ctx.tenantId,
+    orderId: order.id,
+    kind: "created",
+    toStatus: status,
+    note: source === "storefront" ? "Placed from the storefront" : null,
+    actorUserId: ctx.userId,
+  });
+
+  if (commit) await commitStock(tx, ctx, order.id, input.items);
+
+  return { id: order.id, orderNumber, totalCents: totals.totalCents };
+}
+
 export async function createOrder(
   ctx: ActiveContext,
   input: OrderDraftInput,
 ): Promise<{ id: string; orderNumber: number }> {
   return withTenant(ctx.tenantId, async (tx) => {
-    const customerId = await resolveCustomer(tx, ctx, input);
-    const priced = await priceItems(tx, ctx, input.items);
-    const totals = money({
-      priced,
-      deliveryFee: input.deliveryFee,
-      discountType: input.discountType,
-      discountValue: input.discountValue,
-    });
-
-    const [seq] = await tx
-      .update(tenants)
-      .set({ nextOrderNumber: sql`${tenants.nextOrderNumber} + 1` })
-      .where(eq(tenants.id, ctx.tenantId))
-      .returning({ orderNumber: tenants.nextOrderNumber });
-    const orderNumber = seq.orderNumber - 1;
-
-    // Every order is Confirmed on creation (no Draft state). Stock commits now.
-    const commit = await stockTrackingOn(tx, ctx.tenantId);
-
-    const [order] = await tx
-      .insert(orders)
-      .values({
-        tenantId: ctx.tenantId,
-        orderNumber,
-        customerId,
-        status: "confirmed",
-        deliveryStatus: "pending",
-        courier: input.courier?.trim() || null,
-        deliveryFee: fromCents(toCents(input.deliveryFee || "0")),
-        discountType: input.discountType,
-        discountValue:
-          input.discountType === "percent"
-            ? String(Number(input.discountValue || "0"))
-            : fromCents(toCents(input.discountValue || "0")),
-        subtotal: fromCents(totals.subtotalCents),
-        total: fromCents(totals.totalCents),
-        deliveryAddress: input.deliveryAddress?.trim() || null,
-        paymentStatus: input.paymentStatus ?? "unpaid",
-        amountPaid: fromCents(toCents(input.amountPaid || "0")),
-        note: input.note?.trim() || null,
-        stockCommitted: commit,
-        createdBy: ctx.userId,
-      })
-      .returning();
-
-    await tx.insert(orderItems).values(
-      priced.map((p, i) => ({
-        tenantId: ctx.tenantId,
-        orderId: order.id,
-        productId: p.productId,
-        nameSnapshot: p.nameSnapshot,
-        priceSnapshot: fromCents(p.priceCents),
-        quantity: p.quantity,
-        lineTotal: fromCents(totals.lineTotalsCents[i]),
-        note: p.note,
-      })),
-    );
-
-    await tx.insert(orderEvents).values({
-      tenantId: ctx.tenantId,
-      orderId: order.id,
-      kind: "created",
-      toStatus: "confirmed",
-      actorUserId: ctx.userId,
-    });
-
-    if (commit) await commitStock(tx, ctx, order.id, input.items);
-
+    const r = await insertOrderRow(tx, ctx, input, "confirmed", "desk");
     await tx.insert(auditLog).values({
       tenantId: ctx.tenantId,
       actorUserId: ctx.userId,
       action: "order.created",
       entity: "order",
-      entityId: order.id,
-      after: { orderNumber, total: fromCents(totals.totalCents) },
+      entityId: r.id,
+      after: { orderNumber: r.orderNumber, total: fromCents(r.totalCents) },
     });
-
-    return { id: order.id, orderNumber };
+    return { id: r.id, orderNumber: r.orderNumber };
   });
 }
 
@@ -500,13 +527,103 @@ export class OrderTransitionError extends Error {
   }
 }
 
-async function loadForWrite(tx: Tx, ctx: ActiveContext, id: string): Promise<Order> {
+async function loadForWrite(tx: Tx, ctx: WriteCtx, id: string): Promise<Order> {
   const order = await tx.query.orders.findFirst({
     where: and(eq(orders.id, id), eq(orders.tenantId, ctx.tenantId)),
   });
   if (!order) throw new OrderTransitionError("Order not found.");
   return order;
 }
+
+/**
+ * A customer placed an order from the public storefront. Created as `pending`
+ * (no stock impact, no revenue) — the owner reviews it and Accepts or Declines.
+ */
+export async function createStorefrontOrder(
+  tenantId: string,
+  input: StorefrontOrderInput,
+): Promise<{ id: string; orderNumber: number }> {
+  return withTenant(tenantId, async (tx) => {
+    const draft: OrderDraftInput = {
+      customerName: input.customerName,
+      customerPhone: input.customerPhone,
+      deliveryAddress: input.deliveryAddress,
+      items: input.items,
+      discountType: "none",
+      paymentStatus: "unpaid",
+      note: input.note,
+      confirm: false,
+    };
+    const r = await insertOrderRow(tx, { tenantId, userId: null }, draft, "pending", "storefront");
+    await tx.insert(auditLog).values({
+      tenantId,
+      action: "order.created",
+      entity: "order",
+      entityId: r.id,
+      after: { orderNumber: r.orderNumber, source: "storefront", status: "pending" },
+    });
+    return { id: r.id, orderNumber: r.orderNumber };
+  });
+}
+
+async function endPending(
+  ctx: ActiveContext,
+  id: string,
+  to: "confirmed" | "cancelled",
+  note: string | undefined,
+): Promise<void> {
+  await withTenant(ctx.tenantId, async (tx) => {
+    const order = await loadForWrite(tx, ctx, id);
+    if (order.status !== "pending") {
+      throw new OrderTransitionError("This order isn't awaiting review.");
+    }
+
+    let stockCommitted = order.stockCommitted;
+    if (to === "confirmed" && (await stockTrackingOn(tx, ctx.tenantId))) {
+      const items = (
+        await tx
+          .select({ productId: orderItems.productId, quantity: orderItems.quantity })
+          .from(orderItems)
+          .where(eq(orderItems.orderId, id))
+      ).filter((i): i is { productId: string; quantity: number } => !!i.productId);
+      await commitStock(tx, ctx, id, items);
+      stockCommitted = true;
+    }
+
+    await tx
+      .update(orders)
+      .set({ status: to, stockCommitted, updatedAt: new Date() })
+      .where(eq(orders.id, id));
+    await tx.insert(orderEvents).values({
+      tenantId: ctx.tenantId,
+      orderId: id,
+      kind: "status",
+      fromStatus: "pending",
+      toStatus: to,
+      note: note?.trim() || (to === "confirmed" ? "Accepted" : "Declined"),
+      actorUserId: ctx.userId,
+    });
+    await tx.insert(auditLog).values({
+      tenantId: ctx.tenantId,
+      actorUserId: ctx.userId,
+      action: to === "confirmed" ? "order.accepted" : "order.declined",
+      entity: "order",
+      entityId: id,
+    });
+  });
+}
+
+export async function acceptStorefrontOrder(ctx: ActiveContext, id: string): Promise<void> {
+  await endPending(ctx, id, "confirmed", undefined);
+}
+export async function declineStorefrontOrder(
+  ctx: ActiveContext,
+  id: string,
+  reason?: string,
+): Promise<void> {
+  await endPending(ctx, id, "cancelled", reason);
+}
+
 
 /** Free choice among the active order statuses; reconciles stock via the hold rule. */
 export async function setOrderStatus(

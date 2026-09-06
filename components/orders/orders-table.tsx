@@ -41,7 +41,9 @@ export function OrdersTable({
                 <tr
                   key={o.id}
                   onClick={() => setOpenId(o.id)}
-                  className="cursor-pointer hover:bg-surface/60"
+                  className={`cursor-pointer hover:bg-surface/60 ${
+                    o.status === "pending" ? "bg-warn/5" : ""
+                  }`}
                 >
                   <td className="px-3 py-2.5 font-mono text-xs text-accent">#{o.orderNumber}</td>
                   <td className="px-3 py-2.5">
@@ -76,7 +78,16 @@ export function OrdersTable({
                     <StatusSelect orderId={o.id} kind="delivery" value={o.deliveryStatus} />
                   </td>
                   <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
-                    <StatusSelect orderId={o.id} kind="order" value={o.status} />
+                    {o.status === "pending" ? (
+                      <button
+                        onClick={() => setOpenId(o.id)}
+                        className="rounded-full border border-warn/50 bg-warn/10 px-2.5 py-1 text-xs font-medium text-warn"
+                      >
+                        Review
+                      </button>
+                    ) : (
+                      <StatusSelect orderId={o.id} kind="order" value={o.status} />
+                    )}
                   </td>
                 </tr>
               );

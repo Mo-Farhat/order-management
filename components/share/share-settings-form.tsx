@@ -7,6 +7,7 @@ import { Btn } from "@/components/desk/ui";
 
 export function ShareSettingsForm({
   whatsappNumber,
+  instagramHandle,
   accentColor,
   sharePolicyText,
   paused,
@@ -14,6 +15,7 @@ export function ShareSettingsForm({
   chosenCategories,
 }: {
   whatsappNumber: string;
+  instagramHandle: string;
   accentColor: string | null;
   sharePolicyText: string | null;
   paused: boolean;
@@ -74,6 +76,24 @@ export function ShareSettingsForm({
         />
         <span className="text-xs text-muted">Storefront orders are sent here.</span>
         {state?.fieldErrors?.whatsappNumber?.map((m) => (
+          <span key={m} className="text-xs text-danger">{m}</span>
+        ))}
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          Instagram handle
+        </span>
+        <input
+          name="instagramHandle"
+          defaultValue={instagramHandle}
+          placeholder="yourshop"
+          className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent sm:w-56"
+        />
+        <span className="text-xs text-muted">
+          Adds a &ldquo;Send on Instagram&rdquo; button. Set at least one of WhatsApp or Instagram.
+        </span>
+        {state?.fieldErrors?.instagramHandle?.map((m) => (
           <span key={m} className="text-xs text-danger">{m}</span>
         ))}
       </label>

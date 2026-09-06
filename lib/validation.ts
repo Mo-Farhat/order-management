@@ -158,7 +158,6 @@ export const orderDraftSchema = z.object({
   paymentStatus: z.enum(["unpaid", "partial", "paid"]).default("unpaid"),
   amountPaid: z.union([z.literal(""), money2]).optional(),
   note: z.string().trim().max(2000).optional(),
-  shareCode: z.string().trim().max(12).optional(),
   confirm: z.boolean().default(false),
 });
 
@@ -182,20 +181,40 @@ export const orderNoteSchema = z.object({
 
 // --- Share link (Phase 4) -------------------------------------------
 
-export const shareSettingsSchema = z.object({
-  accentColor: z
-    .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #0f7b6c." })])
-    .optional(),
-  sharePolicyText: z.string().trim().max(500).optional().or(z.literal("")),
-  whatsappNumber: z
-    .string()
-    .trim()
-    .min(6, { error: "Enter a valid WhatsApp number." })
-    .max(24)
-    .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
-  storefrontCategories: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
-  paused: z.boolean().default(false),
-});
+export const shareSettingsSchema = z
+  .object({
+    accentColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #0f7b6c." })])
+      .optional(),
+    sharePolicyText: z.string().trim().max(500).optional().or(z.literal("")),
+    whatsappNumber: z
+      .union([
+        z.literal(""),
+        z
+          .string()
+          .trim()
+          .min(6, { error: "Enter a valid WhatsApp number." })
+          .max(24)
+          .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
+      ])
+      .optional(),
+    instagramHandle: z
+      .union([
+        z.literal(""),
+        z
+          .string()
+          .trim()
+          .transform((v) => v.replace(/^@/, ""))
+          .pipe(z.string().regex(/^[A-Za-z0-9._]{1,30}$/, { error: "Just the handle — letters, numbers, . and _" })),
+      ])
+      .optional(),
+    storefrontCategories: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
+    paused: z.boolean().default(false),
+  })
+  .refine((d) => Boolean(d.whatsappNumber) || Boolean(d.instagramHandle), {
+    error: "Add a WhatsApp number or an Instagram handle so customers can reach you.",
+    path: ["whatsappNumber"],
+  });
 
 export const shareHandoffSchema = z.object({
   slug: z.string().trim().min(1).max(60),

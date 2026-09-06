@@ -36,7 +36,7 @@ const GROUPS: Group[] = [
   },
   {
     heading: "Storefront",
-    items: [{ href: "/desk/share", label: "Share link", icon: Store }],
+    items: [{ href: "/desk/share", label: "Storefront", icon: Store }],
   },
   {
     heading: "Account",
@@ -189,7 +189,7 @@ const CRUMB_LABELS: Record<string, string> = {
   desk: "Dashboard",
   orders: "Orders",
   catalog: "Catalog",
-  share: "Share link",
+  share: "Storefront",
   settings: "Settings",
   import: "Import",
   new: "New",

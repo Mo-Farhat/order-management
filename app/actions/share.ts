@@ -43,6 +43,7 @@ export async function saveShareSettings(
     accentColor: formData.get("accentColor") ?? "",
     sharePolicyText: formData.get("sharePolicyText") ?? "",
     whatsappNumber: formData.get("whatsappNumber") ?? "",
+    instagramHandle: formData.get("instagramHandle") ?? "",
     storefrontCategories: categories,
     paused: formData.get("paused") === "on",
   });
@@ -53,7 +54,8 @@ export async function saveShareSettings(
     .set({
       accentColor: parsed.data.accentColor || null,
       sharePolicyText: parsed.data.sharePolicyText || null,
-      whatsappNumber: parsed.data.whatsappNumber,
+      whatsappNumber: parsed.data.whatsappNumber || null,
+      instagramHandle: parsed.data.instagramHandle || null,
       // Store the array as-is: [] is a real choice ("no chips"), not "reset".
       storefrontCategories: parsed.data.storefrontCategories,
       publicPagePaused: parsed.data.paused,

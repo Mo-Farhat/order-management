@@ -8,6 +8,7 @@ import { Step, Placeholder } from "@/components/share/shared";
 import { useStorefrontCart } from "@/components/share/use-cart";
 
 type Field = "name" | "phone" | "address";
+type View = "cart" | "details" | "confirm" | "sent";
 
 function validate(v: Record<Field, string>): Partial<Record<Field, string>> {
   const e: Partial<Record<Field, string>> = {};
@@ -32,14 +33,20 @@ export function CartSheet({
   const { lines, setQty, clear, count } = useStorefrontCart(slug);
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
-  const [view, setView] = useState<"cart" | "checkout">("cart");
+  const [view, setView] = useState<View>("cart");
   const [form, setForm] = useState<Record<Field, string>>({ name: "", phone: "", address: "" });
   const [note, setNote] = useState("");
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [showAll, setShowAll] = useState(false);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ code: string; url: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [sent, setSent] = useState<{
+    orderNumber: number;
+    message: string;
+    whatsapp: string | null;
+    instagram: string | null;
+  } | null>(null);
 
   const items = Object.entries(lines)
     .filter(([id, q]) => q > 0 && byId.has(id))
@@ -48,7 +55,6 @@ export function CartSheet({
   const errs = validate(form);
   const isValid = Object.keys(errs).length === 0;
 
-  // lock body scroll while the sheet is mounted
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -57,9 +63,7 @@ export function CartSheet({
     };
   }, []);
 
-  function submit() {
-    setShowAll(true);
-    if (!isValid) return;
+  function placeOrder() {
     setError(null);
     start(async () => {
       const res = await startShareHandoff({
@@ -74,12 +78,9 @@ export function CartSheet({
         setError(res.error);
         return;
       }
-      const { code, message, waNumber } = res.result;
-      const url = waNumber
-        ? `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`
-        : `https://wa.me/?text=${encodeURIComponent(message)}`;
-      setDone({ code, url });
-      window.open(url, "_blank");
+      setSent(res.result);
+      setView("sent");
+      clear();
     });
   }
 
@@ -89,68 +90,97 @@ export function CartSheet({
       fieldErr(f) ? "border-danger" : "border-line"
     }`;
 
+  const accentBtn =
+    "flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold text-white disabled:opacity-50";
+
+  const heading =
+    view === "sent"
+      ? "Order placed"
+      : view === "cart"
+        ? `Your order (${count})`
+        : view === "details"
+          ? "Your details"
+          : "Confirm your order";
+
   return (
     <div className="fixed inset-0 z-50">
-      <button
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/40"
-      />
+      <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/40" />
       <div className="absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-line bg-card">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            {view === "checkout" && !done && (
+            {(view === "details" || view === "confirm") && (
               <button
-                onClick={() => setView("cart")}
-                aria-label="Back to cart"
+                onClick={() => setView(view === "confirm" ? "details" : "cart")}
+                aria-label="Back"
                 className="flex size-7 items-center justify-center rounded-full border border-line text-sm"
               >
                 ←
               </button>
             )}
-            <h2 className="text-sm font-semibold">
-              {done ? "Order ready" : view === "cart" ? `Your order (${count})` : "Your details"}
-            </h2>
+            <h2 className="text-sm font-semibold">{heading}</h2>
           </div>
-          <button onClick={onClose} aria-label="Close" className="text-muted">✕</button>
+          <button onClick={onClose} aria-label="Close" className="text-muted">
+            ✕
+          </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
-          {/* SUCCESS */}
-          {done ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
+          {view === "sent" && sent ? (
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
               <div
                 className="flex size-14 items-center justify-center rounded-full text-2xl text-white"
                 style={{ background: "var(--sf-accent)" }}
               >
                 ✓
               </div>
-              <p className="text-sm font-medium">Sent to WhatsApp.</p>
-              <p className="text-xs text-muted">
-                Reference code <span className="font-mono font-semibold">{done.code}</span> — the
-                seller uses this to confirm your order.
+              <p className="text-sm font-medium">
+                Order <span className="font-mono">#{sent.orderNumber}</span> placed.
               </p>
-              <a
-                href={done.url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 flex h-11 w-full items-center justify-center rounded-full text-sm font-semibold text-white"
-                style={{ background: "var(--sf-accent)" }}
-              >
-                Open WhatsApp
-              </a>
-              <button
-                onClick={() => {
-                  clear();
-                  onClose();
-                }}
-                className="text-xs text-muted underline"
-              >
+              <p className="text-xs text-muted">Now send it to {tenant.name} so they can confirm:</p>
+
+              <div className="mt-1 flex w-full flex-col gap-2">
+                {sent.whatsapp && (
+                  <a
+                    href={sent.whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={accentBtn}
+                    style={{ background: "var(--sf-accent)" }}
+                  >
+                    Send on WhatsApp
+                  </a>
+                )}
+                {sent.instagram && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(sent.message).catch(() => {});
+                      setCopied(true);
+                      window.open(sent.instagram!, "_blank");
+                    }}
+                    className={`${accentBtn} border`}
+                    style={{
+                      background: sent.whatsapp ? "transparent" : "var(--sf-accent)",
+                      color: sent.whatsapp ? "var(--sf-accent)" : "#fff",
+                      borderColor: "var(--sf-accent)",
+                    }}
+                  >
+                    Send on Instagram
+                  </button>
+                )}
+              </div>
+              {sent.instagram && (
+                <p className="text-[11px] text-muted">
+                  {copied
+                    ? "Order copied — paste it into the Instagram DM."
+                    : "We'll copy your order so you can paste it into the DM."}
+                </p>
+              )}
+              <button onClick={onClose} className="mt-1 text-xs text-muted underline">
                 Done
               </button>
             </div>
           ) : view === "cart" ? (
-            /* CART */
             items.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted">
                 Your order is empty. Add something from the shop.
@@ -169,9 +199,7 @@ export function CartSheet({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-muted">
-                        {cur} {product.price} each
-                      </p>
+                      <p className="text-xs text-muted">{cur} {product.price} each</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Step onClick={() => setQty(product.id, quantity - 1)}>−</Step>
@@ -189,8 +217,7 @@ export function CartSheet({
                 ))}
               </ul>
             )
-          ) : (
-            /* CHECKOUT */
+          ) : view === "details" ? (
             <div className="flex flex-col gap-3 py-2">
               {(["name", "phone", "address"] as Field[]).map((f) => (
                 <label key={f} className="flex flex-col gap-1">
@@ -218,6 +245,28 @@ export function CartSheet({
                   className="rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-[var(--sf-accent)]"
                 />
               </label>
+            </div>
+          ) : (
+            /* CONFIRM */
+            <div className="flex flex-col gap-3 py-2 text-sm">
+              <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
+                {items.map(({ product, quantity }) => (
+                  <li key={product.id} className="flex justify-between gap-2 px-3 py-2">
+                    <span>
+                      {quantity} × {product.name}
+                    </span>
+                    <span className="tabular-nums text-muted">
+                      {cur} {(toCents(product.price) * quantity / 100).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="rounded-lg border border-line bg-surface px-3 py-2 text-xs">
+                <p className="font-medium">{form.name}</p>
+                <p className="text-muted">{form.phone}</p>
+                <p className="whitespace-pre-line text-muted">{form.address}</p>
+                {note.trim() && <p className="mt-1 text-muted">Note: {note.trim()}</p>}
+              </div>
               {error && (
                 <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
@@ -227,8 +276,7 @@ export function CartSheet({
           )}
         </div>
 
-        {/* FOOTER ACTION */}
-        {!done && (
+        {view !== "sent" && (
           <div className="border-t border-line px-4 py-3">
             <div className="mb-2 flex justify-between text-sm">
               <span className="text-muted">Subtotal</span>
@@ -236,26 +284,39 @@ export function CartSheet({
                 {cur} {(subtotalCents / 100).toFixed(2)}
               </span>
             </div>
-            {view === "cart" ? (
+            {view === "cart" && (
               <button
                 disabled={items.length === 0}
-                onClick={() => setView("checkout")}
-                className="h-12 w-full rounded-full text-sm font-semibold text-white disabled:opacity-40"
+                onClick={() => setView("details")}
+                className={accentBtn}
                 style={{ background: "var(--sf-accent)" }}
               >
                 Continue
               </button>
-            ) : (
+            )}
+            {view === "details" && (
+              <button
+                onClick={() => {
+                  setShowAll(true);
+                  if (isValid) setView("confirm");
+                }}
+                className={accentBtn}
+                style={{ background: "var(--sf-accent)" }}
+              >
+                Review order
+              </button>
+            )}
+            {view === "confirm" && (
               <button
                 disabled={pending}
-                onClick={submit}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold text-white disabled:opacity-60"
+                onClick={placeOrder}
+                className={accentBtn}
                 style={{ background: "var(--sf-accent)" }}
               >
                 {pending ? (
                   <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                 ) : (
-                  "Order on WhatsApp"
+                  "Confirm & place order"
                 )}
               </button>
             )}

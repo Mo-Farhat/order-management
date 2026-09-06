@@ -33,9 +33,10 @@ export const planStatusEnum = pgEnum("plan_status", [
 ]);
 
 // Order lifecycle. `draft/packed/shipped/delivered` are legacy values kept in
-// the type for historical `order_events` rows — the app only uses the four
-// below (see lib/pipeline.ts ORDER_STATUSES). Fulfilment progress is tracked
-// separately in `deliveryStatusEnum`.
+// the type for historical `order_events` rows. The app uses:
+//   pending    — created by the storefront, awaiting the owner's Accept
+//   confirmed / completed / cancelled / returned — see lib/pipeline.ts
+// Fulfilment progress is tracked separately in `deliveryStatusEnum`.
 export const orderStatusEnum = pgEnum("order_status", [
   "draft",
   "confirmed",
@@ -45,7 +46,10 @@ export const orderStatusEnum = pgEnum("order_status", [
   "completed",
   "cancelled",
   "returned",
+  "pending",
 ]);
+
+export const orderSourceEnum = pgEnum("order_source", ["desk", "storefront"]);
 
 export const deliveryStatusEnum = pgEnum("delivery_status", [
   "pending",
@@ -83,6 +87,8 @@ export const tenants = pgTable("tenants", {
   accentColor: text("accent_color"),
   logoKey: text("logo_key"),
   sharePolicyText: text("share_policy_text"),
+  instagramHandle: text("instagram_handle"),
+  onboardingDismissedAt: timestamp("onboarding_dismissed_at", { withTimezone: true }),
   // Ordered list of category names shown as filter chips on the storefront.
   // Null = fall back to every distinct product category.
   storefrontCategories: jsonb("storefront_categories").$type<string[]>(),
@@ -254,6 +260,7 @@ export const orders = pgTable(
       .references(() => customers.id, { onDelete: "restrict" }),
 
     status: orderStatusEnum("status").notNull().default("confirmed"),
+    source: orderSourceEnum("source").notNull().default("desk"),
     deliveryStatus: deliveryStatusEnum("delivery_status").notNull().default("pending"),
     courier: text("courier"),
     dispatchedAt: timestamp("dispatched_at", { withTimezone: true }),
@@ -498,6 +505,7 @@ export type ShareCart = typeof shareCarts.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type DeliveryStatus = (typeof deliveryStatusEnum.enumValues)[number];
+export type OrderSource = (typeof orderSourceEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
 export type PlanStatus = (typeof planStatusEnum.enumValues)[number];

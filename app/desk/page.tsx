@@ -5,13 +5,16 @@ import { tenants } from "@/db/schema";
 import type { OrderStatus } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { dashboardMetrics } from "@/lib/dashboard";
+import { gettingStartedStatus } from "@/lib/onboarding";
 import { listOrders } from "@/lib/orders";
 import { upsellState } from "@/lib/upsell";
+import { GettingStarted } from "@/components/desk/getting-started";
 import { StatusPill, relativeTime } from "@/components/orders/status-pill";
 import { UpsellBanner } from "@/components/desk/upsell-banner";
 import { PageHeader, Card, StatCard, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 
 const PIPELINE: { status: OrderStatus; label: string }[] = [
+  { status: "pending", label: "Pending" },
   { status: "confirmed", label: "Confirmed" },
   { status: "completed", label: "Completed" },
   { status: "cancelled", label: "Cancelled" },
@@ -20,12 +23,14 @@ const PIPELINE: { status: OrderStatus; label: string }[] = [
 
 export default async function DashboardPage() {
   const ctx = await requireActive();
-  const [m, recent, tenant, upsell] = await Promise.all([
+  const [m, recent, tenant, upsell, onboarding] = await Promise.all([
     dashboardMetrics(ctx),
     listOrders(ctx, {}),
     db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
     upsellState(ctx),
+    gettingStartedStatus(ctx),
   ]);
+  const showOnboarding = !onboarding.dismissed && !onboarding.complete;
   const currency = tenant?.currency ?? "";
 
   return (
@@ -37,6 +42,21 @@ export default async function DashboardPage() {
         subtitle={`Overview for ${tenant?.name ?? "your shop"}`}
         actions={<BtnLink href="/desk/orders/new">+ New order</BtnLink>}
       />
+
+      {showOnboarding && <GettingStarted steps={onboarding.steps} />}
+
+      {m.pendingReview > 0 && (
+        <Link
+          href="/desk/orders?status=pending"
+          className="flex items-center justify-between gap-3 rounded-xl border border-warn/40 bg-warn/10 px-4 py-3 text-sm transition-colors hover:border-warn"
+        >
+          <span>
+            <strong>{m.pendingReview}</strong> storefront order
+            {m.pendingReview === 1 ? "" : "s"} awaiting review
+          </span>
+          <span className="text-xs font-semibold text-warn">Review →</span>
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard

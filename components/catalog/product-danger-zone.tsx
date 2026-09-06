@@ -33,7 +33,7 @@ export function ProductDangerZone({
         {archived ? "Unarchive" : "Archive"}
       </button>
       <p className="text-xs text-muted">
-        Archived products leave your share link and the new-order grid but stay on
+        Archived products leave your storefront and the new-order grid but stay on
         past orders.
       </p>
 

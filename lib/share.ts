@@ -2,21 +2,11 @@ import "server-only";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
-import { productPhotos, products, shareCarts, tenants } from "@/db/schema";
+import { productPhotos, products, tenants } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import { computeTotals, fromCents, toCents } from "@/lib/money";
 import { normalizePhone } from "@/lib/phone";
 import type { ActiveContext } from "@/lib/session";
-
-const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-
-function randomCode(len = 6): string {
-  let out = "";
-  for (let i = 0; i < len; i++) {
-    out += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
-  }
-  return out;
-}
 
 export type StorefrontProduct = {
   id: string;
@@ -32,10 +22,24 @@ export type StorefrontTenant = {
   slug: string;
   currency: string;
   whatsappNumber: string | null;
+  instagramHandle: string | null;
   accentColor: string | null;
   logoUrl: string | null;
   sharePolicyText: string | null;
 };
+
+function storefrontTenant(t: typeof tenants.$inferSelect): StorefrontTenant {
+  return {
+    name: t.name,
+    slug: t.slug,
+    currency: t.currency,
+    whatsappNumber: t.whatsappNumber,
+    instagramHandle: t.instagramHandle,
+    accentColor: t.accentColor,
+    logoUrl: t.logoKey ? publicUrlForKey(t.logoKey) : null,
+    sharePolicyText: t.sharePolicyText,
+  };
+}
 
 export type Storefront = {
   tenant: StorefrontTenant;
@@ -91,18 +95,8 @@ export async function getStorefront(
     if (!firstPhoto.has(ph.productId)) firstPhoto.set(ph.productId, publicUrlForKey(ph.key));
   }
 
-  const tenantOut: StorefrontTenant = {
-    name: tenant.name,
-    slug: tenant.slug,
-    currency: tenant.currency,
-    whatsappNumber: tenant.whatsappNumber,
-    accentColor: tenant.accentColor,
-    logoUrl: tenant.logoKey ? publicUrlForKey(tenant.logoKey) : null,
-    sharePolicyText: tenant.sharePolicyText,
-  };
-
   return {
-    tenant: tenantOut,
+    tenant: storefrontTenant(tenant),
     categories: storefrontChips(tenant.storefrontCategories, rows.map((r) => r.category)),
     products: rows.map((p) => ({
       id: p.id,
@@ -153,15 +147,7 @@ export async function getStorefrontProduct(
     .orderBy(productPhotos.sortOrder);
 
   return {
-    tenant: {
-      name: tenant.name,
-      slug: tenant.slug,
-      currency: tenant.currency,
-      whatsappNumber: tenant.whatsappNumber,
-      accentColor: tenant.accentColor,
-      logoUrl: tenant.logoKey ? publicUrlForKey(tenant.logoKey) : null,
-      sharePolicyText: tenant.sharePolicyText,
-    },
+    tenant: storefrontTenant(tenant),
     product: {
       id: product.id,
       name: product.name,
@@ -184,17 +170,23 @@ export type HandoffInput = {
 };
 
 export type HandoffResult = {
-  code: string;
-  waNumber: string | null;
+  orderNumber: number;
   message: string;
-  subtotal: string;
   currency: string;
+  whatsapp: string | null;   // wa.me deep link with the message pre-filled
+  instagram: string | null;  // ig.me DM link (message is copied client-side)
 };
 
-/** Freezes a public visitor's selection and returns a WhatsApp deep-link body. */
+/**
+ * A public visitor placed an order. Creates it as a `pending` order (owner
+ * Accepts later) and returns the channel links + the message to send.
+ */
 export async function createShareHandoff(input: HandoffInput): Promise<HandoffResult> {
   const tenant = await db.query.tenants.findFirst({ where: eq(tenants.slug, input.slug) });
   if (!tenant || tenant.publicPagePaused) throw new Error("This page isn't taking orders right now.");
+  if (!tenant.whatsappNumber && !tenant.instagramHandle) {
+    throw new Error("This shop hasn't set up a way to receive orders yet.");
+  }
 
   const clean = input.items.filter((i) => i.quantity > 0);
   if (clean.length === 0) throw new Error("Add at least one item first.");
@@ -208,53 +200,29 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
   const lines = clean.map((i) => {
     const p = byId.get(i.productId);
     if (!p) throw new Error("One of the items is no longer available.");
-    return {
-      productId: p.id,
-      nameSnapshot: p.name,
-      priceSnapshot: p.price,
-      priceCents: toCents(p.price),
-      quantity: i.quantity,
-    };
+    return { name: p.name, price: p.price, priceCents: toCents(p.price), quantity: i.quantity };
   });
-
   const totals = computeTotals({
-    items: lines,
+    items: lines.map((l) => ({ priceCents: l.priceCents, quantity: l.quantity })),
     deliveryFeeCents: 0,
     discountType: "none",
     discountValue: 0,
   });
   const subtotal = fromCents(totals.subtotalCents);
 
-  // Allocate a code, retrying on the (tenant, code) unique collision.
-  let code = "";
-  for (let attempt = 0; attempt < 8; attempt++) {
-    code = randomCode();
-    try {
-      await db.insert(shareCarts).values({
-        tenantId: tenant.id,
-        code,
-        items: lines.map(({ productId, nameSnapshot, priceSnapshot, quantity }) => ({
-          productId,
-          nameSnapshot,
-          priceSnapshot,
-          quantity,
-        })),
-        note: input.note?.trim() || null,
-        customerName: input.customerName.trim(),
-        customerPhone: normalizePhone(input.customerPhone) ?? input.customerPhone.trim(),
-        customerAddress: input.deliveryAddress.trim(),
-        subtotal,
-      });
-      break;
-    } catch (err) {
-      if (attempt === 7) throw err;
-    }
-  }
+  const { createStorefrontOrder } = await import("@/lib/orders");
+  const order = await createStorefrontOrder(tenant.id, {
+    customerName: input.customerName.trim(),
+    customerPhone: normalizePhone(input.customerPhone) ?? input.customerPhone.trim(),
+    deliveryAddress: input.deliveryAddress.trim(),
+    items: clean,
+    note: input.note?.trim() || undefined,
+  });
 
   const cur = tenant.currency;
-  const body = [
-    `Hi ${tenant.name}! I'd like to order:`,
-    ...lines.map((l) => `• ${l.quantity} × ${l.nameSnapshot} (${cur} ${l.priceSnapshot})`),
+  const message = [
+    `Hi ${tenant.name}! I'd like to order (ref #${order.orderNumber}):`,
+    ...lines.map((l) => `• ${l.quantity} × ${l.name} (${cur} ${l.price})`),
     ``,
     `Subtotal: ${cur} ${subtotal}`,
     ``,
@@ -262,67 +230,34 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     `Phone: ${input.customerPhone.trim()}`,
     `Address: ${input.deliveryAddress.trim()}`,
     input.note?.trim() ? `Note: ${input.note.trim()}` : ``,
-    `Reference: ${code}`,
   ]
     .filter(Boolean)
     .join("\n");
 
+  const waNumber = tenant.whatsappNumber ? tenant.whatsappNumber.replace(/[^0-9]/g, "") : null;
   return {
-    code,
-    waNumber: tenant.whatsappNumber ? tenant.whatsappNumber.replace(/[^0-9]/g, "") : null,
-    message: body,
-    subtotal,
+    orderNumber: order.orderNumber,
+    message,
     currency: cur,
+    whatsapp: waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}` : null,
+    instagram: tenant.instagramHandle ? `https://ig.me/m/${tenant.instagramHandle}` : null,
   };
 }
 
-/** Owner-side: look up a pending handoff by its reference code. */
-export async function getShareCartByCode(ctx: ActiveContext, rawCode: string) {
-  const code = rawCode.trim().toUpperCase();
-  if (!code) return null;
-  const cart = await db.query.shareCarts.findFirst({
-    where: and(eq(shareCarts.tenantId, ctx.tenantId), eq(shareCarts.code, code)),
-  });
-  if (!cart) return null;
-  return {
-    code: cart.code,
-    status: cart.status,
-    note: cart.note ?? "",
-    customerName: cart.customerName ?? "",
-    customerPhone: cart.customerPhone ?? "",
-    deliveryAddress: cart.customerAddress ?? "",
-    items: cart.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
-    createdAt: cart.createdAt,
-  };
-}
-
-export async function markShareCartImported(
-  ctx: ActiveContext,
-  code: string,
-  orderId: string,
-): Promise<void> {
-  await db
-    .update(shareCarts)
-    .set({ status: "imported", importedOrderId: orderId })
-    .where(
-      and(
-        eq(shareCarts.tenantId, ctx.tenantId),
-        eq(shareCarts.code, code.trim().toUpperCase()),
-      ),
-    );
-}
-
-export async function recentShareCarts(ctx: ActiveContext, limit = 10) {
+/** Owner-side: the storefront orders currently awaiting Accept / Decline. */
+export async function pendingStorefrontOrders(ctx: ActiveContext) {
+  const { orders, customers } = await import("@/db/schema");
   return db
     .select({
-      code: shareCarts.code,
-      status: shareCarts.status,
-      subtotal: shareCarts.subtotal,
-      customerName: shareCarts.customerName,
-      createdAt: shareCarts.createdAt,
+      id: orders.id,
+      orderNumber: orders.orderNumber,
+      total: orders.total,
+      customerName: customers.name,
+      createdAt: orders.createdAt,
     })
-    .from(shareCarts)
-    .where(eq(shareCarts.tenantId, ctx.tenantId))
-    .orderBy(desc(shareCarts.createdAt))
-    .limit(limit);
+    .from(orders)
+    .innerJoin(customers, eq(customers.id, orders.customerId))
+    .where(and(eq(orders.tenantId, ctx.tenantId), eq(orders.status, "pending")))
+    .orderBy(desc(orders.createdAt))
+    .limit(20);
 }

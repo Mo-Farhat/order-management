@@ -39,7 +39,7 @@ export function StorefrontHeader({
       )}
       <div>
         <h1 className="text-lg font-semibold">{tenant.name}</h1>
-        <p className="text-xs text-muted">Browse and send your order on WhatsApp</p>
+        <p className="text-xs text-muted">Browse and send your order straight to our DMs</p>
       </div>
     </header>
   );

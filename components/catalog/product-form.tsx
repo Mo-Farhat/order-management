@@ -155,7 +155,7 @@ export function ProductForm({
           <span className="font-medium">Hide from storefront</span>
           <span className="block text-xs text-muted">
             Keeps it in your catalog and usable for DM orders, but customers
-            won&apos;t see it on your share link.
+            won&apos;t see it on your storefront.
           </span>
         </span>
         <input

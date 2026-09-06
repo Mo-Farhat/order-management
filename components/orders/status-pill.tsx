@@ -2,6 +2,7 @@ import type { OrderStatus, DeliveryStatus, PaymentStatus } from "@/db/schema";
 
 const ORDER: Record<string, { label: string; tone: string }> = {
   draft: { label: "Draft", tone: "border-line text-muted" },
+  pending: { label: "Pending", tone: "border-warn/50 bg-warn/10 text-warn" },
   confirmed: { label: "Confirmed", tone: "border-accent/40 text-ink" },
   packed: { label: "Confirmed", tone: "border-accent/40 text-ink" },
   shipped: { label: "Confirmed", tone: "border-accent/40 text-ink" },
