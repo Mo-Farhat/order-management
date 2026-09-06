@@ -5,8 +5,8 @@ const ORDER: Record<string, { label: string; tone: string }> = {
   confirmed: { label: "Confirmed", tone: "border-accent/40 text-ink" },
   packed: { label: "Confirmed", tone: "border-accent/40 text-ink" },
   shipped: { label: "Confirmed", tone: "border-accent/40 text-ink" },
-  delivered: { label: "Completed", tone: "border-accent/40 bg-accent-weak text-accent" },
-  completed: { label: "Completed", tone: "border-accent/40 bg-accent-weak text-accent" },
+  delivered: { label: "Completed", tone: "border-ok/40 bg-ok/10 text-ok" },
+  completed: { label: "Completed", tone: "border-ok/40 bg-ok/10 text-ok" },
   cancelled: { label: "Cancelled", tone: "border-danger/40 text-danger" },
   returned: { label: "Returned", tone: "border-danger/40 text-danger" },
 };
@@ -14,13 +14,13 @@ const ORDER: Record<string, { label: string; tone: string }> = {
 const DELIVERY: Record<DeliveryStatus, { label: string; tone: string }> = {
   pending: { label: "Pending", tone: "border-line text-muted" },
   dispatched: { label: "Dispatched", tone: "border-warn/50 text-warn" },
-  delivered: { label: "Delivered", tone: "border-accent/40 bg-accent-weak text-accent" },
+  delivered: { label: "Delivered", tone: "border-ok/40 bg-ok/10 text-ok" },
 };
 
 const PAYMENT: Record<PaymentStatus, { label: string; tone: string }> = {
   unpaid: { label: "Unpaid", tone: "border-line text-muted" },
   partial: { label: "Partial", tone: "border-warn/50 text-warn" },
-  paid: { label: "Paid", tone: "border-accent/40 bg-accent-weak text-accent" },
+  paid: { label: "Paid", tone: "border-ok/40 bg-ok/10 text-ok" },
 };
 
 function Pill({ label, tone }: { label: string; tone: string }) {

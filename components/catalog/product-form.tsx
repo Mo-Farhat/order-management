@@ -56,7 +56,7 @@ export function ProductForm({
                     type="button"
                     onClick={() => removePhotoAction(ph.id)}
                     aria-label="Remove photo"
-                    className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-ink text-xs text-paper"
+                    className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-ink text-xs text-white"
                   >
                     ×
                   </button>

@@ -26,7 +26,7 @@ export default async function Home() {
         <div className="mt-8 flex flex-col gap-3">
           <Link
             href="/signup"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-ink px-6 font-mono text-xs font-semibold uppercase tracking-widest text-paper"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
           >
             Start free — no card needed
           </Link>

@@ -1,38 +1,37 @@
 @import "tailwindcss";
 
 /*
- * Palette: a calm teal-forward admin console.
- * Deep teal navigation rail, warm off-white workspace, a single teal accent
- * for primary actions and links, amber for "new / attention", clay-red for
- * destructive. Tuned against the OrderCast reference (docs/ux, image.png).
+ * Light UI, orange accent, near-white sidebar. Reference: the Stripe-style
+ * console (image #8) — soft borders everywhere, a light nav rail set apart
+ * from a white workspace by a hair of grey + a border.
  */
-/* Light only — the console does not follow the OS dark-mode setting. */
 :root {
   color-scheme: light;
-  --background: #eaeeec;
-  --foreground: #14201d;
+
+  --background: #fbfbfc;
+  --foreground: #1a1f36;
 
   --paper: #ffffff;   /* cards / raised surfaces */
   --card: #ffffff;
-  --surface: #f4f6f5; /* inputs, insets, muted panels */
-  --ink: #14201d;
-  --muted: #5c6a65;
-  --line: #dde3e0;
+  --surface: #f5f6f8; /* inputs, insets, muted panels */
+  --ink: #1a1f36;
+  --muted: #697386;
+  --line: #e4e6ec;
 
-  --accent: #0f7b6c;
+  --accent: #ea580c;       /* orange */
   --accent-fg: #ffffff;
-  --accent-weak: #e3f1ee;
+  --accent-weak: #fff2e8;
 
-  --lime: #7fd4c4;    /* legacy token — now a soft teal tint */
-  --warn: #c9791f;
-  --ok: #0f7b6c;
+  --lime: #ffd8bf;         /* legacy token — soft orange tint */
+  --warn: #b7791f;         /* amber, distinct from the accent */
+  --ok: #15803d;           /* green — genuinely-positive states (paid, delivered) */
   --danger: #b3402f;
 
-  --sidebar: #0c3b37;
-  --sidebar-fg: #d9e7e3;
-  --sidebar-muted: #7ba39c;
-  --sidebar-active: #16514a;
-  --sidebar-active-fg: #ffffff;
+  --sidebar: #f6f6f7;
+  --sidebar-fg: #3c4257;
+  --sidebar-muted: #8792a2;
+  --sidebar-active: #fff2e8;      /* = accent-weak */
+  --sidebar-active-fg: #ea580c;   /* = accent */
 }
 
 @theme inline {
@@ -56,12 +55,12 @@
   --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-active: var(--sidebar-active);
   --color-sidebar-active-fg: var(--sidebar-active-fg);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
 }

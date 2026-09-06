@@ -14,12 +14,12 @@ type Kind = "order" | "delivery";
 
 const TONE: Record<string, string> = {
   confirmed: "border-accent/40 text-ink",
-  completed: "border-accent/40 bg-accent-weak text-accent",
+  completed: "border-ok/40 bg-ok/10 text-ok",
   cancelled: "border-danger/40 text-danger",
   returned: "border-danger/40 text-danger",
   pending: "border-line text-muted",
   dispatched: "border-warn/50 text-warn",
-  delivered: "border-accent/40 bg-accent-weak text-accent",
+  delivered: "border-ok/40 bg-ok/10 text-ok",
 };
 
 export function StatusSelect({

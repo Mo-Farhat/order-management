@@ -63,7 +63,7 @@ export function CatalogSearch({
               onClick={() => toggleCategory(cat)}
               className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide ${
                 activeCategory === cat
-                  ? "border-ink bg-ink text-paper"
+                  ? "border-accent bg-accent text-accent-fg"
                   : "border-line text-muted"
               }`}
             >

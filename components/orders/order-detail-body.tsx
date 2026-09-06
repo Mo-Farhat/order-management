@@ -193,7 +193,7 @@ function Row({
     <div className={`flex justify-between ${bold ? "font-semibold" : "text-muted"}`}>
       <span>{k}</span>
       <span
-        className={`tabular-nums ${tone === "danger" ? "text-danger" : tone === "ok" ? "text-accent" : ""}`}
+        className={`tabular-nums ${tone === "danger" ? "text-danger" : tone === "ok" ? "text-ok" : ""}`}
       >
         {v}
       </span>

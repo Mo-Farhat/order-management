@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { requireActive, isPlatformAdmin } from "@/lib/session";
 import { APP_NAME } from "@/lib/constants";
-import { signOutAction } from "@/app/actions/session";
 import { DesktopSidebar, MobileNav, Breadcrumbs } from "@/components/desk/nav";
 
 export default async function DeskLayout({
@@ -21,26 +20,16 @@ export default async function DeskLayout({
   return (
     <div className="flex h-[100dvh] overflow-hidden">
       {/* Fixed, full-height nav rail — never scrolls with the content. */}
-      <DesktopSidebar appName={APP_NAME} isAdmin={admin} />
+      <DesktopSidebar appName={APP_NAME} isAdmin={admin} email={ctx.email} role={ctx.role} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="z-40 flex shrink-0 items-center gap-3 border-b border-line bg-card px-4 py-3 sm:px-6">
-          <MobileNav appName={APP_NAME} isAdmin={admin} />
+          <MobileNav appName={APP_NAME} isAdmin={admin} email={ctx.email} role={ctx.role} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{tenant?.name ?? "Order Desk"}</p>
             <Breadcrumbs />
           </div>
-          <div className="hidden text-right sm:block">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
-              {ctx.role}
-            </p>
-            {trial && <p className="text-[10px] text-muted">{trial}</p>}
-          </div>
-          <form action={signOutAction}>
-            <button className="rounded-lg border border-line px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted hover:text-ink">
-              Sign out
-            </button>
-          </form>
+          {trial && <p className="hidden text-[10px] text-muted sm:block">{trial}</p>}
         </header>
 
         {/* The one scroll container for everything below the top bar. */}
