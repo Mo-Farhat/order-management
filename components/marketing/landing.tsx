@@ -42,15 +42,10 @@ export function Landing() {
       <MarketingNav />
 
       {/* Hero — deep blue bleeding into the page */}
-      <section className="mkt-hero -mt-[68px] px-5 pb-24 pt-32 text-center sm:pt-40">
+      <section className="mkt-hero -mt-[68px] px-5 pb-24 pt-36 text-center sm:pt-44">
         <div className="mx-auto max-w-3xl">
           <Reveal>
-            <p className="mkt-eyebrow text-[12px] text-white/80">
-              ◆ &nbsp;Storefront &nbsp;+&nbsp; order desk
-            </p>
-          </Reveal>
-          <Reveal delay={60}>
-            <h1 className="mx-auto mt-6 max-w-2xl text-white [text-wrap:balance]">
+            <h1 className="mx-auto max-w-2xl text-white [text-wrap:balance]">
               <span className="block text-[2.9rem] leading-[1.02] sm:text-[4.25rem]">
                 Take the order.
               </span>
@@ -59,27 +54,20 @@ export function Landing() {
               </span>
             </h1>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={80}>
             <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">
               {APP_NAME} gives you a mini storefront your customers order from, and a desk
               that tracks every order — pending, dispatched, paid — straight from your phone.
             </p>
           </Reveal>
-          <Reveal delay={180}>
-            <div className="mt-9 flex flex-col items-center gap-3">
+          <Reveal delay={140}>
+            <div className="mt-9">
               <Link
                 href="/signup"
                 className="mkt-btn mkt-btn-light h-12 px-7 text-[12px] uppercase tracking-[0.16em]"
               >
-                Start free — no card
+                Start free
               </Link>
-              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[11px] text-white/70">
-                <span>14-day free trial</span>
-                <span className="text-white/30">•</span>
-                <span>No card</span>
-                <span className="text-white/30">•</span>
-                <span>Cancel anytime</span>
-              </div>
             </div>
           </Reveal>
         </div>
@@ -266,22 +254,83 @@ export function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-card">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-10 text-sm text-muted sm:flex-row">
-          <span className="flex items-center gap-2">
-            <span className="grid size-6 place-items-center rounded-md bg-accent text-xs text-accent-fg">
-              {APP_NAME.charAt(0)}
+      <footer className="border-t border-line bg-card">
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div className="max-w-xs">
+              <span className="flex items-center gap-2">
+                <span className="grid size-7 place-items-center rounded-md bg-accent text-xs font-bold text-accent-fg">
+                  {APP_NAME.charAt(0)}
+                </span>
+                <span className="mkt-serif text-lg">{APP_NAME}</span>
+              </span>
+              <p className="mt-3 text-sm text-muted">
+                A mini storefront and an order desk for sellers who take orders on Instagram
+                and WhatsApp.
+              </p>
+              <Link
+                href="/signup"
+                className="mkt-btn mkt-btn-primary mt-5 h-10 px-5 text-[11px] uppercase tracking-[0.16em]"
+              >
+                Start free
+              </Link>
+            </div>
+
+            <FooterCol
+              title="Product"
+              links={[
+                ["How it works", "#how"],
+                ["Features", "#features"],
+                ["Pricing", "#pricing"],
+                ["FAQ", "#faq"],
+              ]}
+            />
+            <FooterCol
+              title="Account"
+              links={[
+                ["Log in", "/login"],
+                ["Create account", "/signup"],
+              ]}
+            />
+            <FooterCol
+              title="Legal"
+              links={[
+                ["Terms of Service", "/terms"],
+                ["Privacy Policy", "/privacy"],
+              ]}
+            />
+          </div>
+
+          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-line pt-6 text-xs text-muted sm:flex-row">
+            <span>
+              © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
             </span>
-            © {new Date().getFullYear()} {APP_NAME}
-          </span>
-          <div className="flex gap-5">
-            <Link href="/login" className="hover:text-ink">Log in</Link>
-            <Link href="/signup" className="hover:text-ink">Start free</Link>
-            <Link href="/terms" className="hover:text-ink">Terms</Link>
-            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <span className="flex items-center gap-2">
+              Made for sellers in Sri Lanka
+              {SOCIALS.map(({ name, Logo }) => (
+                <Logo key={name} className="size-4 opacity-70" />
+              ))}
+            </span>
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
+  return (
+    <div>
+      <p className="mkt-eyebrow text-[10px] text-muted">{title}</p>
+      <ul className="mt-3 flex flex-col gap-2 text-sm">
+        {links.map(([label, href]) => (
+          <li key={href}>
+            <Link href={href} className="text-muted transition-colors hover:text-ink">
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

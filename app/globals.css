@@ -110,10 +110,10 @@ body {
   scroll-margin-top: 5rem;
 }
 
-/* Marketing typography: Fraunces (editorial serif) headlines, Plus Jakarta
- * Sans everywhere else. Scoped to .mkt so the app keeps IBM Plex. */
+/* Marketing typography: Geist for display headlines, Spline Sans for body.
+ * Scoped to .mkt so the app keeps IBM Plex. */
 .mkt {
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-spline), ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
 }
 .mkt-amber {
@@ -121,27 +121,23 @@ body {
 }
 .mkt h1,
 .mkt h2,
-.mkt .mkt-display {
-  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  font-weight: 500;
-  font-optical-sizing: auto;
-  letter-spacing: -0.02em;
-  line-height: 1.08;
+.mkt .mkt-display,
+.mkt-serif {
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
 }
 .mkt em,
 .mkt .mkt-italic {
   font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
 }
 .mkt-eyebrow {
-  font-family: var(--font-jakarta), sans-serif;
-  font-weight: 700;
+  font-family: var(--font-spline), sans-serif;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-}
-.mkt-serif {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-optical-sizing: auto;
 }
 
 /* ---- Hero: deep-blue gradient bleeding into the page ------------------- */

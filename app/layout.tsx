@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Spline_Sans, Geist } from "next/font/google";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
 
@@ -15,17 +15,17 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-// Marketing site only (editorial serif headlines + geometric sans).
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Marketing site only: Geist for display headlines, Spline Sans for body.
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
-  style: ["normal", "italic"],
   display: "swap",
 });
 
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
+const splineSans = Spline_Sans({
+  variable: "--font-spline",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${plexSans.variable} ${plexMono.variable} ${fraunces.variable} ${jakarta.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable} ${geist.variable} ${splineSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
