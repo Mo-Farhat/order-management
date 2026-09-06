@@ -49,7 +49,7 @@ export function Landing() {
               <span className="block text-[2.9rem] leading-[1.02] sm:text-[4.25rem]">
                 Take the order.
               </span>
-              <span className="mkt-italic block text-[2.9rem] leading-[1.05] sm:text-[4.25rem]">
+              <span className="mkt-light block text-[2.9rem] leading-[1.05] text-white/70 sm:text-[4.25rem]">
                 Skip the chaos.
               </span>
             </h1>

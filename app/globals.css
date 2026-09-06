@@ -128,10 +128,15 @@ body {
   letter-spacing: -0.03em;
   line-height: 1.06;
 }
-.mkt em,
-.mkt .mkt-italic {
-  font-style: italic;
-  font-weight: 500;
+/* Emphasis without italics: inline <em> gets the amber accent; the
+ * .mkt-light headline line drops to a lighter weight for contrast. */
+.mkt em {
+  font-style: normal;
+  color: var(--amber);
+  font-weight: 600;
+}
+.mkt .mkt-light {
+  font-weight: 400;
 }
 .mkt-eyebrow {
   font-family: var(--font-spline), sans-serif;
