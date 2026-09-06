@@ -6,11 +6,7 @@ import { Faq } from "@/components/marketing/faq";
 import { DashboardMock, PhoneStorefrontMock } from "@/components/marketing/mockups";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-mono text-[11px] font-semibold uppercase tracking-widest text-accent">
-      {children}
-    </p>
-  );
+  return <p className="mkt-eyebrow text-[11px] text-accent">{children}</p>;
 }
 
 const STEPS = [
@@ -60,7 +56,7 @@ const FEATURES = [
 
 export function Landing() {
   return (
-    <div className="flex flex-col">
+    <div className="mkt flex flex-col text-foreground">
       <MarketingNav />
 
       {/* Hero */}
@@ -70,8 +66,8 @@ export function Landing() {
             <span className="size-1.5 rounded-full bg-ok" />
             For sellers on Instagram & WhatsApp
           </span>
-          <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
-            Your orders stop living in your DMs.
+          <h1 className="mx-auto mt-6 max-w-3xl text-[2.75rem] leading-[1.03] sm:text-6xl">
+            Your orders stop living in your <em>DMs</em>.
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg">
             {APP_NAME} gives you a mini storefront customers can order from, and a desk that
@@ -80,13 +76,13 @@ export function Landing() {
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/signup"
-              className="inline-flex h-12 items-center justify-center rounded-md bg-accent px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg hover:bg-accent/90"
+              className="inline-flex h-12 items-center justify-center rounded-md bg-accent px-6 text-xs font-bold uppercase tracking-[0.16em] text-accent-fg hover:bg-accent/90"
             >
               Start free — no card
             </Link>
             <a
               href="#how"
-              className="inline-flex h-12 items-center justify-center rounded-md border border-line bg-card px-6 font-mono text-xs font-semibold uppercase tracking-widest hover:border-accent/50"
+              className="inline-flex h-12 items-center justify-center rounded-md border border-line bg-card px-6 text-xs font-bold uppercase tracking-[0.16em] hover:border-accent/50"
             >
               See how it works
             </a>
@@ -102,7 +98,7 @@ export function Landing() {
       {/* Channels strip */}
       <section className="border-y border-line bg-card">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 py-8 sm:flex-row sm:justify-between">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          <p className="mkt-eyebrow text-[11px] text-muted">
             Works with how Sri Lanka already sells
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-muted">
@@ -120,14 +116,14 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="text-center">
             <Eyebrow>How it works</Eyebrow>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+            <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">
               From &ldquo;DM to order&rdquo; to &ldquo;delivered &amp; paid&rdquo;
             </h2>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {STEPS.map((s) => (
               <div key={s.n} className="rounded-2xl border border-line bg-card p-6">
-                <span className="font-mono text-sm font-semibold text-accent">{s.n}</span>
+                <span className="mkt-serif text-2xl text-accent">{s.n}</span>
                 <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
                 <p className="mt-2 text-sm text-muted">{s.body}</p>
               </div>
@@ -141,8 +137,8 @@ export function Landing() {
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2">
           <div>
             <Eyebrow>Your mini storefront</Eyebrow>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-              A link you can actually be proud to send
+            <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">
+              A link you can actually be <em>proud</em> to send
             </h2>
             <p className="mt-4 text-muted">
               Not a Google Form. A clean, branded shop — your photos, your categories, your
@@ -171,7 +167,7 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="text-center">
             <Eyebrow>Features</Eyebrow>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+            <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">
               Everything you need to run orders — nothing you don&apos;t
             </h2>
           </div>
@@ -191,7 +187,7 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="text-center">
             <Eyebrow>From early sellers</Eyebrow>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+            <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">
               Off the spreadsheet, off the stress
             </h2>
           </div>
@@ -224,8 +220,8 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="text-center">
             <Eyebrow>Pricing</Eyebrow>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-              One simple plan to start
+            <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">
+              One simple plan to <em>start</em>
             </h2>
             <p className="mx-auto mt-3 max-w-md text-sm text-muted">
               Start free for 14 days. Keep going for LKR 1,500 a month. Bigger plans are on the
@@ -243,7 +239,7 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="text-center">
             <Eyebrow>FAQ</Eyebrow>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">Questions, answered</h2>
+            <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">Questions, answered</h2>
           </div>
           <div className="mt-12">
             <Faq />
@@ -254,15 +250,15 @@ export function Landing() {
       {/* CTA band */}
       <section className="mkt-cta-band">
         <div className="mx-auto max-w-4xl px-5 py-20 text-center text-white">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Take your first order on {APP_NAME} today
+          <h2 className="text-[2rem] leading-[1.05] sm:text-[2.9rem]">
+            Take your first order on {APP_NAME} <em>today</em>
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-white/85">
             Set up your storefront in minutes. Free for 14 days, no card — you decide after.
           </p>
           <Link
             href="/signup"
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-md bg-white px-6 font-mono text-xs font-semibold uppercase tracking-widest text-accent hover:bg-white/90"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-md bg-white px-6 text-xs font-bold uppercase tracking-[0.16em] text-accent hover:bg-white/90"
           >
             Start free
           </Link>

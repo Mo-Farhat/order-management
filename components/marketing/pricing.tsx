@@ -36,10 +36,10 @@ export function Pricing() {
       <div className="grid w-full max-w-3xl gap-5 sm:grid-cols-2">
         {/* Starter — the live plan */}
         <div className="flex flex-col rounded-2xl border-2 border-accent bg-card p-6 shadow-[0_2px_20px_rgba(234,88,12,0.10)]">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-widest text-accent">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
             Starter
           </p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight">
+          <p className="mkt-serif mt-3 text-4xl">
             LKR {fmt(shown)}
             <span className="text-base font-normal text-muted">/mo</span>
           </p>
@@ -63,7 +63,7 @@ export function Pricing() {
           </ul>
           <Link
             href="/signup"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-accent px-5 font-mono text-[11px] font-semibold uppercase tracking-widest text-accent-fg hover:bg-accent/90"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-accent px-5 text-[11px] font-bold uppercase tracking-[0.16em] text-accent-fg hover:bg-accent/90"
           >
             Start free
           </Link>
@@ -71,10 +71,10 @@ export function Pricing() {
 
         {/* Growth — coming soon */}
         <div className="flex flex-col rounded-2xl border border-line bg-surface/60 p-6">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
             Growth · coming soon
           </p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-muted">Later</p>
+          <p className="mkt-serif mt-3 text-4xl text-muted">Later</p>
           <p className="mt-1 text-xs text-muted">For shops that outgrow Starter.</p>
           <ul className="mt-5 flex flex-col gap-2.5 text-sm text-muted">
             {[
@@ -90,7 +90,7 @@ export function Pricing() {
               </li>
             ))}
           </ul>
-          <span className="mt-6 inline-flex h-11 items-center justify-center rounded-md border border-line px-5 font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          <span className="mt-6 inline-flex h-11 items-center justify-center rounded-md border border-line px-5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
             Not yet available
           </span>
         </div>

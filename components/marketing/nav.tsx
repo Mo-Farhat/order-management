@@ -17,11 +17,11 @@ export function MarketingNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-background/80 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2">
           <span className="grid size-7 place-items-center rounded-md bg-accent text-sm text-accent-fg">
             {APP_NAME.charAt(0)}
           </span>
-          {APP_NAME}
+          <span className="mkt-serif text-xl">{APP_NAME}</span>
         </Link>
 
         <div className="hidden items-center gap-7 text-sm text-muted md:flex">
@@ -38,7 +38,7 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/signup"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-accent px-4 font-mono text-[11px] font-semibold uppercase tracking-widest text-accent-fg hover:bg-accent/90"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-accent px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-accent-fg hover:bg-accent/90"
           >
             Start free
           </Link>
@@ -65,13 +65,13 @@ export function MarketingNav() {
             <div className="mt-2 flex gap-3">
               <Link
                 href="/login"
-                className="inline-flex h-10 flex-1 items-center justify-center rounded-md border border-line font-mono text-[11px] font-semibold uppercase tracking-widest"
+                className="inline-flex h-10 flex-1 items-center justify-center rounded-md border border-line text-[11px] font-bold uppercase tracking-[0.16em]"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex h-10 flex-1 items-center justify-center rounded-md bg-accent font-mono text-[11px] font-semibold uppercase tracking-widest text-accent-fg"
+                className="inline-flex h-10 flex-1 items-center justify-center rounded-md bg-accent text-[11px] font-bold uppercase tracking-[0.16em] text-accent-fg"
               >
                 Start free
               </Link>
