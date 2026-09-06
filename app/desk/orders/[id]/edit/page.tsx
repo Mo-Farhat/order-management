@@ -23,8 +23,7 @@ export default async function EditOrderPage({
   const { order, customer, items } = data;
   const blocked =
     TERMINAL.includes(order.status) ||
-    order.status === "delivered" ||
-    (order.status !== "draft" && !can(ctx.role, "order:edit_past_confirmed"));
+    (order.status === "completed" && !can(ctx.role, "order:edit_past_confirmed"));
   if (blocked) redirect(`/desk/orders/${id}`);
 
   const [productItems, tenant] = await Promise.all([
@@ -59,6 +58,7 @@ export default async function EditOrderPage({
             phone: customer?.phone ?? "",
           },
           deliveryAddress: order.deliveryAddress ?? "",
+          courier: order.courier ?? "",
           items: items.map((it) => ({ productId: it.productId ?? "", quantity: it.quantity })),
           deliveryFee: order.deliveryFee,
           discountType: order.discountType,

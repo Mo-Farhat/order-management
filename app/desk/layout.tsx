@@ -44,12 +44,12 @@ export default async function DeskLayout({
 
         {/* The one scroll container for everything below the top bar. */}
         <div className="flex-1 overflow-y-auto">
-          <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6">
+          <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6">
             {children}
           </main>
 
           {/* eslint-disable @next/next/no-html-link-for-pages -- CSV download endpoints, not pages */}
-          <footer className="mx-auto flex w-full max-w-5xl flex-wrap gap-x-4 gap-y-1 px-4 pb-8 pt-2 text-xs text-muted sm:px-6">
+          <footer className="mx-auto flex w-full max-w-7xl flex-wrap gap-x-4 gap-y-1 px-4 pb-8 pt-2 text-xs text-muted sm:px-6">
             <span>Export CSV:</span>
             <a href="/desk/export/orders" className="underline underline-offset-2 hover:text-ink">Orders</a>
             <a href="/desk/export/customers" className="underline underline-offset-2 hover:text-ink">Customers</a>

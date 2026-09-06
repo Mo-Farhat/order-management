@@ -1,110 +1,45 @@
 import { describe, it, expect } from "vitest";
 import {
-  MAIN_NEXT,
-  isLegalTransition,
-  legalMoves,
-  canAdvance,
-  canCancel,
-  canReturn,
-  NEEDS_ACTION,
+  ORDER_STATUSES,
+  DELIVERY_STATUSES,
+  TERMINAL,
+  isValidOrderStatus,
+  isValidDeliveryStatus,
+  shouldHoldStock,
+  ORDER_STATUS_LABEL,
 } from "@/lib/pipeline";
-import type { OrderStatus } from "@/db/schema";
 
-const ALL: OrderStatus[] = [
-  "draft",
-  "confirmed",
-  "packed",
-  "shipped",
-  "delivered",
-  "cancelled",
-  "returned",
-];
-
-describe("MAIN_NEXT", () => {
-  it("is the fixed forward chain, ending at delivered", () => {
-    expect(MAIN_NEXT).toEqual({
-      draft: "confirmed",
-      confirmed: "packed",
-      packed: "shipped",
-      shipped: "delivered",
-    });
-    expect(MAIN_NEXT.delivered).toBeUndefined();
-  });
-});
-
-describe("isLegalTransition", () => {
-  it("allows each forward step", () => {
-    expect(isLegalTransition("draft", "confirmed")).toBe(true);
-    expect(isLegalTransition("confirmed", "packed")).toBe(true);
-    expect(isLegalTransition("packed", "shipped")).toBe(true);
-    expect(isLegalTransition("shipped", "delivered")).toBe(true);
+describe("order status model", () => {
+  it("active order statuses", () => {
+    expect(ORDER_STATUSES).toEqual(["confirmed", "completed", "cancelled", "returned"]);
+    expect(DELIVERY_STATUSES).toEqual(["pending", "dispatched", "delivered"]);
   });
 
-  it("rejects skipping a step or moving backward", () => {
-    expect(isLegalTransition("draft", "packed")).toBe(false);
-    expect(isLegalTransition("draft", "delivered")).toBe(false);
-    expect(isLegalTransition("packed", "confirmed")).toBe(false);
-    expect(isLegalTransition("delivered", "shipped")).toBe(false);
+  it("validators reject legacy / unknown values", () => {
+    expect(isValidOrderStatus("confirmed")).toBe(true);
+    expect(isValidOrderStatus("completed")).toBe(true);
+    expect(isValidOrderStatus("draft")).toBe(false);
+    expect(isValidOrderStatus("packed")).toBe(false);
+    expect(isValidOrderStatus("nonsense")).toBe(false);
+
+    expect(isValidDeliveryStatus("dispatched")).toBe(true);
+    expect(isValidDeliveryStatus("shipped")).toBe(false);
   });
 
-  it("allows cancel from any pre-delivery state, not after", () => {
-    expect(isLegalTransition("draft", "cancelled")).toBe(true);
-    expect(isLegalTransition("confirmed", "cancelled")).toBe(true);
-    expect(isLegalTransition("shipped", "cancelled")).toBe(true);
-    expect(isLegalTransition("delivered", "cancelled")).toBe(false);
+  it("stock is held while confirmed/completed, released when cancelled/returned", () => {
+    expect(shouldHoldStock("confirmed")).toBe(true);
+    expect(shouldHoldStock("completed")).toBe(true);
+    expect(shouldHoldStock("cancelled")).toBe(false);
+    expect(shouldHoldStock("returned")).toBe(false);
   });
 
-  it("allows return only from delivered", () => {
-    expect(isLegalTransition("delivered", "returned")).toBe(true);
-    expect(isLegalTransition("shipped", "returned")).toBe(false);
-    expect(isLegalTransition("draft", "returned")).toBe(false);
+  it("TERMINAL is cancelled + returned", () => {
+    expect([...TERMINAL].sort()).toEqual(["cancelled", "returned"]);
   });
 
-  it("locks terminal states", () => {
-    for (const to of ALL) {
-      if (to === "cancelled") continue;
-      expect(isLegalTransition("cancelled", to)).toBe(false);
-    }
-    for (const to of ALL) {
-      if (to === "returned") continue;
-      expect(isLegalTransition("returned", to)).toBe(false);
-    }
-  });
-
-  it("treats a no-op move as legal", () => {
-    for (const s of ALL) expect(isLegalTransition(s, s)).toBe(true);
-  });
-});
-
-describe("predicates", () => {
-  it("canAdvance is true iff there is a next step", () => {
-    expect(canAdvance("draft")).toBe(true);
-    expect(canAdvance("shipped")).toBe(true);
-    expect(canAdvance("delivered")).toBe(false);
-    expect(canAdvance("cancelled")).toBe(false);
-  });
-
-  it("canCancel / canReturn", () => {
-    expect(canCancel("packed")).toBe(true);
-    expect(canCancel("delivered")).toBe(false);
-    expect(canReturn("delivered")).toBe(true);
-    expect(canReturn("shipped")).toBe(false);
-  });
-
-  it("NEEDS_ACTION is confirmed + packed", () => {
-    expect([...NEEDS_ACTION].sort()).toEqual(["confirmed", "packed"]);
-  });
-
-  it("legalMoves lists the inline status-picker options", () => {
-    expect(legalMoves("draft")).toEqual(["confirmed", "cancelled"]);
-    expect(legalMoves("confirmed")).toEqual(["packed", "cancelled"]);
-    expect(legalMoves("shipped")).toEqual(["delivered", "cancelled"]);
-    expect(legalMoves("delivered")).toEqual(["returned"]);
-    expect(legalMoves("cancelled")).toEqual([]);
-    expect(legalMoves("returned")).toEqual([]);
-    // every listed move must actually be legal
-    for (const from of ALL) {
-      for (const to of legalMoves(from)) expect(isLegalTransition(from, to)).toBe(true);
-    }
+  it("legacy statuses map to a current label", () => {
+    expect(ORDER_STATUS_LABEL.draft).toBe("Draft");
+    expect(ORDER_STATUS_LABEL.packed).toBe("Confirmed");
+    expect(ORDER_STATUS_LABEL.delivered).toBe("Completed");
   });
 });

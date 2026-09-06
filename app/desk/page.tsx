@@ -12,11 +12,10 @@ import { UpsellBanner } from "@/components/desk/upsell-banner";
 import { PageHeader, Card, StatCard, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 
 const PIPELINE: { status: OrderStatus; label: string }[] = [
-  { status: "draft", label: "Draft" },
   { status: "confirmed", label: "Confirmed" },
-  { status: "packed", label: "Packed" },
-  { status: "shipped", label: "Shipped" },
-  { status: "delivered", label: "Delivered" },
+  { status: "completed", label: "Completed" },
+  { status: "cancelled", label: "Cancelled" },
+  { status: "returned", label: "Returned" },
 ];
 
 export default async function DashboardPage() {
@@ -41,24 +40,24 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
-          label="Needs action"
+          label="To dispatch"
           value={m.needsAction}
-          hint="Confirmed + packed"
-          href="/desk/orders?tab=needs-action"
+          hint="Confirmed · delivery pending"
+          href="/desk/orders?status=confirmed&delivery=pending"
           tone={m.needsAction > 0 ? "warn" : "default"}
         />
         <StatCard
           label="Open orders"
           value={m.openOrders}
           hint={`${currency} ${m.openValue} in flight`}
-          href="/desk/orders?tab=open"
+          href="/desk/orders?status=confirmed"
         />
         <StatCard
-          label="Delivered"
-          value={m.deliveredCount}
-          hint={`${currency} ${m.deliveredValue} total`}
-          href="/desk/orders?tab=delivered"
-          tone="accent"
+          label="Outstanding"
+          value={`${currency} ${m.outstandingValue}`}
+          hint="Unpaid + partial balances"
+          href="/desk/orders?payment=unpaid"
+          tone={Number(m.outstandingValue) > 0 ? "danger" : "default"}
         />
         <StatCard
           label="Low stock"
@@ -74,7 +73,7 @@ export default async function DashboardPage() {
           {PIPELINE.map((p) => (
             <Link
               key={p.status}
-              href={`/desk/orders?tab=all`}
+              href={`/desk/orders?status=${p.status}`}
               className="rounded-lg border border-line bg-surface px-3 py-3 text-center transition-colors hover:border-accent/50"
             >
               <p className="text-lg font-semibold tabular-nums">{m.countsByStatus[p.status] ?? 0}</p>
@@ -103,7 +102,7 @@ export default async function DashboardPage() {
                 <Th>Customer</Th>
                 <Th className="text-right">Total</Th>
                 <Th>Status</Th>
-                <Th className="text-right">Updated</Th>
+                <Th className="text-right">Date</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -117,7 +116,7 @@ export default async function DashboardPage() {
                   <Td className="font-medium">{o.customerName}</Td>
                   <Td className="text-right tabular-nums">{currency} {o.total}</Td>
                   <Td><StatusPill status={o.status} /></Td>
-                  <Td className="text-right text-xs text-muted">{relativeTime(o.updatedAt)}</Td>
+                  <Td className="text-right text-xs text-muted">{relativeTime(o.createdAt)}</Td>
                 </tr>
               ))}
             </tbody>

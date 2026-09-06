@@ -50,6 +50,20 @@
       "when": 1788694143480,
       "tag": "0006_dazzling_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788695896730,
+      "tag": "0007_wakeful_lizard",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788695916858,
+      "tag": "0008_remap_order_statuses",
+      "breakpoints": true
     }
   ]
 }

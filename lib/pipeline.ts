@@ -1,50 +1,52 @@
-import type { OrderStatus } from "@/db/schema";
+import type { OrderStatus, DeliveryStatus } from "@/db/schema";
 
 /**
- * Order pipeline (FR-9) — pure logic, no DB, no `server-only`. Both the order
- * engine (`lib/orders.ts`) and the test suite import from here.
+ * Order state — pure logic, no DB, no `server-only`. Both the order engine
+ * (`lib/orders.ts`) and the test suite import from here.
  *
- * Fixed pipeline: Draft → Confirmed → Packed → Shipped → Delivered, with
- * Cancelled and Returned as branches. Not configurable, by design.
+ * Three independent axes:
+ *   - order status    — Confirmed / Completed / Cancelled / Returned (free choice)
+ *   - delivery status — Pending → Dispatched → Delivered
+ *   - payment status  — Unpaid / Partial / Paid (see lib/money + orders)
  */
 
-export const MAIN_NEXT: Partial<Record<OrderStatus, OrderStatus>> = {
-  draft: "confirmed",
-  confirmed: "packed",
-  packed: "shipped",
-  shipped: "delivered",
+export const ORDER_STATUSES: OrderStatus[] = ["confirmed", "completed", "cancelled", "returned"];
+export const DELIVERY_STATUSES: DeliveryStatus[] = ["pending", "dispatched", "delivered"];
+
+/** Terminal order states — stock is released and the order is closed. */
+export const TERMINAL: OrderStatus[] = ["cancelled", "returned"];
+
+/** Order status is a free choice among the active values (legacy values rejected). */
+export function isValidOrderStatus(s: string): s is OrderStatus {
+  return (ORDER_STATUSES as string[]).includes(s);
+}
+
+export function isValidDeliveryStatus(s: string): s is DeliveryStatus {
+  return (DELIVERY_STATUSES as string[]).includes(s);
+}
+
+/**
+ * Whether an order in `status` should be holding committed stock.
+ * Confirmed / Completed hold stock; Cancelled / Returned release it.
+ */
+export function shouldHoldStock(status: OrderStatus): boolean {
+  return status === "confirmed" || status === "completed";
+}
+
+/** Labels for UI. Legacy statuses map to their closest current label. */
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  draft: "Draft",
+  confirmed: "Confirmed",
+  packed: "Confirmed",
+  shipped: "Confirmed",
+  delivered: "Completed",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  returned: "Returned",
 };
 
-export const CANCELLABLE: OrderStatus[] = ["draft", "confirmed", "packed", "shipped"];
-export const TERMINAL: OrderStatus[] = ["cancelled", "returned"];
-export const NEEDS_ACTION: OrderStatus[] = ["confirmed", "packed"];
-
-export function canAdvance(status: OrderStatus): boolean {
-  return status in MAIN_NEXT;
-}
-export function canCancel(status: OrderStatus): boolean {
-  return CANCELLABLE.includes(status);
-}
-export function canReturn(status: OrderStatus): boolean {
-  return status === "delivered";
-}
-
-/** The single source of truth for whether a status move is allowed. */
-export function isLegalTransition(from: OrderStatus, to: OrderStatus): boolean {
-  if (from === to) return true;
-  return (
-    MAIN_NEXT[from] === to ||
-    (to === "cancelled" && canCancel(from)) ||
-    (to === "returned" && canReturn(from))
-  );
-}
-
-/** The statuses an order can move to from `from` — for the inline status picker. */
-export function legalMoves(from: OrderStatus): OrderStatus[] {
-  const moves: OrderStatus[] = [];
-  const forward = MAIN_NEXT[from];
-  if (forward) moves.push(forward);
-  if (canCancel(from)) moves.push("cancelled");
-  if (canReturn(from)) moves.push("returned");
-  return moves;
-}
+export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
+  pending: "Pending",
+  dispatched: "Dispatched",
+  delivered: "Delivered",
+};

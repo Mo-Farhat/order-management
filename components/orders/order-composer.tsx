@@ -21,6 +21,7 @@ type DiscountType = "none" | "flat" | "percent";
 export type ComposerInitial = {
   customer: { id: string | null; name: string; phone: string };
   deliveryAddress: string;
+  courier: string;
   items: Line[];
   deliveryFee: string;
   discountType: DiscountType;
@@ -55,6 +56,7 @@ export function OrderComposer({
   const [custName, setCustName] = useState(initial?.customer.name ?? "");
   const [custPhone, setCustPhone] = useState(initial?.customer.phone ?? "");
   const [address, setAddress] = useState(initial?.deliveryAddress ?? "");
+  const [courier, setCourier] = useState(initial?.courier ?? "");
   const [lines, setLines] = useState<Line[]>(initial?.items ?? []);
   const [deliveryFee, setDeliveryFee] = useState(
     initial?.deliveryFee ?? deliveryFeeDefault ?? "",
@@ -101,12 +103,13 @@ export function OrderComposer({
     address.trim().length >= 5 &&
     lines.length > 0;
 
-  function payload(confirm: boolean) {
+  function payload() {
     return JSON.stringify({
       customerId: initial?.customer.id || undefined,
       customerName: custName.trim(),
       customerPhone: custPhone.trim(),
       deliveryAddress: address.trim(),
+      courier: courier.trim() || undefined,
       items: lines,
       deliveryFee: deliveryFee || "",
       discountType,
@@ -115,7 +118,6 @@ export function OrderComposer({
       amountPaid: paymentStatus === "unpaid" ? "" : amountPaid || "",
       note: note.trim(),
       shareCode: initial?.shareCode,
-      confirm,
     });
   }
 
@@ -173,6 +175,18 @@ export function OrderComposer({
               rows={2}
               placeholder="Street, city, notes for the courier"
               className="rounded-lg border border-line bg-surface px-3 py-2 text-base outline-none focus:border-accent"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+              Courier <span className="normal-case text-muted/70">(optional)</span>
+            </span>
+            <input
+              value={courier}
+              onChange={(e) => setCourier(e.target.value)}
+              placeholder="e.g. Citypack, Pronto"
+              className={inputCls}
             />
           </label>
 
@@ -356,14 +370,10 @@ export function OrderComposer({
 
           <input type="hidden" name="payload" value="" id="order-payload" />
 
-          {mode === "new" ? (
-            <div className="flex gap-2">
-              <SubmitAs label="Save as draft" confirm={false} build={payload} className="flex-1 border border-line" />
-              <SubmitAs label="Confirm order" confirm build={payload} className="flex-1 bg-accent text-accent-fg" />
-            </div>
-          ) : (
-            <SubmitAs label="Save changes" confirm={false} build={payload} className="bg-accent text-accent-fg" />
-          )}
+          <SubmitBtn
+            label={mode === "new" ? "Create order" : "Save changes"}
+            build={payload}
+          />
         </section>
       )}
     </form>
@@ -379,25 +389,15 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SubmitAs({
-  label,
-  confirm,
-  build,
-  className = "",
-}: {
-  label: string;
-  confirm: boolean;
-  build: (confirm: boolean) => string;
-  className?: string;
-}) {
+function SubmitBtn({ label, build }: { label: string; build: () => string }) {
   return (
     <button
       type="submit"
       onClick={() => {
         const el = document.getElementById("order-payload") as HTMLInputElement | null;
-        if (el) el.value = build(confirm);
+        if (el) el.value = build();
       }}
-      className={`h-11 rounded-full px-5 font-mono text-xs font-semibold uppercase tracking-widest ${className}`}
+      className="h-11 rounded-full bg-accent px-5 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
     >
       {label}
     </button>

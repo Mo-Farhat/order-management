@@ -32,14 +32,25 @@ export const planStatusEnum = pgEnum("plan_status", [
   "cancelled",
 ]);
 
+// Order lifecycle. `draft/packed/shipped/delivered` are legacy values kept in
+// the type for historical `order_events` rows — the app only uses the four
+// below (see lib/pipeline.ts ORDER_STATUSES). Fulfilment progress is tracked
+// separately in `deliveryStatusEnum`.
 export const orderStatusEnum = pgEnum("order_status", [
   "draft",
   "confirmed",
   "packed",
   "shipped",
   "delivered",
+  "completed",
   "cancelled",
   "returned",
+]);
+
+export const deliveryStatusEnum = pgEnum("delivery_status", [
+  "pending",
+  "dispatched",
+  "delivered",
 ]);
 
 export const discountTypeEnum = pgEnum("discount_type", ["none", "flat", "percent"]);
@@ -239,7 +250,11 @@ export const orders = pgTable(
       .notNull()
       .references(() => customers.id, { onDelete: "restrict" }),
 
-    status: orderStatusEnum("status").notNull().default("draft"),
+    status: orderStatusEnum("status").notNull().default("confirmed"),
+    deliveryStatus: deliveryStatusEnum("delivery_status").notNull().default("pending"),
+    courier: text("courier"),
+    dispatchedAt: timestamp("dispatched_at", { withTimezone: true }),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }),
 
     // Money — all snapshot at their moment; editing a product later never
     // changes an existing order (FR-10).
@@ -450,5 +465,6 @@ export type OrderEvent = typeof orderEvents.$inferSelect;
 export type ShareCart = typeof shareCarts.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
+export type DeliveryStatus = (typeof deliveryStatusEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];

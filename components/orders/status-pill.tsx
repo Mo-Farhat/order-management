@@ -1,26 +1,51 @@
-import type { OrderStatus } from "@/db/schema";
+import type { OrderStatus, DeliveryStatus, PaymentStatus } from "@/db/schema";
 
-// Icon + label so status is legible without relying on colour (UX 03 note).
-const META: Record<OrderStatus, { label: string; icon: string; tone: string }> = {
-  draft: { label: "Draft", icon: "✎", tone: "border-line text-muted" },
-  confirmed: { label: "Confirmed", icon: "●", tone: "border-ink text-ink" },
-  packed: { label: "Packed", icon: "▣", tone: "border-ink text-ink" },
-  shipped: { label: "Shipped", icon: "➜", tone: "border-ink text-ink" },
-  delivered: { label: "Delivered", icon: "✓", tone: "border-ink bg-lime/40 text-ink" },
-  cancelled: { label: "Cancelled", icon: "✕", tone: "border-danger/50 text-danger" },
-  returned: { label: "Returned", icon: "↩", tone: "border-danger/50 text-danger" },
+const ORDER: Record<string, { label: string; tone: string }> = {
+  draft: { label: "Draft", tone: "border-line text-muted" },
+  confirmed: { label: "Confirmed", tone: "border-accent/40 text-ink" },
+  packed: { label: "Confirmed", tone: "border-accent/40 text-ink" },
+  shipped: { label: "Confirmed", tone: "border-accent/40 text-ink" },
+  delivered: { label: "Completed", tone: "border-accent/40 bg-accent-weak text-accent" },
+  completed: { label: "Completed", tone: "border-accent/40 bg-accent-weak text-accent" },
+  cancelled: { label: "Cancelled", tone: "border-danger/40 text-danger" },
+  returned: { label: "Returned", tone: "border-danger/40 text-danger" },
 };
 
-export function StatusPill({ status }: { status: OrderStatus }) {
-  const m = META[status];
+const DELIVERY: Record<DeliveryStatus, { label: string; tone: string }> = {
+  pending: { label: "Pending", tone: "border-line text-muted" },
+  dispatched: { label: "Dispatched", tone: "border-warn/50 text-warn" },
+  delivered: { label: "Delivered", tone: "border-accent/40 bg-accent-weak text-accent" },
+};
+
+const PAYMENT: Record<PaymentStatus, { label: string; tone: string }> = {
+  unpaid: { label: "Unpaid", tone: "border-line text-muted" },
+  partial: { label: "Partial", tone: "border-warn/50 text-warn" },
+  paid: { label: "Paid", tone: "border-accent/40 bg-accent-weak text-accent" },
+};
+
+function Pill({ label, tone }: { label: string; tone: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ${m.tone}`}
+      className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ${tone}`}
     >
-      <span aria-hidden>{m.icon}</span>
-      {m.label}
+      {label}
     </span>
   );
+}
+
+export function StatusPill({ status }: { status: OrderStatus }) {
+  const m = ORDER[status] ?? ORDER.confirmed;
+  return <Pill label={m.label} tone={m.tone} />;
+}
+
+export function DeliveryPill({ status }: { status: DeliveryStatus }) {
+  const m = DELIVERY[status];
+  return <Pill label={m.label} tone={m.tone} />;
+}
+
+export function PaymentPill({ status }: { status: PaymentStatus }) {
+  const m = PAYMENT[status];
+  return <Pill label={m.label} tone={m.tone} />;
 }
 
 export function relativeTime(date: Date): string {

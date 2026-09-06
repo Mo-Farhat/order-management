@@ -1,71 +1,76 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { legalMoves } from "@/lib/pipeline";
-import { setOrderStatusAction } from "@/app/actions/orders";
-import type { OrderStatus } from "@/db/schema";
+import {
+  ORDER_STATUSES,
+  DELIVERY_STATUSES,
+  ORDER_STATUS_LABEL,
+  DELIVERY_STATUS_LABEL,
+} from "@/lib/pipeline";
+import { setOrderStatusAction, setDeliveryStatusAction } from "@/app/actions/orders";
+import type { OrderStatus, DeliveryStatus } from "@/db/schema";
 
-const LABEL: Record<OrderStatus, string> = {
-  draft: "Draft",
-  confirmed: "Confirmed",
-  packed: "Packed",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-  returned: "Returned",
+type Kind = "order" | "delivery";
+
+const TONE: Record<string, string> = {
+  confirmed: "border-accent/40 text-ink",
+  completed: "border-accent/40 bg-accent-weak text-accent",
+  cancelled: "border-danger/40 text-danger",
+  returned: "border-danger/40 text-danger",
+  pending: "border-line text-muted",
+  dispatched: "border-warn/50 text-warn",
+  delivered: "border-accent/40 bg-accent-weak text-accent",
 };
 
-const TONE: Record<OrderStatus, string> = {
-  draft: "text-muted border-line",
-  confirmed: "text-ink border-accent/50",
-  packed: "text-ink border-accent/50",
-  shipped: "text-ink border-accent/50",
-  delivered: "text-accent border-accent/50 bg-accent-weak",
-  cancelled: "text-danger border-danger/40",
-  returned: "text-danger border-danger/40",
-};
-
-export function OrderStatusSelect({
+export function StatusSelect({
   orderId,
-  status,
+  kind,
+  value,
+  onDone,
 }: {
   orderId: string;
-  status: OrderStatus;
+  kind: Kind;
+  value: string;
+  onDone?: () => void;
 }) {
   const [pending, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
-  const moves = legalMoves(status);
 
-  if (moves.length === 0) {
-    return (
-      <span
-        className={`inline-flex rounded-md border px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide ${TONE[status]}`}
-      >
-        {LABEL[status]}
-      </span>
-    );
-  }
+  const options =
+    kind === "order"
+      ? ORDER_STATUSES.map((s) => [s, ORDER_STATUS_LABEL[s as OrderStatus]] as const)
+      : DELIVERY_STATUSES.map((s) => [s, DELIVERY_STATUS_LABEL[s as DeliveryStatus]] as const);
+
+  // legacy order statuses (packed/shipped/…) still show — normalise to Confirmed
+  const current = kind === "order" && !ORDER_STATUSES.includes(value as OrderStatus)
+    ? "confirmed"
+    : value;
 
   return (
     <div className="flex flex-col gap-0.5">
       <select
-        value={status}
+        value={current}
         disabled={pending}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => {
-          const to = e.target.value as OrderStatus;
-          if (to === status) return;
+          const to = e.target.value;
+          if (to === current) return;
           start(async () => {
-            const res = await setOrderStatusAction(orderId, to);
+            const res =
+              kind === "order"
+                ? await setOrderStatusAction(orderId, to)
+                : await setDeliveryStatusAction(orderId, to);
             setErr(res?.error ?? null);
+            if (!res?.error) onDone?.();
           });
         }}
-        className={`rounded-md border bg-card px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide outline-none focus:border-accent disabled:opacity-50 ${TONE[status]}`}
+        className={`rounded-md border bg-card px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide outline-none focus:border-accent disabled:opacity-50 ${
+          TONE[current] ?? "border-line"
+        }`}
       >
-        <option value={status}>{LABEL[status]}</option>
-        {moves.map((m) => (
-          <option key={m} value={m}>
-            → {LABEL[m]}
+        {options.map(([v, label]) => (
+          <option key={v} value={v}>
+            {label}
           </option>
         ))}
       </select>

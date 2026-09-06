@@ -141,11 +141,19 @@ export const orderDraftSchema = z.object({
     .trim()
     .min(5, { error: "Delivery address is required." })
     .max(500),
+  courier: z.string().trim().max(80).optional(),
   paymentStatus: z.enum(["unpaid", "partial", "paid"]).default("unpaid"),
   amountPaid: z.union([z.literal(""), money2]).optional(),
   note: z.string().trim().max(2000).optional(),
   shareCode: z.string().trim().max(12).optional(),
   confirm: z.boolean().default(false),
+});
+
+export const orderStatusUpdateSchema = z.object({
+  status: z.enum(["confirmed", "completed", "cancelled", "returned"]),
+});
+export const deliveryStatusUpdateSchema = z.object({
+  deliveryStatus: z.enum(["pending", "dispatched", "delivered"]),
 });
 
 export const paymentUpdateSchema = z.object({

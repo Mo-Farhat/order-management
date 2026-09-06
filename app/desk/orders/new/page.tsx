@@ -44,6 +44,7 @@ export default async function NewOrderPage({
       initial = {
         customer: { id: null, name: cart.customerName, phone: cart.customerPhone },
         deliveryAddress: cart.deliveryAddress,
+        courier: "",
         items,
         deliveryFee: "",
         discountType: "none",
