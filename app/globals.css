@@ -175,7 +175,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   font-weight: 600;
   white-space: nowrap;
   box-shadow: var(--btn-shadow);

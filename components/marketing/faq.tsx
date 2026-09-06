@@ -46,7 +46,7 @@ export function Faq() {
             >
               <span className="text-sm font-medium">{q}</span>
               <span
-                className={`grid size-6 shrink-0 place-items-center rounded-full border border-line text-muted transition-transform duration-300 ${
+                className={`grid size-6 shrink-0 place-items-center rounded-md border border-line text-muted transition-transform duration-300 ${
                   isOpen ? "rotate-45" : ""
                 }`}
               >

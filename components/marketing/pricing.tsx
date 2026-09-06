@@ -14,10 +14,10 @@ export function Pricing() {
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className="inline-flex rounded-full border border-line bg-card p-1 text-sm">
+      <div className="inline-flex rounded-md border border-line bg-card p-1 text-sm">
         <button
           onClick={() => setAnnual(false)}
-          className={`rounded-full px-4 py-1.5 font-medium transition-all duration-300 ${
+          className={`rounded px-4 py-1.5 font-medium transition-all duration-300 ${
             !annual ? "bg-accent text-accent-fg shadow-sm" : "text-muted hover:text-ink"
           }`}
         >
@@ -25,7 +25,7 @@ export function Pricing() {
         </button>
         <button
           onClick={() => setAnnual(true)}
-          className={`rounded-full px-4 py-1.5 font-medium transition-all duration-300 ${
+          className={`rounded px-4 py-1.5 font-medium transition-all duration-300 ${
             annual ? "bg-accent text-accent-fg shadow-sm" : "text-muted hover:text-ink"
           }`}
         >
