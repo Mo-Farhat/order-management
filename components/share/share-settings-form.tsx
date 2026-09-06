@@ -23,7 +23,7 @@ export function ShareSettingsForm({
   chosenCategories: string[] | null;
 }) {
   const [state, action] = useActionState(saveShareSettings, undefined);
-  const [color, setColor] = useState(accentColor || "#0f7b6c");
+  const [color, setColor] = useState(accentColor || "#1e40af");
 
   // ordered list of shown chips; unshown = allCategories not in `order`.
   // null = never configured → default to all; [] = deliberately none.

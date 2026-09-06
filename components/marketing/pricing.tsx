@@ -35,10 +35,8 @@ export function Pricing() {
 
       <div className="grid w-full max-w-3xl gap-5 sm:grid-cols-2">
         {/* Starter — the live plan */}
-        <div className="flex flex-col rounded-2xl border-2 border-accent bg-card p-6 shadow-[0_2px_20px_rgba(234,88,12,0.10)]">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
-            Starter
-          </p>
+        <div className="flex flex-col rounded-2xl border-2 border-accent bg-card p-6 shadow-[0_2px_24px_rgba(30,64,175,0.12)]">
+          <p className="mkt-eyebrow mkt-amber text-[11px]">Starter</p>
           <p className="mkt-serif mt-3 text-4xl">
             LKR {fmt(shown)}
             <span className="text-base font-normal text-muted">/mo</span>
@@ -71,9 +69,7 @@ export function Pricing() {
 
         {/* Growth — coming soon */}
         <div className="flex flex-col rounded-2xl border border-line bg-surface/60 p-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
-            Growth · coming soon
-          </p>
+          <p className="mkt-eyebrow text-[11px] text-muted">Growth · coming soon</p>
           <p className="mkt-serif mt-3 text-4xl text-muted">Later</p>
           <p className="mt-1 text-xs text-muted">For shops that outgrow Starter.</p>
           <ul className="mt-5 flex flex-col gap-2.5 text-sm text-muted">
@@ -96,7 +92,10 @@ export function Pricing() {
         </div>
       </div>
 
-      <p className="max-w-xl rounded-xl border border-ok/30 bg-ok/10 px-4 py-3 text-center text-sm">
+      <p
+        className="max-w-xl rounded-xl border px-4 py-3 text-center text-sm"
+        style={{ borderColor: "var(--amber)", background: "var(--amber-weak)" }}
+      >
         <strong>Running your storefront on {APP_NAME}?</strong> You get <strong>20% off</strong>{" "}
         when we build your full website — your catalog and branding carry straight over.
       </p>

@@ -6,7 +6,7 @@ import { Faq } from "@/components/marketing/faq";
 import { DashboardMock, PhoneStorefrontMock } from "@/components/marketing/mockups";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <p className="mkt-eyebrow text-[11px] text-accent">{children}</p>;
+  return <p className="mkt-eyebrow mkt-amber text-[11px]">{children}</p>;
 }
 
 const STEPS = [
@@ -123,7 +123,7 @@ export function Landing() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {STEPS.map((s) => (
               <div key={s.n} className="rounded-2xl border border-line bg-card p-6">
-                <span className="mkt-serif text-2xl text-accent">{s.n}</span>
+                <span className="mkt-serif mkt-amber text-2xl">{s.n}</span>
                 <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
                 <p className="mt-2 text-sm text-muted">{s.body}</p>
               </div>

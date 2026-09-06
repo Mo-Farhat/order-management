@@ -184,7 +184,7 @@ export const orderNoteSchema = z.object({
 export const shareSettingsSchema = z
   .object({
     accentColor: z
-      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #0f7b6c." })])
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #1e40af." })])
       .optional(),
     sharePolicyText: z.string().trim().max(500).optional().or(z.literal("")),
     whatsappNumber: z

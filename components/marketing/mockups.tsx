@@ -23,15 +23,13 @@ export function DashboardMock() {
 
       <div className="grid grid-cols-[128px_1fr] text-[11px]">
         {/* sidebar */}
-        <div className="hidden flex-col gap-1 border-r border-line bg-sidebar p-3 sm:flex">
-          <span className="mb-1 font-mono text-[9px] font-semibold uppercase tracking-widest text-sidebar-muted">
-            Pola
-          </span>
+        <div className="hidden flex-col gap-1 border-r border-line bg-surface p-3 sm:flex">
+          <span className="mkt-serif mb-1 text-sm text-ink">Pola</span>
           {["Dashboard", "Orders", "Catalog", "Storefront", "Settings"].map((x, i) => (
             <span
               key={x}
               className={`rounded px-2 py-1 ${
-                i === 0 ? "bg-sidebar-active text-sidebar-active-fg" : "text-sidebar-fg"
+                i === 0 ? "bg-accent-weak font-medium text-accent" : "text-muted"
               }`}
             >
               {x}

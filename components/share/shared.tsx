@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { StorefrontTenant } from "@/lib/share";
 
 export function accentVars(tenant: Pick<StorefrontTenant, "accentColor">): CSSProperties {
-  return { "--sf-accent": tenant.accentColor || "#0f7b6c" } as CSSProperties;
+  return { "--sf-accent": tenant.accentColor || "#1e40af" } as CSSProperties;
 }
 
 export function StorefrontHeader({

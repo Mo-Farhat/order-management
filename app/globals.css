@@ -65,23 +65,46 @@ body {
   font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* ---- Marketing site (/) ------------------------------------------------- *
- * Same palette as the app — orange accent, green for positive — but a soft
- * warm haze instead of the reference's blue sky. */
+/* ---- Customer-facing palette: "B2B Trust Blue" ------------------------- *
+ * Primary #1E40AF, amber accent #F59E0B, cool neutral #F8FAFC. Scoped to
+ * .mkt (marketing) and .sf-theme (public storefront) so the desk app keeps
+ * its orange system. */
+.mkt,
+.sf-theme {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --surface: #eef2f8;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: #e2e8f0;
+
+  --accent: #1e40af; /* primary — buttons, links, active borders */
+  --accent-fg: #ffffff;
+  --accent-weak: #eaf0ff;
+  --ok: #1e40af; /* "included" ticks read as primary, not a 3rd colour */
+
+  --amber: #f59e0b; /* accent — eyebrows, numerals, highlights */
+  --amber-weak: #fdf0dc;
+
+  background: var(--background);
+  color: var(--foreground);
+}
+
 .mkt-haze {
   background:
-    radial-gradient(60% 55% at 50% -10%, #ffe6d2 0%, rgba(255, 242, 232, 0) 60%),
-    radial-gradient(45% 40% at 85% 0%, #ffedd9 0%, rgba(255, 242, 232, 0) 55%),
-    radial-gradient(40% 45% at 10% 5%, #fdeadf 0%, rgba(255, 242, 232, 0) 55%),
+    radial-gradient(60% 55% at 50% -10%, #dbe6ff 0%, rgba(219, 230, 255, 0) 60%),
+    radial-gradient(45% 40% at 85% 0%, #e4ecff 0%, rgba(228, 236, 255, 0) 55%),
+    radial-gradient(40% 45% at 10% 5%, #e8f0ff 0%, rgba(232, 240, 255, 0) 55%),
     var(--background);
 }
 .mkt-haze-soft {
   background:
-    radial-gradient(50% 60% at 50% 100%, #fff2e8 0%, rgba(255, 242, 232, 0) 70%),
+    radial-gradient(50% 60% at 50% 100%, #e6edff 0%, rgba(230, 237, 255, 0) 70%),
     var(--background);
 }
 .mkt-cta-band {
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 55%, #fb923c 100%);
+  background: linear-gradient(135deg, #172c73 0%, #1e40af 55%, #2b57d6 100%);
 }
 .mkt-scroll {
   scroll-margin-top: 5rem;
@@ -92,6 +115,9 @@ body {
 .mkt {
   font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
+}
+.mkt-amber {
+  color: var(--amber);
 }
 .mkt h1,
 .mkt h2,
