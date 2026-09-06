@@ -5,12 +5,15 @@
 **Last updated:** 2026-09-05
 **Repo placement:** `/docs/PRD.md`
 
-> **Build note (2026-09-06):** Phases 1–3 built — auth/tenancy/RBAC, catalog
-> (FR-4–7), and the order desk (FR-8–14: order flow, fixed pipeline, timeline,
-> auto customers, board view, CSV export). Stack in §9 is resolved. Photo upload
-> needs Cloudflare R2 (GUIDE.md step 4a) — everything else works without it.
-> Setup and key handover: `/GUIDE.md`. Architecture: `/docs/architecture.md`.
-> Product name remains a placeholder ("Storefront Desk") — see §14.
+> **Build note (2026-09-06):** Phases 1–4 + 6 built — auth/tenancy/RBAC, catalog
+> (FR-4–7), order desk (FR-8–14), share link (FR-15–18), settings (business +
+> password), and the read API + upgrade banner (FR-22–23). RLS is now enforced on
+> the write path via a restricted `app_runtime` role. Deploy target is Cloudflare
+> Workers (`@opennextjs/cloudflare`, scaffolded). **Phase 5 (billing, FR-19–21)
+> is the remaining piece.** Photo upload needs Cloudflare R2 (GUIDE.md step 4a);
+> everything else runs without it. Setup / deploy / keys: `/GUIDE.md`. API
+> contract: `/docs/api.md`. Architecture: `/docs/architecture.md`. Product name
+> remains a placeholder ("Storefront Desk") — see §14.
 
 ---
 
@@ -186,6 +189,7 @@ These are unresolved and should not be assumed by anyone reading this PRD:
 ## 15. Related documents
 
 - `docs/ux/00-scope-overview.md` and `docs/ux/01`–`04` — screen-level UX specs
+- `docs/api.md` — the FR-22 read API contract for external storefronts
 - `design/Storefront Desk Mockups.dc.html` — exploratory Claude Design canvas (visual direction only, not a spec); `design/_ds/**` is its imported design system
 - `docs/architecture.md` — data model, tenancy, auth, and RBAC implementation notes
 - `GUIDE.md` — environment setup and the list of API keys / Cloudflare config to provide

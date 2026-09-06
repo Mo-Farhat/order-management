@@ -80,6 +80,7 @@ export default async function NewOrderPage({
         currency={tenant?.currency ?? ""}
         deliveryFeeDefault={tenant?.deliveryFeeDefault ?? null}
         initial={initial}
+        stockTracking={tenant?.stockTrackingEnabled ?? true}
       />
     </div>
   );

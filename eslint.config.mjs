@@ -15,6 +15,10 @@ const eslintConfig = defineConfig([
     // Imported design reference material — not part of the app build.
     "design/**",
     "drizzle/**",
+    // Cloudflare / OpenNext build output.
+    ".open-next/**",
+    ".wrangler/**",
+    "cloudflare-env.d.ts",
   ]),
 ]);
 

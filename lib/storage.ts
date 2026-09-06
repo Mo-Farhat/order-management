@@ -1,15 +1,15 @@
-import { PutObjectCommand, DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { s3Fetch, type S3Config } from "@/lib/s3-sigv4";
 
 /**
- * Object storage for product photos over the S3-compatible API.
+ * Object storage for product photos over the S3-compatible API, signed with a
+ * tiny SigV4 helper (no AWS SDK — keeps the Cloudflare Worker bundle small).
  *
- * Provider: **Cloudflare R2** (see GUIDE.md step 4a). The client is
- * provider-agnostic — any S3-compatible store works by repointing STORAGE_*
- * (endpoint, region, key/secret, bucket, public base URL).
+ * Provider: **Cloudflare R2** (see GUIDE.md step 4a). Provider-agnostic — repoint
+ * STORAGE_* (endpoint, region, key/secret, bucket, public base URL) at any
+ * S3-compatible store.
  *
  * If STORAGE_* isn't set, `isStorageConfigured()` is false and the catalog UI
- * hides photo upload — products still save without photos (FR-4 says "up to 6",
- * not "at least one").
+ * hides photo upload — products still save without photos.
  */
 
 const endpoint = process.env.STORAGE_ENDPOINT; // e.g. https://<accountid>.r2.cloudflarestorage.com
@@ -23,21 +23,19 @@ export function isStorageConfigured(): boolean {
   return Boolean(endpoint && accessKeyId && secretAccessKey && bucket && publicBaseUrl);
 }
 
-let client: S3Client | undefined;
-
-function getClient(): S3Client {
+function config(): S3Config {
   if (!isStorageConfigured()) {
     throw new Error(
       "Object storage is not configured. Set STORAGE_* in .env.local — see GUIDE.md step 4a.",
     );
   }
-  client ??= new S3Client({
+  return {
+    endpoint: endpoint!,
     region,
-    endpoint,
-    forcePathStyle: true, // works for R2; required by Supabase / MinIO
-    credentials: { accessKeyId: accessKeyId!, secretAccessKey: secretAccessKey! },
-  });
-  return client;
+    accessKeyId: accessKeyId!,
+    secretAccessKey: secretAccessKey!,
+    bucket: bucket!,
+  };
 }
 
 const ALLOWED = new Map<string, string>([
@@ -61,22 +59,19 @@ export async function uploadProductPhoto(
   if (file.size > MAX_PHOTO_BYTES) throw new Error("Each photo must be under 6 MB.");
 
   const key = `${tenantId}/products/${crypto.randomUUID()}.${ext}`;
-  const body = Buffer.from(await file.arrayBuffer());
+  const body = new Uint8Array(await file.arrayBuffer());
 
-  await getClient().send(
-    new PutObjectCommand({
-      Bucket: bucket!,
-      Key: key,
-      Body: body,
-      ContentType: file.type,
-      CacheControl: "public, max-age=31536000, immutable",
-    }),
-  );
-
+  const res = await s3Fetch(config(), "PUT", key, body, {
+    "content-type": file.type,
+    "cache-control": "public, max-age=31536000, immutable",
+  });
+  if (!res.ok) {
+    throw new Error(`Photo upload failed (${res.status}). Check your STORAGE_* settings.`);
+  }
   return { key };
 }
 
 export async function deleteObject(key: string): Promise<void> {
   if (!isStorageConfigured()) return;
-  await getClient().send(new DeleteObjectCommand({ Bucket: bucket!, Key: key }));
+  await s3Fetch(config(), "DELETE", key, undefined);
 }

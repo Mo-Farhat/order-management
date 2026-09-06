@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "storefront-desk",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true }
+  // Secrets (set with `wrangler secret put NAME`, not here):
+  //   DATABASE_URL, DATABASE_URL_RUNTIME, AUTH_SECRET,
+  //   EMAIL_SERVER_HOST, EMAIL_SERVER_PORT, EMAIL_SERVER_USER,
+  //   EMAIL_SERVER_PASSWORD, EMAIL_FROM,
+  //   STORAGE_ENDPOINT, STORAGE_REGION, STORAGE_ACCESS_KEY_ID,
+  //   STORAGE_SECRET_ACCESS_KEY, STORAGE_BUCKET, STORAGE_PUBLIC_BASE_URL
+  // Plain vars (safe to commit) go in "vars": { ... } — e.g. APP_NAME, AUTH_URL.
+}

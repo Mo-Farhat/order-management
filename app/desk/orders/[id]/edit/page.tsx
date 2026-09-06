@@ -50,6 +50,7 @@ export default async function EditOrderPage({
           photoUrl: p.photoUrl,
         }))}
         currency={tenant?.currency ?? ""}
+        stockTracking={tenant?.stockTrackingEnabled ?? true}
         action={editOrderAction.bind(null, id)}
         initial={{
           customer: {

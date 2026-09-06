@@ -16,11 +16,13 @@ export function NewOrderFlow({
   currency,
   deliveryFeeDefault,
   initial,
+  stockTracking = true,
 }: {
   products: Product[];
   currency: string;
   deliveryFeeDefault: string | null;
   initial?: ComposerInitial;
+  stockTracking?: boolean;
 }) {
   return (
     <OrderComposer
@@ -30,6 +32,7 @@ export function NewOrderFlow({
       deliveryFeeDefault={deliveryFeeDefault}
       action={createOrderAction}
       initial={initial}
+      stockTracking={stockTracking}
     />
   );
 }

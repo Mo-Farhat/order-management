@@ -35,6 +35,7 @@ export function OrderComposer({
   action,
   mode,
   initial,
+  stockTracking = true,
 }: {
   products: Product[];
   currency: string;
@@ -42,6 +43,7 @@ export function OrderComposer({
   action: (prev: OrderState, fd: FormData) => Promise<OrderState>;
   mode: "new" | "edit";
   initial?: ComposerInitial;
+  stockTracking?: boolean;
 }) {
   const [state, formAction] = useActionState<OrderState, FormData>(action, undefined);
   const [step, setStep] = useState<"customer" | "items" | "review">(
@@ -223,7 +225,7 @@ export function OrderComposer({
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {products.map((p) => {
               const q = qtyOf(p.id);
-              const out = p.stockQty <= 0;
+              const out = stockTracking && p.stockQty <= 0;
               return (
                 <div
                   key={p.id}
@@ -240,7 +242,7 @@ export function OrderComposer({
                     <span className="line-clamp-2 text-xs font-medium">{p.name}</span>
                     <span className="text-xs text-muted">
                       {currency} {p.price}
-                      {out ? " · out of stock" : ` · ${p.stockQty} left`}
+                      {stockTracking && (out ? " · out of stock" : ` · ${p.stockQty} left`)}
                     </span>
                   </button>
                   {q > 0 && (

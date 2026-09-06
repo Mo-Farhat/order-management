@@ -20,28 +20,26 @@ import { computeTotals, fromCents, toCents, type DiscountType } from "@/lib/mone
 import type { ActiveContext } from "@/lib/session";
 import type { OrderDraftInput } from "@/lib/validation";
 
-// --- Pipeline (FR-9) ---------------------------------------------------
+// --- Pipeline (FR-9) — pure logic lives in lib/pipeline.ts -------------
 
-export const MAIN_NEXT: Partial<Record<OrderStatus, OrderStatus>> = {
-  draft: "confirmed",
-  confirmed: "packed",
-  packed: "shipped",
-  shipped: "delivered",
-};
+export {
+  MAIN_NEXT,
+  TERMINAL,
+  NEEDS_ACTION,
+  canAdvance,
+  canCancel,
+  canReturn,
+  isLegalTransition,
+} from "@/lib/pipeline";
+import { MAIN_NEXT, TERMINAL, isLegalTransition } from "@/lib/pipeline";
 
-const CANCELLABLE: OrderStatus[] = ["draft", "confirmed", "packed", "shipped"];
-export const TERMINAL: OrderStatus[] = ["cancelled", "returned"];
-
-export const NEEDS_ACTION: OrderStatus[] = ["confirmed", "packed"];
-
-export function canAdvance(status: OrderStatus): boolean {
-  return status in MAIN_NEXT;
-}
-export function canCancel(status: OrderStatus): boolean {
-  return CANCELLABLE.includes(status);
-}
-export function canReturn(status: OrderStatus): boolean {
-  return status === "delivered";
+/** Whether this tenant decrements stock on confirm / restores it on cancel. */
+async function stockTrackingOn(tx: Tx, tenantId: string): Promise<boolean> {
+  const row = await tx.query.tenants.findFirst({
+    where: eq(tenants.id, tenantId),
+    columns: { stockTrackingEnabled: true },
+  });
+  return row?.stockTrackingEnabled ?? true;
 }
 
 // --- Reads -----------------------------------------------------------
@@ -330,6 +328,7 @@ export async function createOrder(
     const orderNumber = seq.orderNumber - 1;
 
     const status: OrderStatus = input.confirm ? "confirmed" : "draft";
+    const commitOnConfirm = input.confirm && (await stockTrackingOn(tx, ctx.tenantId));
 
     const [order] = await tx
       .insert(orders)
@@ -347,7 +346,7 @@ export async function createOrder(
         subtotal: fromCents(totals.subtotalCents),
         total: fromCents(totals.totalCents),
         note: input.note?.trim() || null,
-        stockCommitted: input.confirm,
+        stockCommitted: commitOnConfirm,
         createdBy: ctx.userId,
       })
       .returning();
@@ -373,7 +372,7 @@ export async function createOrder(
     });
 
     if (input.confirm) {
-      await commitStock(tx, ctx, order.id, input.items);
+      if (commitOnConfirm) await commitStock(tx, ctx, order.id, input.items);
       await tx.insert(orderEvents).values({
         tenantId: ctx.tenantId,
         orderId: order.id,
@@ -423,11 +422,7 @@ async function transition(
     const from = order.status;
     if (from === to) return;
 
-    const allowed =
-      MAIN_NEXT[from] === to ||
-      (to === "cancelled" && canCancel(from)) ||
-      (to === "returned" && canReturn(from));
-    if (!allowed) {
+    if (!isLegalTransition(from, to)) {
       throw new OrderTransitionError(`Can't move an order from ${from} to ${to}.`);
     }
 
@@ -437,7 +432,7 @@ async function transition(
       .from(orderItems)
       .where(eq(orderItems.orderId, id));
 
-    if (to === "confirmed" && !stockCommitted) {
+    if (to === "confirmed" && !stockCommitted && (await stockTrackingOn(tx, ctx.tenantId))) {
       await commitStock(
         tx,
         ctx,

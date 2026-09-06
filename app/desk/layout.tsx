@@ -4,7 +4,9 @@ import { tenants } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { APP_NAME } from "@/lib/constants";
 import { signOutAction } from "@/app/actions/session";
+import { upsellState } from "@/lib/upsell";
 import { DesktopSidebar, MobileNav, Breadcrumbs } from "@/components/desk/nav";
+import { UpsellBanner } from "@/components/desk/upsell-banner";
 
 export default async function DeskLayout({
   children,
@@ -12,7 +14,10 @@ export default async function DeskLayout({
   children: React.ReactNode;
 }) {
   const ctx = await requireActive();
-  const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
+  const [tenant, upsell] = await Promise.all([
+    db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
+    upsellState(ctx),
+  ]);
   const trial = tenant?.trialEndsAt
     ? `Trial ends ${new Date(tenant.trialEndsAt).toLocaleDateString()}`
     : null;
@@ -40,6 +45,8 @@ export default async function DeskLayout({
             </button>
           </form>
         </header>
+
+        {upsell.show && <UpsellBanner reason={upsell.reason} />}
 
         <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6">
           {children}

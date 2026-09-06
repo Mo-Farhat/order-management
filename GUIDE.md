@@ -116,15 +116,43 @@ account to enable R2 — it won't charge within the free limits.)
 
 Leave these unset and the app hides photo upload — products still save.
 
-## 4b. Hosting (Cloudflare Pages / Workers)
+## 4b. Hosting — Cloudflare Workers (OpenNext)
 
-Decision still open on Pages vs Workers for a Next 16 app. When we deploy:
+The repo is already scaffolded: `open-next.config.ts`, `wrangler.jsonc`, and
+`npm run cf:*` scripts. The adapter is `@opennextjs/cloudflare` (Pages'
+`next-on-pages` is deprecated). `npm run cf:preview` builds the Worker and runs
+it locally; `npm run build` is enough for CI/typecheck.
 
-- Connect the GitHub repo to Cloudflare Pages, **or** deploy via `@opennextjs/cloudflare`.
-- Add every `.env.local` value as a Pages/Workers environment variable
-  (`DATABASE_URL`, `DATABASE_URL_RUNTIME`, `AUTH_SECRET`, `AUTH_URL` = the real
-  domain, `EMAIL_*`, `STORAGE_*`, `APP_NAME`).
-- Point `desk.<yourdomain>` DNS at the deployment.
+**First deploy:**
+
+1. `npx wrangler login` (opens a browser; needs a Cloudflare account).
+2. Push secrets (once each — values from `.env.local`):
+
+   ```bash
+   for k in DATABASE_URL DATABASE_URL_RUNTIME AUTH_SECRET \
+            EMAIL_SERVER_HOST EMAIL_SERVER_PORT EMAIL_SERVER_USER \
+            EMAIL_SERVER_PASSWORD EMAIL_FROM \
+            STORAGE_ENDPOINT STORAGE_REGION STORAGE_ACCESS_KEY_ID \
+            STORAGE_SECRET_ACCESS_KEY STORAGE_BUCKET STORAGE_PUBLIC_BASE_URL; do
+     npx wrangler secret put "$k"
+   done
+   ```
+
+   Non-secret vars (`APP_NAME`, `AUTH_URL` = the real https origin) go in the
+   `"vars"` block of `wrangler.jsonc` — safe to commit.
+3. `npm run cf:deploy`.
+4. In the Cloudflare dashboard: **Workers → storefront-desk → Settings → Domains
+   & Routes** → add `desk.<yourdomain>` (and the apex/`www` if the marketing site
+   lives elsewhere). DNS records are created for you.
+5. Set `AUTH_URL` to that final `https://desk.<yourdomain>` and redeploy.
+
+**Free-plan note:** a Next 16 Worker bundle is ~4 MB gzipped, which is over the
+Workers **Free** plan limit (3 MB). If `cf:deploy` is rejected for size, the
+Workers **Paid** plan ($5/mo) raises it to 10 MB — reasonable for a product you
+charge for. (The bundle is mostly the Next runtime; the app's own code is small.)
+
+**Migrations** run from your machine against the production `DATABASE_URL`, not
+from the Worker: `npm run db:migrate && npm run db:rls` after each schema change.
 
 ### 4c. Domain
 
@@ -141,7 +169,7 @@ then everything uses the "Storefront Desk" placeholder and localhost.
 | **Now** | run `RUNTIME_DB_PASSWORD=… npm run db:rls` → `DATABASE_URL_RUNTIME` | Neon (step 1a) |
 | Soon | `STORAGE_*` | Cloudflare R2 (step 4a) |
 | Soon | `EMAIL_SERVER_*` + `EMAIL_FROM` | Resend (step 3) |
-| Deploy | Cloudflare account access + chosen domain | step 4b/4c |
+| Deploy | Cloudflare account (`wrangler login`) + chosen domain | step 4b/4c |
 
 Paste them into `.env.local`. Never commit that file (it's gitignored).
 
@@ -149,7 +177,7 @@ Paste them into `.env.local`. Never commit that file (it's gitignored).
 
 ## Known advisories
 
-`npm audit` reports issues in `drizzle-kit`'s bundled esbuild (dev-only, dev
-server) and in `nodemailer` via `@auth/core` (the `raw` message option — unused
-here). Both are transitive and upstream; no action needed for the pilot. Revisit
-at the Phase 5 (billing) hardening pass.
+`npm audit` reports issues in the bundled esbuild of `drizzle-kit` / `wrangler`
+(dev-only) and in `nodemailer` via `@auth/core` (the `raw` message option —
+unused here). All transitive and upstream; no action needed for the pilot.
+Revisit at the Phase 5 (billing) hardening pass.

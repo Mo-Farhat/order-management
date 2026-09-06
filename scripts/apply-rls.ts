@@ -59,6 +59,7 @@ const TENANT_TABLES = [
   "order_items",
   "order_events",
   "share_carts",
+  "api_keys",
 ];
 
 const scoped = (col: string) => `(

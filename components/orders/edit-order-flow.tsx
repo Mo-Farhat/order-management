@@ -16,12 +16,14 @@ export function EditOrderFlow({
   currency,
   action,
   initial,
+  stockTracking = true,
 }: {
   orderId: string;
   products: Product[];
   currency: string;
   action: (prev: OrderState, fd: FormData) => Promise<OrderState>;
   initial: ComposerInitial;
+  stockTracking?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -36,6 +38,7 @@ export function EditOrderFlow({
         deliveryFeeDefault={null}
         action={action}
         initial={initial}
+        stockTracking={stockTracking}
       />
     </div>
   );

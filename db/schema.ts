@@ -75,6 +75,9 @@ export const tenants = pgTable("tenants", {
   planStatus: planStatusEnum("plan_status").notNull().default("trialing"),
   trialEndsAt: timestamp("trial_ends_at", { mode: "date", withTimezone: true }),
 
+  // FR-23: when the owner last dismissed the "upgrade to a website" banner.
+  upsellDismissedAt: timestamp("upsell_dismissed_at", { withTimezone: true }),
+
   // Per-tenant human-readable order numbering (FR-8). Incremented in the
   // create-order transaction.
   nextOrderNumber: integer("next_order_number").notNull().default(1),
@@ -329,6 +332,33 @@ export const shareCarts = pgTable(
   ],
 );
 
+/**
+ * Scoped, revocable read API keys (FR-22). Each key exposes /api/v1/products
+ * and /api/v1/catalog for one tenant so an external website can render a
+ * storefront without touching the Order Desk database directly. Only the
+ * SHA-256 hash is stored; the plaintext is shown once at creation.
+ */
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    keyPrefix: text("key_prefix").notNull(), // e.g. "sd_live_a1b2c3d4" — for display
+    hashedKey: text("hashed_key").notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("api_keys_hashed_uq").on(t.hashedKey),
+    index("api_keys_tenant_idx").on(t.tenantId, t.createdAt),
+  ],
+);
+
 // --- Audit log ----------------------------------------------------------
 
 export const auditLog = pgTable(
@@ -405,5 +435,6 @@ export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type OrderEvent = typeof orderEvents.$inferSelect;
 export type ShareCart = typeof shareCarts.$inferSelect;
+export type ApiKey = typeof apiKeys.$inferSelect;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];

@@ -81,8 +81,9 @@ export async function getStorefront(
       price: p.price,
       category: p.category,
       photoUrl: firstPhoto.get(p.id) ?? null,
-      stockState:
-        p.stockQty <= 0
+      stockState: !tenant.stockTrackingEnabled
+        ? "in"
+        : p.stockQty <= 0
           ? "out"
           : p.lowStockThreshold != null && p.stockQty <= p.lowStockThreshold
             ? "low"

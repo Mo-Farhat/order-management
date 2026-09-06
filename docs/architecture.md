@@ -15,6 +15,7 @@ app/                     App Router routes
   (auth)/                login, signup, verify-request  (public)
   onboarding/business/   business-basics step           (auth, no tenant yet)
   s/[slug]/              public storefront              (public, no auth)
+  api/v1/                read API — products, catalog   (public, bearer key)
   desk/                  the authed app                 (auth + tenant)
     layout.tsx           sidebar + topbar shell + CSV export links
     page.tsx             Dashboard (metrics, recent orders)
@@ -35,16 +36,24 @@ db/
   index.ts               `db` — neon-http client (no transactions)
   tenant.ts              `pooledDb()` + `withTenant()` — WebSocket pool, transactions
 lib/
+  pipeline.ts            pure order-status machine (isLegalTransition) — no DB
   rbac.ts                capability matrix + can()/assertCan()
+  api-keys.ts            /api/v1 key mint / hash / resolve
+  public-api.ts          catalog shape for the read API
+  s3-sigv4.ts            tiny AWS SigV4 signer (no SDK — small Worker bundle)
+  upsell.ts              FR-23 "time for a website" banner logic
   session.ts             requireUser / requireActive / requireCapability
   validation.ts          zod schemas
   email.ts               magic-link sender (console in dev)
   catalog.ts             product CRUD + stock ledger (server-only)
   csv-import.ts          CSV parse / preview / all-or-nothing commit
-  storage.ts             S3-compatible upload — Cloudflare R2 (no-op + UI hidden when unconfigured)
+  storage.ts             S3-compatible upload (SigV4, no SDK) — Cloudflare R2
   settings.ts (actions)  business settings + password change
 drizzle/                 generated migrations
-scripts/apply-rls.ts     installs row-level security policies
+scripts/apply-rls.ts     installs RLS policies + provisions the app_runtime role
+open-next.config.ts      Cloudflare Workers adapter (@opennextjs/cloudflare)
+wrangler.jsonc           Worker config (nodejs_compat, ASSETS binding)
+vitest.config.ts         unit tests — lib/**/*.test.ts
 ```
 
 ## Data model (Phase 1)
@@ -99,6 +108,28 @@ cents. Every write path runs in one `withTenant()` transaction:
 
 `app/desk/export/[entity]/route.ts` streams CSV for orders / customers /
 products (FR-14), tenant-scoped, no support request.
+
+**Stock tracking toggle** (`tenants.stock_tracking_enabled`, set in Settings):
+when off, `createOrder` / `transition` skip `commitStock`/`restoreStock` and
+leave `stock_committed = false`; the composer and storefront stop showing
+"X left" / out-of-stock. `lib/pipeline.ts` holds the transition rules as pure
+functions so they're unit-tested without a DB.
+
+### Read API — the website bridge (FR-22)
+
+`app/api/v1/{products,catalog}/route.ts` — public route handlers (Node runtime),
+authed by `Authorization: Bearer sd_live_…`. `lib/api-keys.ts` stores only the
+SHA-256 of each key (`api_keys` table), resolves the bearer token to a
+`tenantId`, and touches `last_used_at`. `lib/public-api.ts` builds the response
+(business + categories + products, `in_stock` boolean only — never quantities).
+Keys are minted / revoked from **Settings → API access** (owner-only). Full
+contract: `docs/api.md`.
+
+### Upgrade banner (FR-23)
+
+`lib/upsell.ts#upsellState` — shows the "ready for a website" banner in the desk
+layout once orders ≥ 50, products ≥ 30, or account age ≥ 90 days; dismissible
+(`tenants.upsell_dismissed_at`), reappears after 60 days, never blocks.
 
 ### Share link (Phase 4)
 
@@ -183,6 +214,9 @@ routing reads through a GUC-scoped pooled client is a follow-up.
 | `npm run db:generate` | generate a migration from `db/schema.ts` |
 | `npm run db:migrate` | apply migrations to `DATABASE_URL` |
 | `npm run db:push` | push schema directly (dev only) |
-| `npm run db:rls` | install/refresh RLS policies |
+| `npm run db:rls` | install/refresh RLS policies (`RUNTIME_DB_PASSWORD=…` also provisions `app_runtime`) |
 | `npm run db:studio` | Drizzle Studio |
+| `npm test` | unit tests (Vitest) |
+| `npm run cf:preview` | build + run the Cloudflare Worker locally |
+| `npm run cf:deploy` | build + deploy to Cloudflare Workers |
 | `npm run typecheck` / `npm run lint` | checks |
