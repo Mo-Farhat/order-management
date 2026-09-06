@@ -17,6 +17,7 @@ import {
   updateOrderNote,
 } from "@/lib/orders";
 import { orderDraftSchema, orderNoteSchema } from "@/lib/validation";
+import { markShareCartImported } from "@/lib/share";
 
 export type OrderState =
   | { error?: string; fieldErrors?: Record<string, string[]>; ok?: string }
@@ -68,7 +69,17 @@ export async function createOrderAction(
     return { error: err instanceof Error ? err.message : "Couldn't save the order." };
   }
 
+  if (parsed.data.shareCode) {
+    try {
+      await markShareCartImported(ctx, parsed.data.shareCode, result.id);
+    } catch {
+      /* non-fatal: the order is saved; the handoff row just stays "pending" */
+    }
+  }
+
   revalidatePath("/desk");
+  revalidatePath("/desk/orders");
+  revalidatePath("/desk/share");
   redirect(`/desk/orders/${result.id}`);
 }
 
@@ -107,6 +118,7 @@ async function runTransition(
     throw err;
   }
   revalidatePath("/desk");
+  revalidatePath("/desk/orders");
   revalidatePath(`/desk/orders/${orderId}`);
   return { ok: "Updated." };
 }

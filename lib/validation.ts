@@ -105,6 +105,7 @@ export const orderDraftSchema = z.object({
   discountType: z.enum(["none", "flat", "percent"]).default("none"),
   discountValue: z.union([z.literal(""), money2]).optional(),
   note: z.string().trim().max(2000).optional(),
+  shareCode: z.string().trim().max(12).optional(),
   confirm: z.boolean().default(false),
 });
 
@@ -112,6 +113,31 @@ export type OrderDraftInput = z.infer<typeof orderDraftSchema>;
 
 export const orderNoteSchema = z.object({
   note: z.string().trim().max(2000),
+});
+
+// --- Share link (Phase 4) -------------------------------------------
+
+export const shareSettingsSchema = z.object({
+  accentColor: z
+    .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #0f7b6c." })])
+    .optional(),
+  sharePolicyText: z.string().trim().max(500).optional().or(z.literal("")),
+  paused: z.boolean().default(false),
+});
+
+export const shareHandoffSchema = z.object({
+  slug: z.string().trim().min(1).max(60),
+  items: z
+    .array(
+      z.object({
+        productId: z.uuid(),
+        quantity: z.number().int().min(1).max(100000),
+      }),
+    )
+    .min(1, { error: "Add at least one item." }),
+  note: z.string().trim().max(500).optional(),
+  customerName: z.string().trim().max(80).optional(),
+  customerPhone: z.string().trim().max(24).optional(),
 });
 
 /** Turns "Aisha's Kitchen" into "aishas-kitchen". */

@@ -28,4 +28,8 @@ Order-and-catalog SaaS for DM-based sellers. Read `docs/PRD.md` first, then
 - **Every mutation** resolves `tenantId` first, then calls
   `requireCapability()` / `assertCan()` from `lib/rbac.ts`. Never trust the client.
 - `design/` is imported reference material — excluded from lint/tsc, don't edit.
+- **Desk UI:** every `/desk` screen uses the packaging in `components/desk/ui.tsx`
+  (`PageHeader`, `Card`, `StatCard`, `Table`/`Th`/`Td`, `Btn`/`BtnLink`) and the
+  palette tokens in `app/globals.css` (`accent`, `surface`, `card`, `line`,
+  `warn`, `sidebar*`). Don't hand-roll page headers or one-off button styles.
 - Product name is a placeholder (`lib/constants.ts` / `APP_NAME`) — see PRD §14.

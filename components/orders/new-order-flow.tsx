@@ -1,7 +1,7 @@
 "use client";
 
 import { createOrderAction } from "@/app/actions/orders";
-import { OrderComposer } from "@/components/orders/order-composer";
+import { OrderComposer, type ComposerInitial } from "@/components/orders/order-composer";
 
 type Product = {
   id: string;
@@ -15,10 +15,12 @@ export function NewOrderFlow({
   products,
   currency,
   deliveryFeeDefault,
+  initial,
 }: {
   products: Product[];
   currency: string;
   deliveryFeeDefault: string | null;
+  initial?: ComposerInitial;
 }) {
   return (
     <OrderComposer
@@ -27,6 +29,7 @@ export function NewOrderFlow({
       currency={currency}
       deliveryFeeDefault={deliveryFeeDefault}
       action={createOrderAction}
+      initial={initial}
     />
   );
 }

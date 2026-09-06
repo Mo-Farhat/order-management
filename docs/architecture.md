@@ -14,13 +14,16 @@ Auth.js v5, deployed to Cloudflare, no Prisma.
 app/                     App Router routes
   (auth)/                login, signup, verify-request  (public)
   onboarding/business/   business-basics step           (auth, no tenant yet)
+  s/[slug]/              public storefront              (public, no auth)
   desk/                  the authed app                 (auth + tenant)
-    layout.tsx           header + tab nav + CSV export links
-    page.tsx             order list (status tabs, search)
-    orders/              new-order flow, [id] detail, [id]/edit
+    layout.tsx           sidebar + topbar shell + CSV export links
+    page.tsx             Dashboard (metrics, recent orders)
+    orders/              order list, new-order flow, [id] detail, [id]/edit
     board/               pipeline board (tap-to-advance)
     catalog/             product list, new, [id] edit, import
+    share/               storefront settings (accent, pause, QR)
     export/[entity]/     CSV download route handler
+components/desk/         shell nav + shared UI packaging (Card, Table, Btn…)
   actions/               server actions (auth, onboarding, session, catalog, orders)
   api/auth/[...nextauth] Auth.js route handlers
 auth.ts                  full Auth.js config (Node runtime)
@@ -94,6 +97,36 @@ cents. Every write path runs in one `withTenant()` transaction:
 
 `app/desk/export/[entity]/route.ts` streams CSV for orders / customers /
 products (FR-14), tenant-scoped, no support request.
+
+### Share link (Phase 4)
+
+| Table | Purpose |
+|---|---|
+| `share_carts` | a public visitor's frozen selection + short reference `code` (unique per tenant). `status` ∈ pending/imported; `imported_order_id` set when the owner pulls it into a Draft. |
+
+`tenants` gains `accent_color` / `logo_key` / `share_policy_text` for the
+storefront's presentation (`public_page_paused` already existed).
+
+- **Public page** `app/s/[slug]/page.tsx` (matched by `proxy.ts` `/s/` prefix, no
+  auth). `lib/share.ts#getStorefront` returns the in-stock catalog (stock shown
+  as in/low/out, never a count) or a paused/empty placeholder.
+- **Handoff** — `components/share/storefront.tsx` builds a cart client-side; the
+  `startShareHandoff` server action (unauthenticated) freezes it into
+  `share_carts`, returns a `wa.me` deep-link body + reference code.
+- **Import** — `/desk/orders/new?code=XXXX` calls `getShareCartByCode`, pre-fills
+  the composer; `createOrderAction` marks the cart `imported` on success.
+- **Settings** — `app/desk/share/page.tsx`: accent colour, policy text, pause
+  toggle (`saveShareSettings`), copyable link + server-rendered QR (`qrcode`).
+
+## Desk shell (dashboard console)
+
+`app/desk/layout.tsx` is a sidebar + topbar shell (`components/desk/nav.tsx`):
+persistent nav rail (Dashboard / Orders / Catalog / Storefront), breadcrumbs,
+mobile drawer. `app/desk/page.tsx` is the **Dashboard** — stat tiles
+(`lib/dashboard.ts#dashboardMetrics`), pipeline counts, recent orders. The order
+list moved to `app/desk/orders/`. Shared packaging (PageHeader / Card / StatCard
+/ Table / Btn) lives in `components/desk/ui.tsx`. Palette: teal accent on a warm
+off-white workspace, deep-teal nav rail — `app/globals.css`.
 
 Roles: `owner` \| `staff` \| `viewer` (`role` enum). Plan status:
 `trialing` \| `active` \| `past_due` \| `read_only` \| `cancelled`.

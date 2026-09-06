@@ -17,12 +17,13 @@ type Product = {
 type Line = { productId: string; quantity: number };
 
 export type ComposerInitial = {
-  customer: { id: string; name: string; phone: string };
+  customer: { id: string | null; name: string; phone: string };
   items: Line[];
   deliveryFee: string;
   discountType: "none" | "flat" | "percent";
   discountValue: string;
   note: string;
+  shareCode?: string;
 };
 
 type Match = { id: string; name: string; phone: string; lastOrderAt: string | null };
@@ -112,7 +113,7 @@ export function OrderComposer({
 
   function payload(confirm: boolean) {
     return JSON.stringify({
-      customerId: customerId ?? undefined,
+      customerId: customerId || undefined,
       customerName: customerId ? undefined : custName.trim(),
       customerPhone: customerId ? undefined : custPhone.trim(),
       items: lines,
@@ -120,6 +121,7 @@ export function OrderComposer({
       discountType,
       discountValue: discountValue || "",
       note: note.trim(),
+      shareCode: initial?.shareCode,
       confirm,
     });
   }

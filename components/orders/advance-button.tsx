@@ -17,7 +17,7 @@ export function AdvanceButton({ orderId }: { orderId: string }) {
             setError(res?.error ?? null);
           })
         }
-        className="w-full rounded border border-line py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
+        className="mt-1 w-full rounded-lg border border-accent/40 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-accent hover:bg-accent-weak disabled:opacity-50"
       >
         {pending ? "…" : "Advance →"}
       </button>

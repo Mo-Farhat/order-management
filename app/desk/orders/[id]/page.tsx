@@ -5,18 +5,16 @@ import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { can } from "@/lib/rbac";
-import {
-  canAdvance,
-  canCancel,
-  canReturn,
-  getOrder,
-  TERMINAL,
-} from "@/lib/orders";
+import { canAdvance, canCancel, canReturn, getOrder, TERMINAL } from "@/lib/orders";
 import { StatusPill } from "@/components/orders/status-pill";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderNote } from "@/components/orders/order-note";
+import { PageHeader, Card } from "@/components/desk/ui";
 
-const EVENT_LABEL: Record<string, (e: { fromStatus: string | null; toStatus: string | null; note: string | null }) => string> = {
+const EVENT_LABEL: Record<
+  string,
+  (e: { fromStatus: string | null; toStatus: string | null; note: string | null }) => string
+> = {
   created: (e) => `Order created${e.toStatus === "confirmed" ? " and confirmed" : " as draft"}`,
   status: (e) => `${e.fromStatus ?? "?"} → ${e.toStatus ?? "?"}`,
   note: () => "Note updated",
@@ -44,100 +42,109 @@ export default async function OrderDetailPage({
     (order.status === "draft" || can(ctx.role, "order:edit_past_confirmed"));
 
   return (
-    <div className="flex flex-col gap-5">
-      <Link href="/desk" className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
-        ← Orders
-      </Link>
-
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-lg font-medium">Order #{order.orderNumber}</h2>
-          <p className="text-sm text-muted">
-            {new Date(order.createdAt).toLocaleString()}
-          </p>
-        </div>
-        <StatusPill status={order.status} />
-      </div>
-
-      {customer && (
-        <div className="rounded-lg border border-line bg-surface p-3 text-sm">
-          <p className="font-medium">{customer.name}</p>
-          <p className="text-muted">{customer.phone}</p>
-          <div className="mt-2 flex gap-3 text-xs">
-            <a href={`tel:${customer.phone}`} className="underline underline-offset-4">Call</a>
-            <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
-              WhatsApp
-            </a>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col divide-y divide-line rounded-lg border border-line text-sm">
-        {items.map((it) => (
-          <div key={it.id} className="flex justify-between gap-2 p-2">
-            <span className="flex-1 truncate">
-              {it.nameSnapshot} <span className="text-muted">× {it.quantity}</span>
-            </span>
-            <span className="text-muted">{currency} {it.priceSnapshot}</span>
-            <span className="w-24 text-right">{currency} {it.lineTotal}</span>
-          </div>
-        ))}
-        <div className="flex flex-col gap-0.5 p-2 text-muted">
-          <Row label="Subtotal" value={`${currency} ${order.subtotal}`} />
-          {order.discountType !== "none" && (
-            <Row
-              label={`Discount (${order.discountType === "percent" ? `${order.discountValue}%` : "flat"})`}
-              value=""
-            />
-          )}
-          {Number(order.deliveryFee) > 0 && (
-            <Row label="Delivery" value={`${currency} ${order.deliveryFee}`} />
-          )}
-          <div className="mt-1 flex justify-between border-t border-line pt-1 font-medium text-ink">
-            <span>Total</span>
-            <span>{currency} {order.total}</span>
-          </div>
-        </div>
-      </div>
-
-      <OrderActions
-        orderId={order.id}
-        status={order.status}
-        canAdvance={canAdvance(order.status) && can(ctx.role, "order:advance")}
-        canCancel={canCancel(order.status) && can(ctx.role, "order:advance")}
-        canReturn={canReturn(order.status) && can(ctx.role, "order:advance")}
+    <>
+      <PageHeader
+        title={`Order #${order.orderNumber}`}
+        subtitle={new Date(order.createdAt).toLocaleString()}
+        actions={
+          <>
+            <StatusPill status={order.status} />
+            {editable && (
+              <Link
+                href={`/desk/orders/${order.id}/edit`}
+                className="text-xs text-accent hover:underline"
+              >
+                Edit items &amp; fees
+              </Link>
+            )}
+          </>
+        }
       />
 
-      {editable && (
-        <Link
-          href={`/desk/orders/${order.id}/edit`}
-          className="self-start text-xs text-muted underline underline-offset-4"
-        >
-          Edit items &amp; fees
-        </Link>
-      )}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          <Card title="Items" bodyClassName="p-0">
+            <div className="divide-y divide-line text-sm">
+              {items.map((it) => (
+                <div key={it.id} className="flex justify-between gap-2 px-4 py-3">
+                  <span className="flex-1 truncate">
+                    {it.nameSnapshot} <span className="text-muted">× {it.quantity}</span>
+                  </span>
+                  <span className="text-muted">{currency} {it.priceSnapshot}</span>
+                  <span className="w-24 text-right tabular-nums">{currency} {it.lineTotal}</span>
+                </div>
+              ))}
+              <div className="flex flex-col gap-0.5 px-4 py-3 text-muted">
+                <Row label="Subtotal" value={`${currency} ${order.subtotal}`} />
+                {order.discountType !== "none" && (
+                  <Row
+                    label={`Discount (${order.discountType === "percent" ? `${order.discountValue}%` : "flat"})`}
+                    value=""
+                  />
+                )}
+                {Number(order.deliveryFee) > 0 && (
+                  <Row label="Delivery" value={`${currency} ${order.deliveryFee}`} />
+                )}
+                <div className="mt-1 flex justify-between border-t border-line pt-2 font-semibold text-ink">
+                  <span>Total</span>
+                  <span className="tabular-nums">{currency} {order.total}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
 
-      <OrderNote orderId={order.id} note={order.note ?? ""} />
+          <Card title="Actions">
+            <OrderActions
+              orderId={order.id}
+              status={order.status}
+              canAdvance={canAdvance(order.status) && can(ctx.role, "order:advance")}
+              canCancel={canCancel(order.status) && can(ctx.role, "order:advance")}
+              canReturn={canReturn(order.status) && can(ctx.role, "order:advance")}
+            />
+          </Card>
 
-      <section className="flex flex-col gap-2">
-        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
-          Timeline
-        </span>
-        <ul className="flex flex-col gap-2 text-xs">
-          {events.map((e) => (
-            <li key={e.id} className="flex justify-between gap-3 border-b border-line pb-2">
-              <span>
-                {(EVENT_LABEL[e.kind]?.(e) ?? e.kind)}
-                {e.note ? ` — ${e.note}` : ""}
-              </span>
-              <span className="shrink-0 text-muted">
-                {new Date(e.createdAt).toLocaleString()}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
+          <Card title="Note">
+            <OrderNote orderId={order.id} note={order.note ?? ""} />
+          </Card>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {customer && (
+            <Card title="Customer">
+              <p className="font-medium">{customer.name}</p>
+              <p className="text-sm text-muted">{customer.phone}</p>
+              <div className="mt-3 flex gap-3 text-xs">
+                <a href={`tel:${customer.phone}`} className="text-accent underline underline-offset-4">
+                  Call
+                </a>
+                <a
+                  href={`https://wa.me/${wa}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-accent underline underline-offset-4"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </Card>
+          )}
+
+          <Card title="Timeline" bodyClassName="p-0">
+            <ul className="divide-y divide-line text-xs">
+              {events.map((e) => (
+                <li key={e.id} className="flex flex-col gap-0.5 px-4 py-3">
+                  <span>
+                    {EVENT_LABEL[e.kind]?.(e) ?? e.kind}
+                    {e.note ? ` — ${e.note}` : ""}
+                  </span>
+                  <span className="text-muted">{new Date(e.createdAt).toLocaleString()}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </div>
+      </div>
+    </>
   );
 }
 

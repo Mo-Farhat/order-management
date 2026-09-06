@@ -66,6 +66,10 @@ export const tenants = pgTable("tenants", {
   stockTrackingEnabled: boolean("stock_tracking_enabled").notNull().default(true),
   deliveryFeeDefault: numeric("delivery_fee_default", { precision: 12, scale: 2 }),
   publicPagePaused: boolean("public_page_paused").notNull().default(false),
+  // Public share-link presentation (Phase 4, FR-15–18).
+  accentColor: text("accent_color"),
+  logoKey: text("logo_key"),
+  sharePolicyText: text("share_policy_text"),
 
   // Billing (schema now, UI in Phase 5).
   planStatus: planStatusEnum("plan_status").notNull().default("trialing"),
@@ -294,6 +298,37 @@ export const orderEvents = pgTable(
   (t) => [index("order_events_order_idx").on(t.orderId, t.createdAt)],
 );
 
+/**
+ * Share-link handoff (Phase 4, FR-15–18). When a public visitor taps
+ * "Order on WhatsApp", their selection is frozen here with a short reference
+ * code. The owner pastes that code into the new-order flow to pull the lines
+ * into a Draft. No customer account, no payment — this is the bridge only.
+ */
+export const shareCarts = pgTable(
+  "share_carts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    code: text("code").notNull(),
+    items: jsonb("items").notNull().$type<
+      { productId: string; nameSnapshot: string; priceSnapshot: string; quantity: number }[]
+    >(),
+    note: text("note"),
+    customerName: text("customer_name"),
+    customerPhone: text("customer_phone"),
+    subtotal: numeric("subtotal", { precision: 12, scale: 2 }).notNull().default("0"),
+    status: text("status").notNull().default("pending"), // "pending" | "imported"
+    importedOrderId: uuid("imported_order_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("share_carts_tenant_code_uq").on(t.tenantId, t.code),
+    index("share_carts_tenant_idx").on(t.tenantId, t.createdAt),
+  ],
+);
+
 // --- Audit log ----------------------------------------------------------
 
 export const auditLog = pgTable(
@@ -369,5 +404,6 @@ export type Customer = typeof customers.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type OrderEvent = typeof orderEvents.$inferSelect;
+export type ShareCart = typeof shareCarts.$inferSelect;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];

@@ -1,45 +1,83 @@
 @import "tailwindcss";
 
 /*
- * Palette borrowed loosely from the exploratory Forty Pixels mockups
- * (design/_ds/.../_ds_bundle.css): paper ground, ink text, a single lime accent.
- * Not a 1:1 implementation of those artboards — just a consistent, restrained base.
+ * Palette: a calm teal-forward admin console.
+ * Deep teal navigation rail, warm off-white workspace, a single teal accent
+ * for primary actions and links, amber for "new / attention", clay-red for
+ * destructive. Tuned against the OrderCast reference (docs/ux, image.png).
  */
 :root {
-  --background: #f1f0eb;
-  --foreground: #181a19;
-  --paper: #f1f0eb;
-  --surface: #fafaf7;
-  --ink: #181a19;
-  --muted: #6b6d67;
-  --line: #d9d8d2;
-  --lime: #b9ff66;
-  --danger: #b23c3c;
+  --background: #eaeeec;
+  --foreground: #14201d;
+
+  --paper: #ffffff;   /* cards / raised surfaces */
+  --card: #ffffff;
+  --surface: #f4f6f5; /* inputs, insets, muted panels */
+  --ink: #14201d;
+  --muted: #5c6a65;
+  --line: #dde3e0;
+
+  --accent: #0f7b6c;
+  --accent-fg: #ffffff;
+  --accent-weak: #e3f1ee;
+
+  --lime: #7fd4c4;    /* legacy token — now a soft teal tint */
+  --warn: #c9791f;
+  --ok: #0f7b6c;
+  --danger: #b3402f;
+
+  --sidebar: #0c3b37;
+  --sidebar-fg: #d9e7e3;
+  --sidebar-muted: #7ba39c;
+  --sidebar-active: #16514a;
+  --sidebar-active-fg: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-paper: var(--paper);
+  --color-card: var(--card);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-weak: var(--accent-weak);
   --color-lime: var(--lime);
+  --color-warn: var(--warn);
+  --color-ok: var(--ok);
   --color-danger: var(--danger);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #16150f;
-    --foreground: #ededea;
-    --paper: #16150f;
-    --surface: #201f1d;
-    --ink: #ededea;
-    --muted: #a3a29b;
-    --line: #33322d;
+    --background: #0e1614;
+    --foreground: #e6edea;
+    --paper: #16211e;
+    --card: #16211e;
+    --surface: #1c2825;
+    --ink: #e6edea;
+    --muted: #93a39d;
+    --line: #2b3a36;
+    --accent: #3bb7a3;
+    --accent-fg: #05221d;
+    --accent-weak: #14322d;
+    --lime: #2f7367;
+    --warn: #d8933f;
+    --danger: #d4695a;
+    --sidebar: #0a2f2c;
+    --sidebar-fg: #cfe0db;
+    --sidebar-muted: #6f938c;
+    --sidebar-active: #124842;
   }
 }
 
