@@ -19,7 +19,8 @@ app/                     App Router routes
   desk/                  the authed app                 (auth + tenant)
     layout.tsx           sidebar + topbar shell + CSV export links
     page.tsx             Dashboard (metrics, recent orders)
-    orders/              order list (inline status), new-order flow, [id] detail, [id]/edit
+    orders/              filterable list + modal, new-order flow, [id] detail, [id]/edit
+  (print)/invoice/[id]/  print-optimised invoice (outside the desk shell)
     catalog/             product list, new, [id] edit, import
     share/               storefront settings (WhatsApp #, accent, category chips, pause, QR)
     settings/            business settings + change password
@@ -35,7 +36,7 @@ db/
   index.ts               `db` — neon-http client (no transactions)
   tenant.ts              `pooledDb()` + `withTenant()` — WebSocket pool, transactions
 lib/
-  pipeline.ts            pure order-status machine (isLegalTransition) — no DB
+  pipeline.ts            pure status model (ORDER/DELIVERY_STATUSES, shouldHoldStock) — no DB
   rbac.ts                capability matrix + can()/assertCan()
   api-keys.ts            /api/v1 key mint / hash / resolve
   public-api.ts          catalog shape for the read API
@@ -86,37 +87,43 @@ movement — archive instead.
 | Table | Purpose |
 |---|---|
 | `customers` | created automatically inside `createOrder` (FR-13). Name, phone and delivery address are **required** to place an order (internal and storefront); `phone` stays nullable in the schema (legacy rows) and dedupes by `(tenant, phone)` when present. |
-| `orders` | per-tenant `order_number`, status enum, money columns all snapshot, `stock_committed` flag, plus `delivery_address`, `payment_status` (unpaid/partial/paid) and `amount_paid`. |
+| `orders` | per-tenant `order_number`; three independent status axes; money columns snapshot; `stock_committed` flag; `delivery_address`, `courier`, `dispatched_at`, `delivered_at`, `amount_paid`. |
 | `order_items` | `name_snapshot` + `price_snapshot` + qty + `line_total` — frozen at create/edit time (FR-10). |
-| `order_events` | append-only timeline: `kind` ∈ created/status/note/edited (FR-11). |
+| `order_events` | append-only timeline: `kind` ∈ created / status / delivery / payment / note / edited. |
 
-`lib/orders.ts` is the engine. `lib/money.ts` does all arithmetic in integer
-cents. Every write path runs in one `withTenant()` transaction:
+**Three status axes** (migrations 0007 + 0008 split the old pipeline):
 
-- **createOrder** — resolve/create customer → price items from the live catalog →
-  allocate order number → insert order + items + `created` event → if `confirm`,
-  decrement stock (`order_confirmed` movements) and set `stock_committed`.
-- **pipeline** (`advanceOrder` / `moveOrder` / `cancelOrder` / `returnOrder`) —
-  legal moves are `MAIN_NEXT[from] === to`, `to === cancelled && from ∈
-  {draft…shipped}`, or `to === returned && from === delivered`; anything else
-  throws `OrderTransitionError`. The **orders list** has an inline status
-  `<select>` per row (`components/orders/order-status-select.tsx` +
-  `setOrderStatusAction`) offering exactly `legalMoves(status)` — there is no
-  separate board view. Entering Confirmed commits stock; leaving to
-  Cancelled/Returned restores what was outstanding.
-- **updatePayment** — sets `payment_status` / `amount_paid` from the order
-  detail's Payment card; writes a timeline note.
-- **editOrder** — owner-only past Draft (FR-12); reprices, and if the order was
-  stock-committed it restores then re-commits so the ledger stays correct.
+| Axis | Values | Field |
+|---|---|---|
+| Order status | Confirmed · Completed · Cancelled · Returned (free choice, no Draft) | `status` |
+| Delivery status | Pending → Dispatched → Delivered | `delivery_status` |
+| Payment status | Unpaid · Partial · Paid (+ `amount_paid`; balance = total − paid) | `payment_status` |
+
+`lib/pipeline.ts` is pure: `ORDER_STATUSES`, `DELIVERY_STATUSES`,
+`shouldHoldStock(status)` (Confirmed/Completed hold stock; Cancelled/Returned
+release it), validators, labels (legacy enum values fold to a current label).
+
+`lib/orders.ts` — every write in one `withTenant()` transaction:
+- **createOrder** — resolve customer → price from live catalog → allocate
+  number → insert as **Confirmed** and commit stock immediately (if tracking on).
+- **setOrderStatus** — free choice among the four; reconciles stock via the hold
+  rule. **setDeliveryStatus** — stamps `dispatched_at` / `delivered_at`.
+  **setCourier**, **updatePayment**, **updateOrderNote**, **editOrder**
+  (blocked when Cancelled/Returned; owner-only once Completed).
+- **getOrderDetail** returns a serialisable DTO for the modal / invoice.
+
+UI: `app/desk/orders` is a wide (`max-w-7xl`) filterable table
+(`order-filters.tsx` → URL params: search, status, delivery, payment, date
+range). Each row has two inline `<select>`s (delivery + order status,
+`order-status-select.tsx`); clicking a row opens `order-modal.tsx` →
+`order-detail-body.tsx` (shared with the full page `/desk/orders/[id]`).
+`/invoice/[id]` is a print-optimised route outside the desk shell.
 
 `app/desk/export/[entity]/route.ts` streams CSV for orders / customers /
-products (FR-14), tenant-scoped, no support request.
+products (FR-14).
 
-**Stock tracking toggle** (`tenants.stock_tracking_enabled`, set in Settings):
-when off, `createOrder` / `transition` skip `commitStock`/`restoreStock` and
-leave `stock_committed = false`; the composer and storefront stop showing
-"X left" / out-of-stock. `lib/pipeline.ts` holds the transition rules as pure
-functions so they're unit-tested without a DB.
+**Stock tracking toggle** (`tenants.stock_tracking_enabled`): when off,
+`createOrder` / `setOrderStatus` skip `commitStock` / `restoreStock`.
 
 ### Read API — the website bridge (FR-22)
 
