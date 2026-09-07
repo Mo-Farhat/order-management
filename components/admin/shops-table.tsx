@@ -2,16 +2,9 @@
 
 import { useMemo, useState } from "react";
 import type { ShopRow } from "@/lib/admin";
+import { PlanCell } from "@/components/admin/plan-cell";
 
 type SortKey = "name" | "createdAt" | "orders" | "gmv" | "lastOrderAt" | "customers";
-
-const PLAN_TONE: Record<string, string> = {
-  trialing: "text-warn",
-  active: "text-accent",
-  past_due: "text-danger",
-  read_only: "text-danger",
-  cancelled: "text-muted",
-};
 
 function nfmt(n: number) {
   return n >= 1_000_000
@@ -112,12 +105,11 @@ export function ShopsTable({ rows }: { rows: ShopRow[] }) {
                 </span>
               </td>
               <td className="px-3 py-2.5">
-                <span className={`font-mono text-[10px] uppercase tracking-wide ${PLAN_TONE[s.planStatus] ?? ""}`}>
-                  {s.planStatus.replace("_", " ")}
-                </span>
-                {s.planStatus === "trialing" && s.trialEndsAt && (
-                  <span className="block text-[10px] text-muted">ends {fmtDate(s.trialEndsAt)}</span>
-                )}
+                <PlanCell
+                  tenantId={s.id}
+                  planStatus={s.planStatus}
+                  trialEndsAt={s.trialEndsAt}
+                />
               </td>
               <td className="px-3 py-2.5 text-right text-xs text-muted">{fmtDate(s.createdAt)}</td>
               <td className="px-3 py-2.5 text-right tabular-nums">{s.orders}</td>

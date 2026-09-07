@@ -87,7 +87,10 @@ export default async function AdminPage({
           ))}
         </div>
         <p className="mt-2 text-xs text-muted">
-          Billing (Phase 5) isn&apos;t wired yet — everyone is on the 14-day trial.
+          No payment provider is wired yet — set a shop&apos;s status by hand in the
+          table below once they&apos;ve paid. Note that status is <strong>recorded, not
+          enforced</strong>: nothing in the app gates access on it, so a shop marked
+          read-only or cancelled still has full access until trial enforcement lands.
         </p>
       </Card>
 
