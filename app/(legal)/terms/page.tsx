@@ -96,7 +96,7 @@ export default function TermsPage() {
 
       <h2>11. Governing law</h2>
       <p>
-        These terms are governed by the laws of <strong>[jurisdiction — e.g. Sri Lanka]</strong>, and
+        These terms are governed by the laws of <strong>[jurisdiction]</strong>, and
         disputes are subject to the courts of that jurisdiction.
       </p>
 

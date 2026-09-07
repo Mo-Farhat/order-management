@@ -57,7 +57,7 @@ export function AuthShell({
         </div>
 
         <p className="text-xs text-white/55">
-          © {new Date().getFullYear()} {APP_NAME} · Made for sellers in Sri Lanka
+          © {new Date().getFullYear()} {APP_NAME} · Made for sellers who take orders in DMs
         </p>
       </aside>
 

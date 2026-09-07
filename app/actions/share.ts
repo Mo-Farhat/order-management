@@ -10,7 +10,6 @@ import { requireCapability } from "@/lib/session";
 import { shareHandoffSchema, shareSettingsSchema } from "@/lib/validation";
 import { createShareHandoff, type HandoffResult } from "@/lib/share";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { normalizePhone } from "@/lib/phone";
 
 export type ShareState =
   | { error?: string; fieldErrors?: Record<string, string[]>; ok?: string }
@@ -55,7 +54,7 @@ export async function saveShareSettings(
     .set({
       accentColor: parsed.data.accentColor || null,
       sharePolicyText: parsed.data.sharePolicyText || null,
-      whatsappNumber: normalizePhone(parsed.data.whatsappNumber) || parsed.data.whatsappNumber || null,
+      whatsappNumber: parsed.data.whatsappNumber?.trim() || null,
       instagramHandle: parsed.data.instagramHandle || null,
       // Store the array as-is: [] is a real choice ("no chips"), not "reset".
       storefrontCategories: parsed.data.storefrontCategories,

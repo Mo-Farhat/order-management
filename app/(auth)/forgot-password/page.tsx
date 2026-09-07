@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
           type="email"
           autoComplete="email"
           inputMode="email"
-          placeholder="you@business.lk"
+          placeholder="you@yourbusiness.com"
           required
           autoFocus
           errors={state?.fieldErrors?.email}

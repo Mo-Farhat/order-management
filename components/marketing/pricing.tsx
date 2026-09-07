@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { APP_NAME, PLAN_PRICE_LKR } from "@/lib/constants";
 
-const fmt = (n: number) => n.toLocaleString("en-LK");
+const fmt = (n: number) => n.toLocaleString("en-US");
 
 export function Pricing() {
   const [annual, setAnnual] = useState(false);

@@ -11,7 +11,6 @@ import { pooledDb } from "@/db/tenant";
 import { auditLog, memberships, tenants, users } from "@/db/schema";
 import { signupWithBusinessSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/password";
-import { normalizePhone } from "@/lib/phone";
 import { resolveSlug, trialEndsAt } from "@/lib/provisioning";
 
 export type FormState = {
@@ -53,12 +52,13 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
   }
 
   const email = parsed.data.email.trim().toLowerCase();
-  const whatsappNumber = normalizePhone(parsed.data.whatsappNumber);
-  if (!whatsappNumber || whatsappNumber.replace(/\D/g, "").length < 9) {
+  // Stored as typed so an explicit country code survives into the wa.me link.
+  const whatsappNumber = parsed.data.whatsappNumber.trim();
+  if (whatsappNumber.replace(/\D/g, "").length < 7) {
     return {
       fieldErrors: {
         whatsappNumber: [
-          "That doesn't look like a valid mobile number. Enter it like 077 123 4567 or +94 77 123 4567.",
+          "That doesn't look like a valid mobile number. Include your country code, e.g. +1 555 123 4567.",
         ],
       },
     };

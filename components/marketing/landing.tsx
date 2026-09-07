@@ -302,7 +302,7 @@ export function Landing() {
               © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
             </span>
             <span className="flex items-center gap-2">
-              Made for sellers in Sri Lanka
+              Made for sellers who take orders in DMs
               {SOCIALS.map(({ name, Logo }) => (
                 <Logo key={name} className="size-4 opacity-70" />
               ))}

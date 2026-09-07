@@ -14,12 +14,19 @@ import {
 } from "@/components/auth/fields";
 
 const CURRENCIES = [
-  { value: "LKR", label: "LKR — Sri Lankan rupee" },
-  { value: "USD", label: "USD — US dollar" },
-  { value: "GBP", label: "GBP — Pound sterling" },
-  { value: "EUR", label: "EUR — Euro" },
+  { value: "AED", label: "AED — UAE dirham" },
   { value: "AUD", label: "AUD — Australian dollar" },
+  { value: "CAD", label: "CAD — Canadian dollar" },
+  { value: "EUR", label: "EUR — Euro" },
+  { value: "GBP", label: "GBP — Pound sterling" },
   { value: "INR", label: "INR — Indian rupee" },
+  { value: "LKR", label: "LKR — Sri Lankan rupee" },
+  { value: "MYR", label: "MYR — Malaysian ringgit" },
+  { value: "NGN", label: "NGN — Nigerian naira" },
+  { value: "PKR", label: "PKR — Pakistani rupee" },
+  { value: "SGD", label: "SGD — Singapore dollar" },
+  { value: "USD", label: "USD — US dollar" },
+  { value: "ZAR", label: "ZAR — South African rand" },
 ];
 
 // Mirrors lib/validation#slugify closely enough for a live preview; the server
@@ -66,7 +73,7 @@ export default function SignupPage() {
               type="email"
               autoComplete="email"
               inputMode="email"
-              placeholder="you@business.lk"
+              placeholder="you@yourbusiness.com"
               required
               autoFocus
               errors={state?.fieldErrors?.email}
@@ -108,10 +115,10 @@ export default function SignupPage() {
               name="whatsappNumber"
               inputMode="tel"
               autoComplete="tel"
-              placeholder="077 123 4567"
+              placeholder="+1 555 123 4567"
               required
               maxLength={24}
-              hint="Where storefront orders reach you."
+              hint="Include your country code — that's how WhatsApp links work."
               errors={state?.fieldErrors?.whatsappNumber}
             />
           </Row>
@@ -146,7 +153,7 @@ export default function SignupPage() {
                 name="sharePolicyText"
                 rows={2}
                 maxLength={500}
-                placeholder="Island-wide delivery in 2–3 days. Bank transfer or cash on delivery."
+                placeholder="Delivery in 2–3 days. Bank transfer or cash on delivery."
                 errors={state?.fieldErrors?.sharePolicyText}
               />
             </Row>

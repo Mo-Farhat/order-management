@@ -8,7 +8,6 @@ import { pooledDb } from "@/db/tenant";
 import { auditLog, memberships, tenants } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { businessBasicsSchema } from "@/lib/validation";
-import { normalizePhone } from "@/lib/phone";
 import { resolveSlug, trialEndsAt } from "@/lib/provisioning";
 import type { FormState } from "@/app/actions/auth";
 
@@ -48,12 +47,13 @@ export async function saveBusinessBasics(
     return { fieldErrors };
   }
 
-  const whatsappNumber = normalizePhone(parsed.data.whatsappNumber);
-  if (!whatsappNumber || whatsappNumber.replace(/\D/g, "").length < 9) {
+  // Stored as typed so an explicit country code survives into the wa.me link.
+  const whatsappNumber = parsed.data.whatsappNumber.trim();
+  if (whatsappNumber.replace(/\D/g, "").length < 7) {
     return {
       fieldErrors: {
         whatsappNumber: [
-          "That doesn't look like a valid mobile number. Enter it like 077 123 4567 or +94 77 123 4567.",
+          "That doesn't look like a valid mobile number. Include your country code, e.g. +1 555 123 4567.",
         ],
       },
     };

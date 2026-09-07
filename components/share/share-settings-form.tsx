@@ -71,7 +71,7 @@ export function ShareSettingsForm({
           name="whatsappNumber"
           defaultValue={whatsappNumber}
           inputMode="tel"
-          placeholder="+94771234567"
+          placeholder="+15551234567"
           className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent sm:w-56"
         />
         <span className="text-xs text-muted">Storefront orders are sent here.</span>
@@ -174,7 +174,7 @@ export function ShareSettingsForm({
           defaultValue={sharePolicyText ?? ""}
           rows={3}
           maxLength={500}
-          placeholder="e.g. Colombo delivery within 2 days. Cash or bank transfer."
+          placeholder="e.g. Local delivery within 2 days. Cash or bank transfer."
           className="rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
         />
       </label>

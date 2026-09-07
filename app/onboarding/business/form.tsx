@@ -73,10 +73,10 @@ export function BusinessBasicsForm({ email }: { email: string }) {
           type="text"
           inputMode="tel"
           autoComplete="tel"
-          placeholder="077 123 4567"
+          placeholder="+1 555 123 4567"
           required
           maxLength={24}
-          hint="Where storefront orders reach you. Local (077…) or +94 77… both work."
+          hint="Where storefront orders reach you. Include your country code."
           errors={state?.fieldErrors?.whatsappNumber}
         />
 

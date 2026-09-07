@@ -162,7 +162,7 @@ export function OrderComposer({
                 value={custPhone}
                 onChange={(e) => setCustPhone(e.target.value)}
                 inputMode="tel"
-                placeholder="+94…"
+                placeholder="+1 555…"
                 disabled={lockCustomer}
                 className={inputCls}
               />
