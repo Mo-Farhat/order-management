@@ -46,10 +46,22 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
   });
 }
 
+/** Only allow same-origin relative paths as a post-login destination. */
+function safeNext(raw: string): string {
+  if (!raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) {
+    return "/desk";
+  }
+  return raw;
+}
+
 export async function loginWithPassword(_prev: FormState, formData: FormData): Promise<FormState> {
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "") || "/desk";
+  const next = safeNext(String(formData.get("next") ?? ""));
+
+  if (!email || !password) {
+    return { error: "Enter your email and password." };
+  }
 
   try {
     await signIn("credentials", { email, password, redirectTo: next });

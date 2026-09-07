@@ -15,7 +15,7 @@ import {
   Menu,
   type LucideIcon,
 } from "lucide-react";
-import { signOutAction } from "@/app/actions/session";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 type Group = { heading?: string; items: Item[] };
@@ -115,12 +115,10 @@ function SidebarFooter({ email, role }: { email?: string; role?: string }) {
           {role ? ` · ${role}` : ""}
         </p>
       )}
-      <form action={signOutAction}>
-        <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-fg transition-colors hover:bg-black/[0.04]">
-          <LogOut size={17} strokeWidth={2} className="text-sidebar-muted" />
-          Log out
-        </button>
-      </form>
+      <LogoutButton className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-fg transition-colors hover:bg-black/[0.04] disabled:opacity-60">
+        <LogOut size={17} strokeWidth={2} className="text-sidebar-muted" />
+        Log out
+      </LogoutButton>
     </div>
   );
 }

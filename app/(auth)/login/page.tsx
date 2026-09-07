@@ -4,7 +4,7 @@ import { Suspense, useActionState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { loginWithPassword, type FormState } from "@/app/actions/auth";
-import { Field, FormError, SubmitButton } from "@/components/form";
+import { AuthError, AuthField, AuthNotice, AuthSubmit } from "@/components/auth/fields";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -15,34 +15,49 @@ function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight">Log in</h1>
-        <p className="mt-1 text-sm text-muted">Back to your order desk.</p>
+        <h1 className="mkt-serif text-[1.75rem] text-ink">Welcome back</h1>
+        <p className="mt-1 text-sm text-muted">Log in to your order desk.</p>
       </div>
 
       {justReset && (
-        <p className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-sm text-ok">
-          Password updated. Log in with your new password.
-        </p>
+        <AuthNotice>Password updated. Log in with your new password.</AuthNotice>
       )}
 
       <form action={action} className="flex flex-col gap-4">
-        <FormError message={state?.error} />
+        <AuthError message={state?.error} />
         <input type="hidden" name="next" value={next} />
-        <Field label="Email" name="email" type="email" autoComplete="email" inputMode="email" required />
-        <Field label="Password" name="password" type="password" autoComplete="current-password" required />
-        <SubmitButton>Log in</SubmitButton>
-        <Link
-          href="/forgot-password"
-          className="self-start text-sm text-muted underline underline-offset-4"
-        >
-          Forgot your password?
-        </Link>
+        <AuthField
+          label="Email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          placeholder="you@business.lk"
+          required
+          autoFocus
+        />
+        <div className="flex flex-col gap-1.5">
+          <AuthField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+          />
+          <Link
+            href="/forgot-password"
+            className="self-end text-xs text-muted underline underline-offset-4 hover:text-ink"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+        <AuthSubmit>Log in</AuthSubmit>
       </form>
 
       <p className="text-sm text-muted">
         New here?{" "}
-        <Link href="/signup" className="text-ink underline underline-offset-4">
-          Start free
+        <Link href="/signup" className="font-medium text-accent underline-offset-4 hover:underline">
+          Create a free account
         </Link>
       </p>
     </div>

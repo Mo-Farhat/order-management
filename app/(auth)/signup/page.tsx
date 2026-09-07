@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { signup, type FormState } from "@/app/actions/auth";
-import { Field, FormError, SubmitButton } from "@/components/form";
+import { AuthError, AuthField, AuthSubmit } from "@/components/auth/fields";
 
 export default function SignupPage() {
   const [state, action] = useActionState<FormState, FormData>(signup, undefined);
@@ -11,24 +11,26 @@ export default function SignupPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight">Start free</h1>
+        <h1 className="mkt-serif text-[1.75rem] text-ink">Start free</h1>
         <p className="mt-1 text-sm text-muted">
-          Your DMs stop being your order book. 14 days free, no card.
+          Your storefront and order desk, set up in minutes. No card needed.
         </p>
       </div>
 
       <form action={action} className="flex flex-col gap-4">
-        <FormError message={state?.error} />
-        <Field
+        <AuthError message={state?.error} />
+        <AuthField
           label="Email"
           name="email"
           type="email"
           autoComplete="email"
           inputMode="email"
+          placeholder="you@business.lk"
           required
+          autoFocus
           errors={state?.fieldErrors?.email}
         />
-        <Field
+        <AuthField
           label="Password"
           name="password"
           type="password"
@@ -37,18 +39,24 @@ export default function SignupPage() {
           hint="At least 8 characters."
           errors={state?.fieldErrors?.password}
         />
-        <SubmitButton>Create account</SubmitButton>
+        <AuthSubmit>Create account</AuthSubmit>
       </form>
 
-      <p className="text-xs text-muted">
+      <p className="text-xs leading-relaxed text-muted">
         By creating an account you agree to our{" "}
-        <Link href="/terms" className="underline">Terms</Link> and{" "}
-        <Link href="/privacy" className="underline">Privacy Policy</Link>.
+        <Link href="/terms" className="underline underline-offset-2 hover:text-ink">
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-ink">
+          Privacy Policy
+        </Link>
+        .
       </p>
 
-      <p className="text-sm text-muted">
+      <p className="border-t border-line pt-4 text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="text-ink underline underline-offset-4">
+        <Link href="/login" className="font-medium text-accent underline-offset-4 hover:underline">
           Log in
         </Link>
       </p>

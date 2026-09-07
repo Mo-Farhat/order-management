@@ -163,6 +163,50 @@ body {
   }
 }
 
+/* ---- Auth split-screen ------------------------------------------------ */
+/* Deep-blue brand panel with soft "cloud" highlights. */
+.mkt-auth-aside {
+  background:
+    radial-gradient(75% 55% at 12% 8%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(65% 55% at 105% 105%, rgba(111, 151, 234, 0.55) 0%, rgba(111, 151, 234, 0) 60%),
+    linear-gradient(160deg, #142a70 0%, #1e40af 55%, #2b57d6 100%);
+}
+/* Pale cloud wash behind the form column. */
+.mkt-auth-bg {
+  background:
+    radial-gradient(70% 50% at 50% -15%, #dbe6ff 0%, rgba(219, 230, 255, 0) 62%),
+    radial-gradient(42% 38% at 92% 6%, #e6edff 0%, rgba(230, 237, 255, 0) 58%),
+    var(--background);
+}
+
+/* Auth form controls — marketing palette, blue focus ring. */
+.mkt-input {
+  width: 100%;
+  border-radius: 0.625rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0.625rem 0.75rem;
+  font-size: 1rem;
+  color: var(--ink);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.mkt-input::placeholder {
+  color: color-mix(in srgb, var(--muted) 65%, transparent);
+}
+.mkt-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.mkt-input[aria-invalid="true"] {
+  border-color: #b3402f;
+}
+.mkt-input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(179, 64, 47, 0.18);
+}
+
 /* ---- Detached floating nav ------------------------------------------------ */
 .mkt-nav {
   background: rgba(12, 22, 60, 0.72);

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { resetPassword } from "@/app/actions/password-reset";
 import type { FormState } from "@/app/actions/auth";
-import { Field, FormError, SubmitButton } from "@/components/form";
+import { AuthError, AuthField, AuthSubmit } from "@/components/auth/fields";
 
 function ResetForm() {
   const token = useSearchParams().get("token") ?? "";
@@ -14,9 +14,12 @@ function ResetForm() {
   if (!token) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-medium tracking-tight">Invalid link</h1>
+        <h1 className="mkt-serif text-[1.75rem] text-ink">Invalid link</h1>
         <p className="text-sm text-muted">This reset link is missing its token.</p>
-        <Link href="/forgot-password" className="text-sm text-accent underline underline-offset-4">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-medium text-accent underline-offset-4 hover:underline"
+        >
           Request a new one
         </Link>
       </div>
@@ -25,19 +28,21 @@ function ResetForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-medium tracking-tight">Choose a new password</h1>
+      <h1 className="mkt-serif text-[1.75rem] text-ink">Choose a new password</h1>
       <form action={action} className="flex flex-col gap-4">
-        <FormError message={state?.error} />
+        <AuthError message={state?.error} />
         <input type="hidden" name="token" value={token} />
-        <Field
+        <AuthField
           label="New password"
           name="password"
           type="password"
           autoComplete="new-password"
           required
+          autoFocus
+          hint="At least 8 characters."
           errors={state?.fieldErrors?.password}
         />
-        <Field
+        <AuthField
           label="Confirm new password"
           name="confirmPassword"
           type="password"
@@ -45,7 +50,7 @@ function ResetForm() {
           required
           errors={state?.fieldErrors?.confirmPassword}
         />
-        <SubmitButton>Set password</SubmitButton>
+        <AuthSubmit>Set password</AuthSubmit>
       </form>
       <p className="text-xs text-muted">
         Changing your password signs out every other device.
