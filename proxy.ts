@@ -30,7 +30,6 @@ const PUBLIC_PREFIXES = [
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
-  const hasTenant = !!req.auth?.user?.tenantId;
 
   const isPublic =
     pathname === "/" ||
@@ -39,9 +38,7 @@ export default auth((req) => {
   if (isPublic) {
     // Signed-in users don't need the auth screens.
     if (isLoggedIn && (pathname === "/login" || pathname === "/signup")) {
-      return NextResponse.redirect(
-        new URL(hasTenant ? "/desk" : "/onboarding/business", req.url),
-      );
+      return NextResponse.redirect(new URL("/desk", req.url));
     }
     return NextResponse.next();
   }
@@ -52,16 +49,15 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  // Signed in but hasn't finished onboarding → business basics.
-  if (!hasTenant && pathname !== "/onboarding/business") {
-    return NextResponse.redirect(new URL("/onboarding/business", req.url));
-  }
-
-  // Onboarding done → keep them out of the onboarding step.
-  if (hasTenant && pathname === "/onboarding/business") {
-    return NextResponse.redirect(new URL("/desk", req.url));
-  }
-
+  // Deliberately NOT gating on `tenantId` here. The edge can only read what's
+  // already in the JWT, and the only way to put a freshly-created tenantId
+  // there is a server-action cookie write — which doesn't survive on
+  // Cloudflare Workers. Gating here bounced users who had just finished
+  // onboarding straight back to it ("Continue does nothing").
+  //
+  // `requireActive()` (lib/session.ts) is the real gate: it runs in Node with
+  // DB access, and auth.ts's jwt callback re-resolves a null tenantId from the
+  // database on every request, so it always sees the truth.
   return NextResponse.next();
 });
 

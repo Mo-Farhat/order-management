@@ -7,35 +7,16 @@ import { db } from "@/db";
 import { pooledDb } from "@/db/tenant";
 import { auditLog, memberships, tenants } from "@/db/schema";
 import { requireUser } from "@/lib/session";
-import { businessBasicsSchema, slugify } from "@/lib/validation";
+import { businessBasicsSchema } from "@/lib/validation";
 import { normalizePhone } from "@/lib/phone";
+import { resolveSlug, trialEndsAt } from "@/lib/provisioning";
 import type { FormState } from "@/app/actions/auth";
 
-const TRIAL_DAYS = 14; // FR-19
-
-/** Picks the first free slug: base, base-2, base-3, ... */
-async function resolveSlug(base: string): Promise<string> {
-  const candidate = slugify(base);
-  for (let i = 0; i < 50; i++) {
-    const slug = i === 0 ? candidate : `${candidate}-${i + 1}`;
-    const taken = await db.query.tenants.findFirst({
-      where: eq(tenants.slug, slug),
-      columns: { id: true },
-    });
-    if (!taken) return slug;
-  }
-  return `${candidate}-${Date.now().toString(36)}`;
-}
-
 /**
- * Onboarding step S2 — create the tenant + owner membership.
- *
- * On success this returns `{ ok: "/desk" }` rather than calling `redirect()`.
- * The client then does a full navigation to `/desk`. That matters: the JWT
- * cookie rewritten by `updateSession()` needs to be sent back to the browser
- * *before* the next request hits `proxy.ts` (which gates `/desk` purely on the
- * token's `tenantId`). Redirecting from inside the action raced that write and
- * bounced the user straight back here.
+ * Recovery path for an account with no workspace — the normal flow creates
+ * everything at /signup. Returns `{ ok: "/desk" }` and lets the client do a
+ * full navigation; the session refresh below is a best-effort optimisation
+ * only, since `requireActive()` resolves the tenant from the database anyway.
  */
 export async function saveBusinessBasics(
   _prev: FormState,
@@ -78,8 +59,6 @@ export async function saveBusinessBasics(
     };
   }
 
-  const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-
   let tenantId: string;
   try {
     const slug = await resolveSlug(parsed.data.name);
@@ -87,7 +66,7 @@ export async function saveBusinessBasics(
     tenantId = await pooledDb().transaction(async (tx) => {
       const [tenant] = await tx
         .insert(tenants)
-        .values({ name: parsed.data.name, slug, whatsappNumber, trialEndsAt })
+        .values({ name: parsed.data.name, slug, whatsappNumber, trialEndsAt: trialEndsAt() })
         .returning({ id: tenants.id });
 
       if (!tenant) throw new Error("tenant insert returned no row");

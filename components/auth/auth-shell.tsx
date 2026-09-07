@@ -17,7 +17,7 @@ export function AuthShell({
   children,
   headline,
   points = DEFAULT_POINTS,
-  cardWidth = "max-w-[380px]",
+  cardWidth = "max-w-[420px]",
 }: {
   children: React.ReactNode;
   headline?: React.ReactNode;

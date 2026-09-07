@@ -93,6 +93,148 @@ export function AuthField({
   );
 }
 
+export function AuthTextarea({
+  label,
+  name,
+  placeholder,
+  rows = 3,
+  maxLength,
+  hint,
+  errors,
+}: {
+  label: string;
+  name: string;
+  placeholder?: string;
+  rows?: number;
+  maxLength?: number;
+  hint?: string;
+  errors?: string[];
+}) {
+  const id = useId();
+  const invalid = !!errors?.length;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="mkt-eyebrow text-[11px] text-muted">
+        {label}
+      </label>
+      <textarea
+        id={id}
+        name={name}
+        rows={rows}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        aria-invalid={invalid || undefined}
+        className="mkt-input resize-y"
+      />
+      {invalid ? (
+        <p className="text-xs text-[#b3402f]">{errors![0]}</p>
+      ) : hint ? (
+        <p className="text-xs text-muted">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Section divider inside a long auth form. */
+export function AuthSection({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-4 border-t border-line pt-5 first:border-0 first:pt-0">
+      <div>
+        <h2 className="mkt-eyebrow text-[10px] text-accent">{title}</h2>
+        {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function AuthSelect({
+  label,
+  name,
+  options,
+  defaultValue,
+  hint,
+}: {
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  defaultValue?: string;
+  hint?: string;
+}) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="mkt-eyebrow text-[11px] text-muted">
+        {label}
+      </label>
+      <select id={id} name={name} defaultValue={defaultValue} className="mkt-input">
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {hint && <p className="text-xs text-muted">{hint}</p>}
+    </div>
+  );
+}
+
+const SWATCHES = ["#1e40af", "#0f766e", "#b91c1c", "#7c3aed", "#c2410c", "#0f172a"];
+
+/** Storefront accent colour: preset swatches plus a free colour picker. */
+export function AuthColorField({
+  label,
+  name,
+  defaultValue = "#1e40af",
+  hint,
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  hint?: string;
+}) {
+  const [color, setColor] = useState(defaultValue);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="mkt-eyebrow text-[11px] text-muted">{label}</span>
+      <input type="hidden" name={name} value={color} />
+      <div className="flex items-center gap-2">
+        {SWATCHES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setColor(c)}
+            aria-label={`Use ${c}`}
+            aria-pressed={color.toLowerCase() === c}
+            className={`size-7 rounded-md border-2 transition-transform hover:scale-110 ${
+              color.toLowerCase() === c ? "border-ink" : "border-transparent"
+            }`}
+            style={{ backgroundColor: c }}
+          />
+        ))}
+        <label className="ml-1 flex cursor-pointer items-center gap-1.5 text-xs text-muted">
+          <input
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="size-7 cursor-pointer rounded-md border border-line bg-transparent p-0.5"
+          />
+          Custom
+        </label>
+      </div>
+      {hint && <p className="text-xs text-muted">{hint}</p>}
+    </div>
+  );
+}
+
 export function AuthSubmit({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
   return (

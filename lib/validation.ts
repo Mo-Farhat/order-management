@@ -49,6 +49,61 @@ export const businessBasicsSchema = z.object({
     }),
 });
 
+/**
+ * Single-page signup (PRD onboarding, de-wizarded): account + business +
+ * optional storefront presentation, all submitted at once so the tenant exists
+ * before the user is signed in.
+ */
+export const signupWithBusinessSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  businessName: z
+    .string()
+    .trim()
+    .min(2, { error: "Business name must be at least 2 characters." })
+    .max(80, { error: "Keep the business name under 80 characters." }),
+  whatsappNumber: z
+    .string()
+    .trim()
+    .min(6, { error: "Enter your WhatsApp number, e.g. 077 123 4567." })
+    .max(24, { error: "That number looks too long." })
+    .regex(/^\+?[0-9\s-]+$/, {
+      error: "Use digits only (spaces, dashes and a leading + are fine).",
+    }),
+  instagramHandle: z
+    .union([
+      z.literal(""),
+      z
+        .string()
+        .trim()
+        .transform((v) => v.replace(/^@/, ""))
+        .pipe(
+          z.string().regex(/^[A-Za-z0-9._]{1,30}$/, {
+            error: "Just the handle — letters, numbers, . and _",
+          }),
+        ),
+    ])
+    .optional(),
+  currency: z
+    .string()
+    .trim()
+    .min(1, { error: "Pick a currency." })
+    .max(6, { error: "Use a short code like LKR or USD." })
+    .transform((v) => v.toUpperCase()),
+  accentColor: z
+    .union([
+      z.literal(""),
+      z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #1e40af." }),
+    ])
+    .optional(),
+  sharePolicyText: z
+    .string()
+    .trim()
+    .max(500, { error: "Keep it under 500 characters." })
+    .optional()
+    .or(z.literal("")),
+});
+
 // --- Settings ----------------------------------------------------------
 
 export const businessSettingsSchema = z.object({
