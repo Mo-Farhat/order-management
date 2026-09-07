@@ -67,6 +67,9 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // `logout` is excluded outright: the auth() wrapper re-issues a rolling
+    // session cookie on every request it sees, which raced (and undid) the
+    // cookie clear from the /logout route handler.
+    "/((?!_next/static|_next/image|favicon.ico|api/health|logout|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
