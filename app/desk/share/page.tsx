@@ -22,7 +22,8 @@ export default async function SharePage() {
 
   const host = h.get("host") ?? "localhost:3000";
   const proto = host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https";
-  const url = `${proto}://${host}/s/${ctx.tenantSlug}`;
+  const slug = tenant?.slug ?? ctx.tenantSlug;
+  const url = `${proto}://${host}/s/${slug}`;
   const currency = tenant?.currency ?? "";
 
   let qrSvg: string | null = null;

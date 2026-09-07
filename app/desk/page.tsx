@@ -23,13 +23,14 @@ const PIPELINE: { status: OrderStatus; label: string }[] = [
 
 export default async function DashboardPage() {
   const ctx = await requireActive();
-  const [m, recent, tenant, upsell, onboarding] = await Promise.all([
+  const [m, recentList, tenant, upsell, onboarding] = await Promise.all([
     dashboardMetrics(ctx),
-    listOrders(ctx, {}),
+    listOrders(ctx, { limit: 8 }),
     db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
     upsellState(ctx),
     gettingStartedStatus(ctx),
   ]);
+  const recent = recentList.rows;
   const showOnboarding = !onboarding.dismissed && !onboarding.complete;
   const showOnboardingDone = !onboarding.dismissed && onboarding.complete;
   const currency = tenant?.currency ?? "";
@@ -139,7 +140,7 @@ export default async function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {recent.slice(0, 8).map((o) => (
+              {recent.map((o) => (
                 <tr key={o.id} className="hover:bg-surface/60">
                   <Td>
                     <Link href={`/desk/orders/${o.id}`} className="font-mono text-xs text-accent hover:underline">

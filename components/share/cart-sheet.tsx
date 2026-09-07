@@ -40,7 +40,7 @@ export function CartSheet({
   const [showAll, setShowAll] = useState(false);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"idle" | "ok" | "fail">("idle");
   const [sent, setSent] = useState<{
     orderNumber: number;
     message: string;
@@ -58,10 +58,15 @@ export function CartSheet({
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
     };
-  }, []);
+  }, [onClose]);
 
   function placeOrder() {
     setError(null);
@@ -91,7 +96,18 @@ export function CartSheet({
     }`;
 
   const accentBtn =
-    "flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold text-white disabled:opacity-50";
+    "flex h-12 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50";
+
+  async function copyMessage(): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(sent!.message);
+      setCopied("ok");
+      return true;
+    } catch {
+      setCopied("fail");
+      return false;
+    }
+  }
 
   const heading =
     view === "sent"
@@ -105,14 +121,19 @@ export function CartSheet({
   return (
     <div className="fixed inset-0 z-50">
       <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-line bg-card">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={heading}
+        className="absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-line bg-card"
+      >
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             {(view === "details" || view === "confirm") && (
               <button
                 onClick={() => setView(view === "confirm" ? "details" : "cart")}
                 aria-label="Back"
-                className="flex size-7 items-center justify-center rounded-full border border-line text-sm"
+                className="flex size-7 items-center justify-center rounded-md border border-line text-sm"
               >
                 ←
               </button>
@@ -136,7 +157,10 @@ export function CartSheet({
               <p className="text-sm font-medium">
                 Order <span className="font-mono">#{sent.orderNumber}</span> placed.
               </p>
-              <p className="text-xs text-muted">Now send it to {tenant.name} so they can confirm:</p>
+              <p className="text-xs text-muted">
+                <strong className="text-ink">It isn&apos;t sent yet.</strong> Send it to{" "}
+                {tenant.name} so they can confirm:
+              </p>
 
               <div className="mt-1 flex w-full flex-col gap-2">
                 {sent.whatsapp && (
@@ -153,9 +177,8 @@ export function CartSheet({
                 {sent.instagram && (
                   <button
                     type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(sent.message).catch(() => {});
-                      setCopied(true);
+                    onClick={async () => {
+                      await copyMessage();
                       window.open(sent.instagram!, "_blank");
                     }}
                     className={`${accentBtn} border`}
@@ -165,17 +188,41 @@ export function CartSheet({
                       borderColor: "var(--sf-accent)",
                     }}
                   >
-                    Send on Instagram
+                    {copied === "ok" ? "Order copied — open Instagram" : "Copy & open Instagram"}
                   </button>
                 )}
               </div>
-              {sent.instagram && (
-                <p className="text-[11px] text-muted">
-                  {copied
-                    ? "Order copied — paste it into the Instagram DM."
-                    : "We'll copy your order so you can paste it into the DM."}
-                </p>
-              )}
+
+              {/* The order text — always shown so it can be copied by hand if
+                  the deep link or clipboard fails. */}
+              <div className="mt-2 w-full text-left">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
+                    Your order
+                  </span>
+                  <button
+                    type="button"
+                    onClick={copyMessage}
+                    className="text-[11px] font-medium"
+                    style={{ color: "var(--sf-accent)" }}
+                  >
+                    {copied === "ok" ? "Copied ✓" : "Copy"}
+                  </button>
+                </div>
+                <textarea
+                  readOnly
+                  value={sent.message}
+                  onFocus={(e) => e.currentTarget.select()}
+                  rows={6}
+                  className="mt-1 w-full resize-none rounded-lg border border-line bg-surface p-2 text-[11px] leading-relaxed text-muted"
+                />
+                {copied === "fail" && (
+                  <p className="mt-1 text-[11px] text-danger">
+                    Couldn&apos;t copy automatically — select the text above and copy it.
+                  </p>
+                )}
+              </div>
+
               <button onClick={onClose} className="mt-1 text-xs text-muted underline">
                 Done
               </button>

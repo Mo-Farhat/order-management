@@ -77,12 +77,16 @@ export type OrderFilters = {
   search?: string;
   from?: string; // ISO date (sale date lower bound)
   to?: string;
+  limit?: number;
+  offset?: number;
 };
+
+export type OrderList = { rows: OrderListRow[]; total: number };
 
 export async function listOrders(
   ctx: ActiveContext,
   opts: OrderFilters = {},
-): Promise<OrderListRow[]> {
+): Promise<OrderList> {
   const filters = [eq(orders.tenantId, ctx.tenantId)];
   if (opts.statuses?.length) filters.push(inArray(orders.status, opts.statuses));
   if (opts.deliveryStatuses?.length) filters.push(inArray(orders.deliveryStatus, opts.deliveryStatuses));
@@ -105,31 +109,43 @@ export async function listOrders(
     );
   }
 
-  const rows = await db
-    .select({
-      id: orders.id,
-      orderNumber: orders.orderNumber,
-      customerName: customers.name,
-      customerPhone: customers.phone,
-      total: orders.total,
-      amountPaid: orders.amountPaid,
-      status: orders.status,
-      source: orders.source,
-      deliveryStatus: orders.deliveryStatus,
-      paymentStatus: orders.paymentStatus,
-      courier: orders.courier,
-      createdAt: orders.createdAt,
-      dispatchedAt: orders.dispatchedAt,
-      itemCount: sql<number>`(select coalesce(sum(${orderItems.quantity}), 0) from ${orderItems} where ${orderItems.orderId} = ${orders.id})`,
-      firstItemName: sql<string | null>`(select ${orderItems.nameSnapshot} from ${orderItems} where ${orderItems.orderId} = ${orders.id} order by ${orderItems.id} limit 1)`,
-    })
-    .from(orders)
-    .innerJoin(customers, eq(customers.id, orders.customerId))
-    .where(and(...filters))
-    .orderBy(desc(orders.createdAt))
-    .limit(300);
+  const where = and(...filters);
+  const limit = Math.min(Math.max(opts.limit ?? 300, 1), 300);
+  const offset = Math.max(opts.offset ?? 0, 0);
 
-  return rows.map((r) => ({ ...r, itemCount: Number(r.itemCount) }));
+  const [rows, [{ total } = { total: 0 }]] = await Promise.all([
+    db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        customerName: customers.name,
+        customerPhone: customers.phone,
+        total: orders.total,
+        amountPaid: orders.amountPaid,
+        status: orders.status,
+        source: orders.source,
+        deliveryStatus: orders.deliveryStatus,
+        paymentStatus: orders.paymentStatus,
+        courier: orders.courier,
+        createdAt: orders.createdAt,
+        dispatchedAt: orders.dispatchedAt,
+        itemCount: sql<number>`(select coalesce(sum(${orderItems.quantity}), 0) from ${orderItems} where ${orderItems.orderId} = ${orders.id})`,
+        firstItemName: sql<string | null>`(select ${orderItems.nameSnapshot} from ${orderItems} where ${orderItems.orderId} = ${orders.id} order by ${orderItems.id} limit 1)`,
+      })
+      .from(orders)
+      .innerJoin(customers, eq(customers.id, orders.customerId))
+      .where(where)
+      .orderBy(desc(orders.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(orders)
+      .innerJoin(customers, eq(customers.id, orders.customerId))
+      .where(where),
+  ]);
+
+  return { rows: rows.map((r) => ({ ...r, itemCount: Number(r.itemCount) })), total: Number(total) };
 }
 
 export async function orderCountsByStatus(

@@ -92,7 +92,7 @@ export function ProductDetail({
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card p-4">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           {qty > 0 ? (
-            <div className="flex items-center gap-3 rounded-full border border-line px-2 py-1">
+            <div className="flex items-center gap-3 rounded-lg border border-line px-2 py-1">
               <Step onClick={() => add(qty - 1)}>−</Step>
               <span className="w-5 text-center tabular-nums">{qty}</span>
               <Step onClick={() => add(qty + 1)}>+</Step>
@@ -102,7 +102,7 @@ export function ProductDetail({
               type="button"
               disabled={out}
               onClick={() => add(1)}
-              className="h-11 flex-1 rounded-full text-sm font-semibold text-white transition-colors disabled:opacity-40"
+              className="h-11 flex-1 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-40"
               style={{ background: "var(--sf-accent)" }}
             >
               {added ? "Added ✓" : "Add to order"}
@@ -110,7 +110,7 @@ export function ProductDetail({
           )}
           <Link
             href={`/s/${slug}${count > 0 ? "?cart=1" : ""}`}
-            className="ml-auto flex h-11 items-center rounded-full border border-line px-4 text-sm font-medium"
+            className="ml-auto flex h-11 items-center rounded-lg border border-line px-4 text-sm font-medium"
           >
             {count > 0 ? `Order (${count})` : "Back to shop"} →
           </Link>

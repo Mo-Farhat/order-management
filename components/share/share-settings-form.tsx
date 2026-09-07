@@ -154,7 +154,7 @@ export function ShareSettingsForm({
                     key={c}
                     type="button"
                     onClick={() => setOrder([...order, c])}
-                    className="rounded-full border border-line px-2.5 py-1 text-xs text-muted hover:border-accent/50"
+                    className="rounded-md border border-line px-2.5 py-1 text-xs text-muted hover:border-accent/50"
                   >
                     + {c}
                   </button>

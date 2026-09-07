@@ -106,12 +106,24 @@ export const signupWithBusinessSchema = z.object({
 
 // --- Settings ----------------------------------------------------------
 
+/** Storefront slug: lowercase letters, digits and single dashes, 3–40 chars. */
+export const storeSlugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, { error: "Use at least 3 characters." })
+  .max(40, { error: "Keep it under 40 characters." })
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    error: "Lowercase letters, numbers and single dashes only.",
+  });
+
 export const businessSettingsSchema = z.object({
   name: z
     .string()
     .trim()
     .min(2, { error: "Business name must be at least 2 characters." })
     .max(80, { error: "Keep the business name under 80 characters." }),
+  slug: storeSlugSchema,
   currency: z
     .string()
     .trim()

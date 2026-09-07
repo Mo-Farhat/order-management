@@ -50,11 +50,13 @@ function LabeledInput({
 
 export function BusinessSettingsForm({
   name,
+  slug,
   currency,
   deliveryFeeDefault,
   stockTrackingEnabled,
 }: {
   name: string;
+  slug: string;
   currency: string;
   deliveryFeeDefault: string;
   stockTrackingEnabled: boolean;
@@ -64,6 +66,34 @@ export function BusinessSettingsForm({
     <form action={action} className="flex flex-col gap-4">
       <Note state={state} />
       <LabeledInput label="Business name" name="name" defaultValue={name} errors={state?.fieldErrors?.name} />
+
+      <label className="flex flex-col gap-1.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          Storefront address
+        </span>
+        <span className="flex items-stretch rounded-lg border border-line bg-surface focus-within:border-accent">
+          <span className="flex items-center pl-3 pr-1 text-base text-muted">/s/</span>
+          <input
+            name="slug"
+            defaultValue={slug}
+            spellCheck={false}
+            autoCapitalize="none"
+            className="w-full rounded-r-lg bg-transparent py-2.5 pr-3 text-base outline-none aria-[invalid=true]:text-danger"
+            aria-invalid={!!state?.fieldErrors?.slug?.length}
+          />
+        </span>
+        {state?.fieldErrors?.slug?.length ? (
+          state.fieldErrors.slug.map((e) => (
+            <span key={e} className="text-xs text-danger">{e}</span>
+          ))
+        ) : (
+          <span className="text-xs text-warn">
+            Changing this breaks your existing storefront link and QR code — you&apos;ll
+            need to re-share them.
+          </span>
+        )}
+      </label>
+
       <p className="text-xs text-muted">
         Your WhatsApp number moved to <span className="font-medium">Storefront</span>.
       </p>

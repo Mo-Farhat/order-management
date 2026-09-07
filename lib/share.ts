@@ -2,10 +2,12 @@ import "server-only";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
-import { productPhotos, products, tenants } from "@/db/schema";
+import { memberships, productPhotos, products, tenants, users } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import { computeTotals, fromCents, toCents } from "@/lib/money";
 import { normalizePhone, toWhatsAppNumber } from "@/lib/phone";
+import { sendNewOrderEmail } from "@/lib/email";
+import { appUrl } from "@/lib/constants";
 import type { ActiveContext } from "@/lib/session";
 
 export type StorefrontProduct = {
@@ -170,12 +172,51 @@ export type HandoffInput = {
 };
 
 export type HandoffResult = {
+  orderId: string;
   orderNumber: number;
   message: string;
   currency: string;
   whatsapp: string | null;   // wa.me deep link with the message pre-filled
   instagram: string | null;  // ig.me DM link (message is copied client-side)
 };
+
+/**
+ * Email the shop owner(s) that a storefront order came in. Best-effort — a mail
+ * outage must never break ordering, so callers swallow failures.
+ */
+async function notifyOwnersOfStorefrontOrder(args: {
+  tenantId: string;
+  shopName: string;
+  orderId: string;
+  orderNumber: number;
+  customerName: string;
+  customerPhone: string;
+  currency: string;
+  total: string;
+  items: string[];
+  note?: string;
+}): Promise<void> {
+  const owners = await db
+    .select({ email: users.email })
+    .from(memberships)
+    .innerJoin(users, eq(users.id, memberships.userId))
+    .where(and(eq(memberships.tenantId, args.tenantId), eq(memberships.role, "owner")));
+
+  const to = owners.map((o) => o.email).filter(Boolean);
+  if (to.length === 0) return;
+
+  await sendNewOrderEmail(to, {
+    shopName: args.shopName,
+    orderNumber: args.orderNumber,
+    customerName: args.customerName,
+    customerPhone: args.customerPhone,
+    currency: args.currency,
+    total: args.total,
+    items: args.items,
+    note: args.note,
+    url: appUrl(`/desk/orders/${args.orderId}`),
+  });
+}
 
 /**
  * A public visitor placed an order. Creates it as a `pending` order (owner
@@ -234,8 +275,26 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     .filter(Boolean)
     .join("\n");
 
+  try {
+    await notifyOwnersOfStorefrontOrder({
+      tenantId: tenant.id,
+      shopName: tenant.name,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      customerName: input.customerName.trim(),
+      customerPhone: input.customerPhone.trim(),
+      currency: cur,
+      total: subtotal,
+      items: lines.map((l) => `${l.quantity} × ${l.name} (${cur} ${l.price})`),
+      note: input.note?.trim() || undefined,
+    });
+  } catch (err) {
+    console.error("[share] new-order email failed", err);
+  }
+
   const waNumber = toWhatsAppNumber(tenant.whatsappNumber);
   return {
+    orderId: order.id,
     orderNumber: order.orderNumber,
     message,
     currency: cur,

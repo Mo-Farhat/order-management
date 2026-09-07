@@ -25,6 +25,7 @@ export default async function SettingsPage() {
         <Card title="Business">
           <BusinessSettingsForm
             name={tenant?.name ?? ""}
+            slug={tenant?.slug ?? ctx.tenantSlug}
             currency={tenant?.currency ?? "LKR"}
             deliveryFeeDefault={tenant?.deliveryFeeDefault ?? ""}
             stockTrackingEnabled={tenant?.stockTrackingEnabled ?? true}

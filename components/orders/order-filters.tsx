@@ -32,6 +32,7 @@ export function OrderFilters() {
     const next = new URLSearchParams(sp.toString());
     if (value) next.set(key, value);
     else next.delete(key);
+    next.delete("page"); // any filter change resets to the first page
     router.push(`/desk/orders?${next.toString()}`);
   }
 

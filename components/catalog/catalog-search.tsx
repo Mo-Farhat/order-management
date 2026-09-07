@@ -61,7 +61,7 @@ export function CatalogSearch({
               key={cat}
               type="button"
               onClick={() => toggleCategory(cat)}
-              className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide ${
+              className={`rounded-md border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide ${
                 activeCategory === cat
                   ? "border-accent bg-accent text-accent-fg"
                   : "border-line text-muted"

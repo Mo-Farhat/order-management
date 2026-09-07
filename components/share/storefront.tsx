@@ -49,7 +49,7 @@ export function Storefront({
           <button
             type="button"
             onClick={() => setCartOpen(true)}
-            className="relative flex h-10 items-center gap-2 rounded-full border border-line px-3 text-sm font-medium"
+            className="relative flex h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-medium"
           >
             Order
             {count > 0 && (
@@ -151,7 +151,7 @@ export function Storefront({
           className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card p-4"
         >
           <span
-            className="mx-auto flex h-12 max-w-lg items-center justify-between rounded-full px-5 text-sm font-semibold text-white"
+            className="mx-auto flex h-12 max-w-lg items-center justify-between rounded-lg px-5 text-sm font-semibold text-white"
             style={{ background: "var(--sf-accent)" }}
           >
             <span>
@@ -189,7 +189,7 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs transition-colors ${
+      className={`whitespace-nowrap rounded-md border px-3 py-1 text-xs transition-colors ${
         active
           ? "border-[var(--sf-accent)] bg-[var(--sf-accent)] text-white"
           : "border-line text-muted"

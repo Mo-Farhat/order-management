@@ -21,7 +21,7 @@ export function StorefrontHeader({
         <Link
           href={backHref}
           aria-label="Back to shop"
-          className="flex size-8 items-center justify-center rounded-full border border-line text-sm"
+          className="flex size-8 items-center justify-center rounded-md border border-line text-sm"
         >
           ←
         </Link>

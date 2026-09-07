@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import type { ZodError } from "zod";
 
+import { and, ne } from "drizzle-orm";
+
 import { updateSession } from "@/auth";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { db } from "@/db";
@@ -31,6 +33,7 @@ export async function saveBusinessSettings(
   const ctx = await requireCapability("catalog:edit");
   const parsed = businessSettingsSchema.safeParse({
     name: formData.get("name"),
+    slug: formData.get("slug"),
     currency: formData.get("currency"),
     deliveryFeeDefault: formData.get("deliveryFeeDefault") ?? "",
     stockTrackingEnabled: formData.get("stockTrackingEnabled") === "on",
@@ -39,10 +42,22 @@ export async function saveBusinessSettings(
 
   const before = await db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
 
+  const slugChanged = parsed.data.slug !== before?.slug;
+  if (slugChanged) {
+    const taken = await db.query.tenants.findFirst({
+      where: and(eq(tenants.slug, parsed.data.slug), ne(tenants.id, ctx.tenantId)),
+      columns: { id: true },
+    });
+    if (taken) {
+      return { fieldErrors: { slug: ["That storefront address is already taken."] } };
+    }
+  }
+
   await db
     .update(tenants)
     .set({
       name: parsed.data.name,
+      slug: parsed.data.slug,
       currency: parsed.data.currency,
       deliveryFeeDefault: parsed.data.deliveryFeeDefault || null,
       stockTrackingEnabled: parsed.data.stockTrackingEnabled,
@@ -56,12 +71,23 @@ export async function saveBusinessSettings(
     action: "tenant.settings_updated",
     entity: "tenant",
     entityId: ctx.tenantId,
-    before: before ? { name: before.name, currency: before.currency } : null,
-    after: { name: parsed.data.name, currency: parsed.data.currency },
+    before: before ? { name: before.name, slug: before.slug, currency: before.currency } : null,
+    after: { name: parsed.data.name, slug: parsed.data.slug, currency: parsed.data.currency },
   });
 
+  if (slugChanged) {
+    // `tenantSlug` is snapshotted in the JWT; refresh so the desk's "your link"
+    // shows the new address. Best-effort — the share page also reads it from the
+    // tenant row directly.
+    try {
+      await updateSession({});
+    } catch {
+      /* self-heals on next sign-in */
+    }
+  }
+
   revalidatePath("/desk");
-  return { ok: "Settings saved." };
+  return { ok: slugChanged ? "Saved. Your storefront link changed — update it wherever you've shared it." : "Settings saved." };
 }
 
 export async function changePassword(
