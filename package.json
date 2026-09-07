@@ -17,7 +17,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:rls": "tsx scripts/apply-rls.ts"
+    "db:rls": "tsx scripts/apply-rls.ts",
+    "guide": "tsx scripts/gen-guide.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",
@@ -46,6 +47,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5",

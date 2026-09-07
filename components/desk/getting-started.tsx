@@ -33,7 +33,10 @@ export function GettingStarted({
   const dismiss = () => start(async () => { await dismissOnboarding(); });
 
   return (
-    <section className="overflow-hidden rounded-xl border border-accent/30 bg-accent-weak/40 shadow-[0_1px_2px_rgba(20,32,29,0.04)]">
+    <section
+      data-guide="getting-started"
+      className="overflow-hidden rounded-xl border border-accent/30 bg-accent-weak/40 shadow-[0_1px_2px_rgba(20,32,29,0.04)]"
+    >
       <header className="flex items-center justify-between gap-3 border-b border-accent/20 px-4 py-3">
         <div>
           <h2 className="text-sm font-semibold">Set up your shop</h2>
