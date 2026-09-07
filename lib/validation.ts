@@ -42,9 +42,11 @@ export const businessBasicsSchema = z.object({
   whatsappNumber: z
     .string()
     .trim()
-    .min(6, { error: "Enter a valid WhatsApp number." })
-    .max(24, { error: "Enter a valid WhatsApp number." })
-    .regex(/^\+?[0-9\s-]+$/, { error: "Digits, spaces, and a leading + only." }),
+    .min(6, { error: "Enter your WhatsApp number, e.g. 077 123 4567." })
+    .max(24, { error: "That number looks too long." })
+    .regex(/^\+?[0-9\s-]+$/, {
+      error: "Use digits only (spaces, dashes and a leading + are fine).",
+    }),
 });
 
 // --- Settings ----------------------------------------------------------

@@ -20,3 +20,18 @@ export function normalizePhone(raw: string | null | undefined): string | null {
   // anything else — keep the last 10 digits as a best effort
   return digits.length > 10 ? digits.slice(-10) : digits;
 }
+
+/**
+ * International, digits-only form for `wa.me` / `ig.me` deep links.
+ * `0771234567` → `94771234567`, `+94 77 123 4567` → `94771234567`.
+ * Returns null if there's nothing usable.
+ */
+export function toWhatsAppNumber(raw: string | null | undefined): string | null {
+  const canonical = normalizePhone(raw);
+  if (!canonical) return null;
+  const digits = canonical.replace(/\D/g, "");
+  if (!digits) return null;
+  // Local Sri Lanka form (leading 0, 10 digits) → swap the 0 for the 94 code.
+  if (digits.startsWith("0") && digits.length === 10) return `94${digits.slice(1)}`;
+  return digits;
+}

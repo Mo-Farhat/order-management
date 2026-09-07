@@ -77,7 +77,7 @@ export const {
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, session }) {
       // Initial sign-in: `user` is set. Snapshot everything into the token.
       if (user?.id) {
         token.sub = user.id;
@@ -96,9 +96,14 @@ export const {
       // own session survives (FR-2 invalidates *other* sessions only).
       if (trigger === "update") {
         const membership = await loadMembership(token.sub);
-        token.tenantId = membership?.tenantId ?? null;
-        token.tenantSlug = membership?.tenantSlug ?? null;
-        token.role = membership?.role ?? null;
+        // Fall back to a tenantId the caller passed in (onboarding just created
+        // it) in case the read races the write.
+        const passedTenantId =
+          (session as { user?: { tenantId?: string | null } } | undefined)?.user
+            ?.tenantId ?? null;
+        token.tenantId = membership?.tenantId ?? passedTenantId;
+        token.tenantSlug = membership?.tenantSlug ?? token.tenantSlug ?? null;
+        token.role = membership?.role ?? token.role ?? null;
         token.pwdAt = await loadPasswordChangedAt(token.sub);
         return token;
       }

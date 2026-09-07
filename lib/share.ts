@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { productPhotos, products, tenants } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import { computeTotals, fromCents, toCents } from "@/lib/money";
-import { normalizePhone } from "@/lib/phone";
+import { normalizePhone, toWhatsAppNumber } from "@/lib/phone";
 import type { ActiveContext } from "@/lib/session";
 
 export type StorefrontProduct = {
@@ -234,7 +234,7 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     .filter(Boolean)
     .join("\n");
 
-  const waNumber = tenant.whatsappNumber ? tenant.whatsappNumber.replace(/[^0-9]/g, "") : null;
+  const waNumber = toWhatsAppNumber(tenant.whatsappNumber);
   return {
     orderNumber: order.orderNumber,
     message,
