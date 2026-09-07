@@ -146,7 +146,7 @@ export function AuthSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4 border-t border-line pt-5 first:border-0 first:pt-0">
+    <section className="flex flex-col gap-3.5 border-t border-line pt-4 first:border-0 first:pt-0">
       <div>
         <h2 className="mkt-eyebrow text-[10px] text-accent">{title}</h2>
         {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}

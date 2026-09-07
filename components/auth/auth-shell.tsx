@@ -61,11 +61,11 @@ export function AuthShell({
         </p>
       </aside>
 
-      <main className="mkt-auth-bg flex flex-1 flex-col items-center justify-center px-5 py-12">
+      <main className="mkt-auth-bg flex flex-1 flex-col items-center justify-center overflow-y-auto px-5 py-8 lg:py-10">
         <div className={`w-full ${cardWidth}`}>
           <Link
             href="/"
-            className="mb-8 flex items-center gap-2 lg:hidden"
+            className="mb-6 flex items-center gap-2 lg:hidden"
             aria-label={`${APP_NAME} home`}
           >
             <span className="grid size-7 place-items-center rounded-md bg-accent text-sm font-bold text-accent-fg">
