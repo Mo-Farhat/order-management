@@ -83,12 +83,12 @@ export function BusinessBasicsForm({ email }: { email: string }) {
         <AuthSubmit>Continue</AuthSubmit>
       </form>
 
-      <p className="border-t border-line pt-4 text-xs text-muted">
+      <div className="border-t border-line pt-4 text-xs text-muted">
         Signed in as <span className="text-ink">{email}</span>.{" "}
-        <LogoutButton className="font-medium text-accent underline-offset-4 hover:underline disabled:opacity-60">
+        <LogoutButton className="font-medium text-accent underline-offset-4 hover:underline">
           Use a different account
         </LogoutButton>
-      </p>
+      </div>
     </div>
   );
 }

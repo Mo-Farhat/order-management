@@ -1,11 +1,9 @@
-"use client";
-
-import { useTransition } from "react";
 import { signOutAction } from "@/app/actions/session";
 
 /**
- * Logs the user out, then hard-navigates to /login. The full page load ensures
- * the cleared session cookie is in effect before route protection runs again.
+ * Renders a submit button inside a form that posts to `signOutAction`. A real
+ * form submission (not a client RPC) so the cleared-cookie response is applied
+ * before the redirect to /login is followed.
  */
 export function LogoutButton({
   className,
@@ -14,25 +12,11 @@ export function LogoutButton({
   className?: string;
   children: React.ReactNode;
 }) {
-  const [pending, start] = useTransition();
-
   return (
-    <button
-      type="button"
-      disabled={pending}
-      aria-busy={pending}
-      className={className}
-      onClick={() =>
-        start(async () => {
-          try {
-            await signOutAction();
-          } finally {
-            window.location.href = "/login";
-          }
-        })
-      }
-    >
-      {children}
-    </button>
+    <form action={signOutAction} className="contents">
+      <button type="submit" className={className}>
+        {children}
+      </button>
+    </form>
   );
 }
