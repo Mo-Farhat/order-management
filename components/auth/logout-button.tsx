@@ -1,9 +1,6 @@
-import { signOutAction } from "@/app/actions/session";
-
 /**
- * Renders a submit button inside a form that posts to `signOutAction`. A real
- * form submission (not a client RPC) so the cleared-cookie response is applied
- * before the redirect to /login is followed.
+ * Logs the user out via the `/logout` route handler (a real form POST, so the
+ * cookie-clearing redirect response is honoured on every runtime).
  */
 export function LogoutButton({
   className,
@@ -13,7 +10,7 @@ export function LogoutButton({
   children: React.ReactNode;
 }) {
   return (
-    <form action={signOutAction} className="contents">
+    <form action="/logout" method="post" className="contents">
       <button type="submit" className={className}>
         {children}
       </button>

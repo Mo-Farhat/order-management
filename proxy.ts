@@ -17,6 +17,7 @@ const { auth } = NextAuth(authConfig);
 const PUBLIC_PREFIXES = [
   "/login",
   "/signup",
+  "/logout",
   "/forgot-password",
   "/reset-password",
   "/terms",
