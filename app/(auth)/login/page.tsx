@@ -10,6 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "";
   const justReset = searchParams.get("reset") === "1";
+  const justCreated = searchParams.get("created") === "1";
   const [state, action] = useActionState<FormState, FormData>(loginWithPassword, undefined);
 
   return (
@@ -21,6 +22,9 @@ function LoginForm() {
 
       {justReset && (
         <AuthNotice>Password updated. Log in with your new password.</AuthNotice>
+      )}
+      {justCreated && (
+        <AuthNotice>Account created. Log in to finish setting up.</AuthNotice>
       )}
 
       <form action={action} className="flex flex-col gap-4">

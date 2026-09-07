@@ -2,7 +2,6 @@
 
 import { createHash, randomBytes } from "node:crypto";
 import { and, eq, gt, isNull } from "drizzle-orm";
-import bcrypt from "bcryptjs";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ZodError } from "zod";
@@ -12,6 +11,7 @@ import { passwordResetTokens, users } from "@/db/schema";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { forgotPasswordSchema, resetPasswordSchema } from "@/lib/validation";
+import { hashPassword } from "@/lib/password";
 import type { FormState } from "@/app/actions/auth";
 
 function z2fieldErrors(err: ZodError): Record<string, string[]> {
@@ -91,7 +91,7 @@ export async function resetPassword(
     return { error: "This reset link is invalid or has expired. Request a new one." };
   }
 
-  const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
+  const hashedPassword = await hashPassword(parsed.data.password);
   await db
     .update(users)
     .set({ hashedPassword, passwordChangedAt: new Date() })

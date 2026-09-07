@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
 import type { ZodError } from "zod";
 
 import { updateSession } from "@/auth";
+import { hashPassword, verifyPassword } from "@/lib/password";
 import { db } from "@/db";
 import { auditLog, tenants, users } from "@/db/schema";
 import { requireActive, requireCapability } from "@/lib/session";
@@ -80,10 +80,10 @@ export async function changePassword(
   if (!user?.hashedPassword) {
     return { error: "This account signs in with a magic link — there's no password to change." };
   }
-  const ok = await bcrypt.compare(parsed.data.currentPassword, user.hashedPassword);
+  const ok = await verifyPassword(parsed.data.currentPassword, user.hashedPassword);
   if (!ok) return { fieldErrors: { currentPassword: ["That's not your current password."] } };
 
-  const hashedPassword = await bcrypt.hash(parsed.data.newPassword, 12);
+  const hashedPassword = await hashPassword(parsed.data.newPassword);
   await db
     .update(users)
     .set({ hashedPassword, passwordChangedAt: new Date() })

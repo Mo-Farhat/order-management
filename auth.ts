@@ -2,9 +2,8 @@ import NextAuth from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Credentials from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
-
 import { authConfig } from "@/auth.config";
+import { verifyPassword } from "@/lib/password";
 import { db } from "@/db";
 import { accounts, memberships, sessions, users, verificationTokens } from "@/db/schema";
 import { credentialsSchema } from "@/lib/validation";
@@ -68,7 +67,7 @@ export const {
         });
         if (!user?.hashedPassword) return null;
 
-        const ok = await bcrypt.compare(password, user.hashedPassword);
+        const ok = await verifyPassword(password, user.hashedPassword);
         if (!ok) return null;
 
         return { id: user.id, email: user.email, name: user.name };
