@@ -1,0 +1,317 @@
+/* Source for the synced design system's styles.css.
+ * Compiled with @tailwindcss/cli against the scoped component files, then the
+ * design-sync converter copies the result as styles.css.
+ *
+ * Fonts: the app uses next/font/google (self-hosted). Here they load from the
+ * Google Fonts CDN at runtime — same families, no binaries to ship. */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spline+Sans:wght@400;500;600;700&display=swap");
+
+@import "tailwindcss" source(none);
+@source "./_safelist.txt";
+
+/* ---- font tokens (set on <html> by next/font in the app) ---------------- */
+:root {
+  --font-plex-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-plex-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-spline: "Spline Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ==== verbatim from app/globals.css (everything after `@import "tailwindcss"`) ==== */
+
+:root {
+  color-scheme: light;
+
+  --background: #fbfbfc;
+  --foreground: #1a1f36;
+
+  --paper: #ffffff;   /* cards / raised surfaces */
+  --card: #ffffff;
+  --surface: #f5f6f8; /* inputs, insets, muted panels */
+  --ink: #1a1f36;
+  --muted: #697386;
+  --line: #e4e6ec;
+
+  --accent: #ea580c;       /* orange */
+  --accent-fg: #ffffff;
+  --accent-weak: #fff2e8;
+
+  --lime: #ffd8bf;         /* legacy token — soft orange tint */
+  --warn: #b7791f;         /* amber, distinct from the accent */
+  --ok: #15803d;           /* green — genuinely-positive states (paid, delivered) */
+  --danger: #b3402f;
+
+  --sidebar: #f6f6f7;
+  --sidebar-fg: #3c4257;
+  --sidebar-muted: #8792a2;
+  --sidebar-active: #fff2e8;      /* = accent-weak */
+  --sidebar-active-fg: #ea580c;   /* = accent */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-weak: var(--accent-weak);
+  --color-lime: var(--lime);
+  --color-warn: var(--warn);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ---- Customer-facing palette: "B2B Trust Blue" ------------------------- *
+ * Primary #1E40AF, amber accent #F59E0B, cool neutral #F8FAFC. Scoped to
+ * .mkt (marketing) and .sf-theme (public storefront) so the desk app keeps
+ * its orange system. */
+.mkt,
+.sf-theme {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --surface: #eef2f8;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: #e2e8f0;
+
+  --accent: #1e40af; /* primary — buttons, links, active borders */
+  --accent-fg: #ffffff;
+  --accent-weak: #eaf0ff;
+  --ok: #1e40af; /* "included" ticks read as primary, not a 3rd colour */
+
+  --amber: #f59e0b; /* accent — eyebrows, numerals, highlights */
+  --amber-weak: #fdf0dc;
+
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.mkt-haze {
+  background:
+    radial-gradient(60% 55% at 50% -10%, #dbe6ff 0%, rgba(219, 230, 255, 0) 60%),
+    radial-gradient(45% 40% at 85% 0%, #e4ecff 0%, rgba(228, 236, 255, 0) 55%),
+    radial-gradient(40% 45% at 10% 5%, #e8f0ff 0%, rgba(232, 240, 255, 0) 55%),
+    var(--background);
+}
+.mkt-haze-soft {
+  background:
+    radial-gradient(50% 60% at 50% 100%, #e6edff 0%, rgba(230, 237, 255, 0) 70%),
+    var(--background);
+}
+.mkt-cta-band {
+  background: linear-gradient(135deg, #172c73 0%, #1e40af 55%, #2b57d6 100%);
+}
+.mkt-scroll {
+  scroll-margin-top: 5rem;
+}
+
+/* Marketing typography: Geist for display headlines, Spline Sans for body. */
+.mkt {
+  font-family: var(--font-spline), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+}
+.mkt-amber {
+  color: var(--amber);
+}
+.mkt h1,
+.mkt h2,
+.mkt .mkt-display,
+.mkt-serif {
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+}
+.mkt em {
+  font-style: normal;
+  color: var(--amber);
+  font-weight: 600;
+}
+.mkt .mkt-light {
+  font-weight: 400;
+}
+.mkt-eyebrow {
+  font-family: var(--font-spline), sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* ---- Hero: deep-blue gradient bleeding into the page ------------------- */
+.mkt-hero {
+  background:
+    radial-gradient(120% 80% at 50% 0%, #1e40af 0%, #2f5ad0 34%, #6f97ea 62%, var(--background) 100%);
+}
+.mkt-hero-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+}
+.mkt-tilt {
+  transform-origin: 50% 0%;
+}
+@media (min-width: 768px) {
+  .mkt-tilt {
+    transform: perspective(1600px) rotateX(4deg);
+  }
+}
+
+/* ---- Auth split-screen ------------------------------------------------ */
+.mkt-auth-aside {
+  background:
+    radial-gradient(75% 55% at 12% 8%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(65% 55% at 105% 105%, rgba(111, 151, 234, 0.55) 0%, rgba(111, 151, 234, 0) 60%),
+    linear-gradient(160deg, #142a70 0%, #1e40af 55%, #2b57d6 100%);
+}
+.mkt-auth-bg {
+  background:
+    radial-gradient(70% 50% at 50% -15%, #dbe6ff 0%, rgba(219, 230, 255, 0) 62%),
+    radial-gradient(42% 38% at 92% 6%, #e6edff 0%, rgba(230, 237, 255, 0) 58%),
+    var(--background);
+}
+
+/* Auth form controls — marketing palette, blue focus ring. */
+.mkt-input {
+  width: 100%;
+  border-radius: 0.625rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0.625rem 0.75rem;
+  font-size: 1rem;
+  color: var(--ink);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.mkt-input::placeholder {
+  color: color-mix(in srgb, var(--muted) 65%, transparent);
+}
+.mkt-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.mkt-input[aria-invalid="true"] {
+  border-color: #b3402f;
+}
+.mkt-input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(179, 64, 47, 0.18);
+}
+
+/* ---- Detached floating nav ------------------------------------------------ */
+.mkt-nav {
+  background: rgba(12, 22, 60, 0.72);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 40px -12px rgba(10, 20, 60, 0.45);
+}
+
+/* ---- Buttons: smooth hover -------------------------------------------- */
+.mkt-btn {
+  --btn-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--btn-shadow);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.28s ease,
+    color 0.28s ease,
+    filter 0.28s ease;
+  will-change: transform;
+}
+.mkt-btn:hover {
+  transform: translateY(-2px);
+}
+.mkt-btn:active {
+  transform: translateY(0);
+  transition-duration: 0.08s;
+}
+.mkt-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.mkt-btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 14px 30px -10px rgba(30, 64, 175, 0.55);
+}
+.mkt-btn-light {
+  background: #fff;
+  color: var(--accent);
+}
+.mkt-btn-light:hover {
+  box-shadow: 0 14px 34px -10px rgba(255, 255, 255, 0.5);
+}
+.mkt-btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.mkt-btn-ghost:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.2);
+}
+
+/* ---- Card hover ------------------------------------------------------- */
+.mkt-card {
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
+}
+.mkt-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px -24px rgba(15, 23, 42, 0.22);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+/* ---- Scroll reveal -------------------------------------------------------- */
+.mkt-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mkt-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkt-reveal,
+  .mkt-reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+  .mkt-btn,
+  .mkt-card {
+    transition: none;
+  }
+}

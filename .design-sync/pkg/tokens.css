@@ -1,0 +1,64 @@
+/* SFDesk design tokens — the single source of truth for colour, and the
+ * font-family variables the app sets via next/font. Both palettes live here:
+ * the desk app runs on :root (orange); customer-facing surfaces opt into the
+ * blue "B2B Trust Blue" palette by adding the .mkt or .sf-theme class. */
+
+:root {
+  color-scheme: light;
+
+  /* neutrals */
+  --background: #fbfbfc;   /* app canvas */
+  --foreground: #1a1f36;
+  --paper: #ffffff;        /* cards / raised surfaces (alias of --card) */
+  --card: #ffffff;
+  --surface: #f5f6f8;      /* inputs, insets, muted panels */
+  --ink: #1a1f36;          /* primary text */
+  --muted: #697386;        /* secondary text */
+  --line: #e4e6ec;         /* borders, dividers */
+
+  /* accent — orange */
+  --accent: #ea580c;
+  --accent-fg: #ffffff;
+  --accent-weak: #fff2e8;
+
+  /* status */
+  --warn: #b7791f;         /* amber — pending / dispatched / attention */
+  --ok: #15803d;           /* green — paid / delivered / completed */
+  --danger: #b3402f;       /* clay red — cancelled / returned / errors */
+  --lime: #ffd8bf;         /* legacy soft-orange tint, kept for old data */
+
+  /* sidebar rail */
+  --sidebar: #f6f6f7;
+  --sidebar-fg: #3c4257;
+  --sidebar-muted: #8792a2;
+  --sidebar-active: #fff2e8;      /* = --accent-weak */
+  --sidebar-active-fg: #ea580c;   /* = --accent */
+
+  /* font families (the app assigns these from next/font on <html>) */
+  --font-plex-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-plex-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-spline: "Spline Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Customer-facing palette: marketing site (.mkt) + public storefront (.sf-theme).
+ * Add the class to a wrapper element; every token below is re-pointed for that
+ * subtree, so the same utility classes (bg-accent, text-muted, …) render blue. */
+.mkt,
+.sf-theme {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --surface: #eef2f8;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: #e2e8f0;
+
+  --accent: #1e40af;       /* primary blue — buttons, links, active borders */
+  --accent-fg: #ffffff;
+  --accent-weak: #eaf0ff;
+  --ok: #1e40af;           /* "included" ticks read as primary, not a 3rd colour */
+
+  --amber: #f59e0b;        /* secondary accent — eyebrows, numerals, highlights */
+  --amber-weak: #fdf0dc;
+}

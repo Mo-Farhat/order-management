@@ -1,0 +1,10 @@
+{
+  "projectId": "6476e4cd-6609-4da7-8dda-afeec1f0fe87",
+  "shape": "package",
+  "pkg": "sfdesk-ui",
+  "globalName": "SFDeskUI",
+  "cssEntry": "./styles.css",
+  "tokensGlob": ["tokens.css"],
+  "srcDir": "src",
+  "readmeHeader": ".design-sync/conventions.md"
+}
