@@ -19,7 +19,8 @@
     "db:studio": "drizzle-kit studio",
     "db:rls": "tsx scripts/apply-rls.ts",
     "guide": "tsx scripts/gen-guide.ts",
-    "guide:pdf": "tsx scripts/guide-pdf.ts"
+    "guide:pdf": "tsx scripts/guide-pdf.ts",
+    "marketing": "tsx scripts/gen-marketing.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",
