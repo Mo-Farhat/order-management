@@ -40,13 +40,14 @@ Local SME sellers running e-commerce through social DMs lose orders, lose track 
 - Not a custom solution per client. See §5 Product Principles — this is the load-bearing constraint on the whole build.
 - Not competing on features with Shopify-class tools. Competing on being scoped correctly for a business that doesn't need Shopify.
 - Not an agency retainer product. Support is self-serve; anything requiring a human per account breaks the economics.
+- Not a website builder. The storefront is **one configurable layout** — owners tune colours, fonts, copy, a banner and which sections show, but never add pages, rearrange the layout, or run a checkout. FR-17 (no payment, ever) is permanent. Higher tiers widen the configuration surface; they never change this ceiling.
 
 ## 5. Product principles (non-negotiable)
 
 These exist because the founder is aware of the failure mode and is writing it down before it happens.
 
 1. **No forks.** If one client needs a fix, it goes in a request list. It ships to everyone or it doesn't ship. It never ships for one account.
-2. **Configuration over customisation.** Where variation is real and expected (currency, whether stock tracking is on, delivery fee defaults), it's a setting every tenant has from day one. Where it isn't yet known to be real, ship the opinion — don't build a setting speculatively.
+2. **Configuration over customisation.** Where variation is real and expected (currency, whether stock tracking is on, delivery fee defaults), it's a setting every tenant has from day one. Where it isn't yet known to be real, ship the opinion — don't build a setting speculatively. The public storefront is the canonical case: one layout, a bounded set of presentation settings (colours, font, tone, banner, hero copy, section visibility, default sort), **tier-gated** so the surface grows with the plan — never a bespoke layout per shop.
 3. **The free-text note field is the pressure valve.** Edge cases that don't justify a feature go in a note, not a schema change.
 4. **Every tenant runs the same code.** Single codebase, single deploy, `tenant_id` scoping — never a per-client branch or config file.
 
@@ -108,15 +109,25 @@ Enforcement is server-side on every mutation, filtered by `tenant_id` before any
 - **FR-16:** Customers can select items and hand off to WhatsApp with a pre-filled message and reference code. *AC: message includes item names, quantities, subtotal, and a code the owner can locate in Order Desk to convert into a Draft order.*
 - **FR-17:** No payment or checkout happens on this page. *AC: there is no payment field, gateway integration, or amount-collection UI anywhere in this flow, by design, permanently.*
 - **FR-18:** Owner can pause the public page. *AC: paused state shows a static "not taking orders right now" message instead of the catalog.*
+- **FR-24:** Owner can upload a logo (all tiers) and a banner image (Studio+). *AC: stored in object storage, keyed per tenant; replacing an image deletes the old object; upload UI hides when storage is unconfigured.*
+- **FR-25:** Storefront presentation is a single per-shop config blob (`tenants.storefront_config`): accent + on-accent colour, secondary colour, background tone, font, tagline, hero headline/subhead, section visibility (banner / policy note / category nav / powered-by), default product sort. Each field is gated by the shop's `plan_tier`. *AC: a downgrade keeps stored values but stops rendering tier-gated fields — the storefront never errors; a re-upgrade restores them with no re-entry.*
+- **FR-26:** The catalog is a top nav + responsive grid + sort control. The category filter is server-side and URL-addressable (`?category=`), linkable from the product page; sort is `?sort=` (newest / price asc / price desc). *AC: a filtered/sorted URL is reload-safe and shareable; the product-page category eyebrow links back to the filtered catalog.*
 
 ### 7.6 Self-serve billing
 - **FR-19:** 14-day trial, no card required. *AC: full feature access during trial, card requested only at conversion.*
 - **FR-20:** Owner can upgrade, downgrade, pause (up to 3 months), or cancel without contacting support. *AC: every action completes from the billing settings screen.*
 - **FR-21:** Failed payment triggers retries at day 1/3/7, account goes read-only at day 10, data retained 90 days post read-only. *AC: verified against a test dunning schedule before launch.*
 
-### 7.7 Upgrade-to-website bridge
-- **FR-22:** Tenant can generate a scoped, revocable read API key exposing `/api/v1/products` and `/api/v1/catalog`. *AC: any external frontend (Forty Pixels' or another agency's) can render a storefront from this API without touching the Order Desk database directly.*
+### 7.7 Upgrade-to-website bridge (Pro tier)
+- **FR-22:** Tenant can generate a scoped, revocable read API key exposing `/api/v1/products` and `/api/v1/catalog`. *AC: any external frontend (Forty Pixels' or another agency's) can render a storefront from this API without touching the Order Desk database directly.* **Key creation requires the Pro tier**; keys created before a downgrade keep working.
 - **FR-23:** In-product upsell banner triggers on usage thresholds (50+ orders, 30+ products, or 90 days active). *AC: dismissible, reappears after 60 days, never blocks a workflow.*
+- **FR-27:** A Pro shop can have `pro_website_discount` set (by an operator, explicitly — not implied by tier), which surfaces the "20% off your full website" offer. Pro also unlocks removing the "powered by" line from the storefront footer.
+
+### 7.8 Plan tiers
+- **Basic** — today's storefront + logo upload. Price = the current monthly plan.
+- **Studio** — + banner, hero copy/tagline, curated font, secondary/background colour, section visibility, default sort. Price TBD.
+- **Pro** — + read API (FR-22), removable "powered by", and the discounted-website motion (FR-27). Price TBD.
+- `plan_tier` is a Postgres enum (`basic` / `studio` / `pro`) on `tenants`, **independent of `plan_status`**. Set manually via the `/admin` shop table until billing is wired. Tier structure & copy live in `lib/tiers.ts`; entitlement logic in `lib/entitlements.ts`.
 
 ## 8. Non-functional requirements
 
@@ -184,7 +195,7 @@ These are unresolved and should not be assumed by anyone reading this PRD:
 
 - **Product name.** "Storefront Desk" is a placeholder used throughout planning docs. Needs a real name and domain before public content or signup begins.
 - **Pivot trigger.** If active accounts don't reach ~20 within 6 months of launch, does the product fold back into a Forty Pixels-only lead magnet, or get killed? Not yet decided — decide before month 5, not during it.
-- **Single-tier pricing.** Currently planned as one price, one feature set, up to 5 users / 500 products. Revisit only after real usage data — not a pre-launch decision to relitigate.
+- **Tier pricing.** Basic keeps the current monthly price. Studio and Pro prices (and all pricing-card copy) are TBD — `lib/tiers.ts` carries `priceLKR: null` placeholders until the founder sets them. Tier *structure* is decided (§7.8); the numbers are not.
 
 ## 15. Related documents
 

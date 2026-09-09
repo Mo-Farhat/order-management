@@ -96,7 +96,7 @@ export function CartSheet({
     }`;
 
   const accentBtn =
-    "flex h-12 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50";
+    "flex h-12 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold text-[var(--sf-accent-fg)] disabled:opacity-50";
 
   async function copyMessage(): Promise<boolean> {
     try {
@@ -149,7 +149,7 @@ export function CartSheet({
           {view === "sent" && sent ? (
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <div
-                className="flex size-14 items-center justify-center rounded-full text-2xl text-white"
+                className="flex size-14 items-center justify-center rounded-full text-2xl text-[var(--sf-accent-fg)]"
                 style={{ background: "var(--sf-accent)" }}
               >
                 ✓

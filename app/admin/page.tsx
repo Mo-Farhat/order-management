@@ -86,6 +86,20 @@ export default async function AdminPage({
             </div>
           ))}
         </div>
+        <div className="mt-3 grid grid-cols-3 gap-3">
+          {[
+            ["basic", "Basic"],
+            ["studio", "Studio"],
+            ["pro", "Pro"],
+          ].map(([k, lbl]) => (
+            <div key={k} className="rounded-lg border border-line bg-surface px-3 py-3 text-center">
+              <p className="text-lg font-semibold tabular-nums">{overview.tierBreakdown[k] ?? 0}</p>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
+                {lbl} tier
+              </p>
+            </div>
+          ))}
+        </div>
         <p className="mt-2 text-xs text-muted">
           No payment provider is wired yet — set a shop&apos;s status by hand in the
           table below once they&apos;ve paid. Note that status is <strong>recorded, not

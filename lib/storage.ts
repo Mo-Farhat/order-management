@@ -47,8 +47,41 @@ const ALLOWED = new Map<string, string>([
 export const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
 export const MAX_PHOTO_MB = 3;
 
+/** Logo / banner are a bit larger than product photos. */
+export const MAX_TENANT_IMAGE_BYTES = 5 * 1024 * 1024;
+export const MAX_TENANT_IMAGE_MB = 5;
+
 export function publicUrlForKey(key: string): string {
   return `${publicBaseUrl!.replace(/\/$/, "")}/${key}`;
+}
+
+async function putImage(key: string, file: File): Promise<{ key: string }> {
+  const body = new Uint8Array(await file.arrayBuffer());
+  const res = await s3Fetch(config(), "PUT", key, body, {
+    "content-type": file.type,
+    "cache-control": "public, max-age=31536000, immutable",
+  });
+  if (!res.ok) {
+    throw new Error(`Image upload failed (${res.status}). Check your STORAGE_* settings.`);
+  }
+  return { key };
+}
+
+/**
+ * Upload a shop's logo or banner. Keyed `${tenantId}/logo/…` or
+ * `${tenantId}/banner/…` so replacement + cleanup (`deleteObject`) stay simple.
+ */
+export async function uploadTenantImage(
+  kind: "logo" | "banner",
+  tenantId: string,
+  file: File,
+): Promise<{ key: string }> {
+  const ext = ALLOWED.get(file.type);
+  if (!ext) throw new Error("Images must be JPEG, PNG, or WebP.");
+  if (file.size > MAX_TENANT_IMAGE_BYTES) {
+    throw new Error(`The ${kind} must be under ${MAX_TENANT_IMAGE_MB} MB.`);
+  }
+  return putImage(`${tenantId}/${kind}/${crypto.randomUUID()}.${ext}`, file);
 }
 
 export async function uploadProductPhoto(

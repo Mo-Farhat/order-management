@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStorefront } from "@/lib/share";
+import { SORT_KEYS, type SortKey } from "@/lib/validation";
 import { Storefront } from "@/components/share/storefront";
 
 export async function generateMetadata({
@@ -19,32 +20,33 @@ export default async function StorefrontPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ cart?: string }>;
+  searchParams: Promise<{ cart?: string; category?: string; sort?: string }>;
 }) {
   const { slug } = await params;
-  const { cart } = await searchParams;
-  const data = await getStorefront(slug);
+  const { cart, category, sort } = await searchParams;
+  const sortKey: SortKey | undefined =
+    sort && (SORT_KEYS as string[]).includes(sort) ? (sort as SortKey) : undefined;
+
+  const data = await getStorefront(slug, { category: category || undefined, sort: sortKey });
   if (!data) notFound();
 
   if ("paused" in data) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-        <h1 className="text-xl font-semibold">{data.name}</h1>
-        <p className="mt-2 max-w-sm text-sm text-muted">
+        <p className="max-w-sm text-sm text-muted">
           We&apos;re not taking orders right now. Please check back soon.
         </p>
       </main>
     );
   }
 
-  if (data.products.length === 0) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-        <h1 className="text-xl font-semibold">{data.tenant.name}</h1>
-        <p className="mt-2 text-sm text-muted">Catalog coming soon.</p>
-      </main>
-    );
-  }
-
-  return <Storefront slug={slug} storefront={data} openCart={cart === "1"} />;
+  return (
+    <Storefront
+      slug={slug}
+      storefront={data}
+      openCart={cart === "1"}
+      category={category || ""}
+      sort={sortKey ?? null}
+    />
+  );
 }

@@ -35,11 +35,15 @@ No account, no login, no payment on this page. It ends at WhatsApp — everythin
 
 ### S1 — Public catalog page
 **Purpose:** browse and select, nothing else.
+**Layout:** one configurable layout wrapped in a shared shell (`getStorefrontChrome` in the route layout wraps every state — catalog, product, paused, empty, error):
+- Sticky top nav: logo + name (home link), category links (URL-addressable `?category=`), live cart button
+- Optional masthead (Studio+): banner image + hero headline / subhead / tagline
+- Responsive product grid (2 → 3–4 columns) with a sort control (`?sort=` newest / price asc / price desc)
+- Footer: WhatsApp + Instagram links, policy note, "powered by" (removable on Pro)
 **Elements:**
-- Business name, logo, one accent colour (owner-set), WhatsApp contact icon
 - Product grid: photo, name, price, stock status (in stock / low stock / out of stock — no exact count shown to customers)
-- Category filter if the business has categories
-- Persistent "cart" indicator once an item is selected (count + subtotal)
+- Category filter is **server-side and URL-addressable** — a filtered/sorted URL is reload-safe and shareable
+- Persistent "cart" indicator once an item is selected (count + subtotal), synced across the nav badge and the grid
 **States:** default, empty-catalog (business hasn't added products yet — should not be publicly reachable in this state, redirect or show a simple "coming soon"), out-of-stock-item (shown, disabled)
 
 ### S2 — Item selection
@@ -55,18 +59,16 @@ No account, no login, no payment on this page. It ends at WhatsApp — everythin
 - Single button: "Order on WhatsApp" — opens WhatsApp with a pre-filled message containing item list, quantities, subtotal, and a short reference code
 **States:** default, empty-selection (button disabled with a nudge to add items)
 
-## Owner-side: share link settings (minimal)
-**Purpose:** the only configuration surface for this page — deliberately small.
+## Owner-side: share link settings (tier-gated)
+**Purpose:** the configuration surface for this page — bounded, one layout, more knobs on higher tiers. Fields the shop's tier doesn't unlock render greyed with a "✦ Studio" / "✦ Pro" pill; a downgrade keeps stored values but stops rendering them on the storefront.
 **Elements:**
-- Logo upload
-- One accent colour picker
-- Business name (inherited from account, editable here)
-- Delivery note / policy text (shown on S3)
-- Toggle: page live / paused
-- Copyable link + QR code for offline sharing (business cards, physical shop)
+- **Basic:** logo upload · accent + on-accent colour · category nav order · delivery/policy note · page live/paused · copyable link + QR
+- **Studio:** banner image · secondary colour · background tone · font · tagline · hero headline/subhead · section show-hide (banner / policy note / category nav) · default product sort
+- **Pro:** remove the "powered by" line · read API keys (`/desk/settings`) · `pro_website_discount` offer (operator-set)
+- Business name (inherited from account, editable in Settings)
 **States:** default, page-paused (shows a simple "we're not taking orders right now" page to visitors)
 
 ## Notes for Claude Design
-- This page should look intentionally good but obviously constrained — same product photography and clean type as a real storefront, but simpler layout, no custom sections, no brand storytelling. The gap between this and a full website should be visible without being ugly.
+- This page should look intentionally good but stay one constrained layout — Studio/Pro add a banner, hero copy, font and section toggles, but never new pages, a rearrangeable layout, or a checkout. The gap between this and a full website should still be visible: this is the taste of the eventual site, not the site.
 - Design this and the internal Order Desk item-selection screen (03, S4) as visual siblings — same tile pattern, same interaction — since one literally feeds the other.
 - QR code should be a first-class element on the owner settings screen, not an afterthought link — many of these businesses operate a physical counter as well as DMs.
