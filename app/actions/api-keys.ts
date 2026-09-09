@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 
+import { eq } from "drizzle-orm";
+
 import { requireCapability } from "@/lib/session";
 import { createApiKey, revokeApiKey } from "@/lib/api-keys";
+import { tierAllows } from "@/lib/entitlements";
 import { db } from "@/db";
-import { auditLog } from "@/db/schema";
+import { auditLog, tenants } from "@/db/schema";
 
 export type ApiKeyState =
   | { error?: string; ok?: string; plaintext?: string }
@@ -16,6 +19,15 @@ export async function createApiKeyAction(
   formData: FormData,
 ): Promise<ApiKeyState> {
   const ctx = await requireCapability("billing"); // owner-only, like other account settings
+
+  const t = await db.query.tenants.findFirst({
+    where: eq(tenants.id, ctx.tenantId),
+    columns: { planTier: true },
+  });
+  if (!tierAllows(t?.planTier, "readApi")) {
+    return { error: "The read API is a Pro feature. Upgrade to Pro to create keys." };
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   if (name.length < 1) return { error: "Give the key a name so you can tell them apart." };
   if (name.length > 60) return { error: "Keep the name under 60 characters." };

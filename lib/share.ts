@@ -1,14 +1,23 @@
 import "server-only";
+import { cache } from "react";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { memberships, productPhotos, products, tenants, users } from "@/db/schema";
+import type { PlanTier } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import { computeTotals, fromCents, toCents } from "@/lib/money";
 import { normalizePhone, toWhatsAppNumber } from "@/lib/phone";
 import { sendNewOrderEmail } from "@/lib/email";
 import { appUrl } from "@/lib/constants";
+import { onAccentFor, type SortKey, type StorefrontConfig } from "@/lib/validation";
+import { honoredConfig, showsPoweredBy, tierAllows } from "@/lib/entitlements";
 import type { ActiveContext } from "@/lib/session";
+
+/** One lookup on `tenants.slug` per request, shared by chrome + catalog reads. */
+const tenantBySlug = cache((slug: string) =>
+  db.query.tenants.findFirst({ where: eq(tenants.slug, slug) }),
+);
 
 export type StorefrontProduct = {
   id: string;
@@ -45,8 +54,79 @@ function storefrontTenant(t: typeof tenants.$inferSelect): StorefrontTenant {
 
 export type Storefront = {
   tenant: StorefrontTenant;
+  sort: SortKey;
+  masthead: { bannerUrl: string | null; title: string | null; subtitle: string | null } | null;
   categories: string[];
   products: StorefrontProduct[];
+  /** Full catalog for cart lookups (equals `products` when unfiltered). */
+  cartProducts: StorefrontProduct[];
+};
+
+/**
+ * The per-shop presentation that wraps every `/s/{slug}` state (catalog,
+ * product, paused, empty, error) — fetched once in `app/s/[slug]/layout.tsx`.
+ * `config` is already tier-honored; `accentFg` is baked from the accent.
+ */
+export type StorefrontChrome = {
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  accentColor: string;
+  accentFg: string;
+  whatsappNumber: string | null;
+  instagramHandle: string | null;
+  sharePolicyText: string | null;
+  paused: boolean;
+  tier: PlanTier;
+  config: ReturnType<typeof honoredConfig>;
+  categories: string[];
+  showPoweredBy: boolean;
+};
+
+export async function getStorefrontChrome(slug: string): Promise<StorefrontChrome | null> {
+  const t = await tenantBySlug(slug);
+  if (!t) return null;
+
+  const config = honoredConfig(t.planTier, t.storefrontConfig);
+  const accentColor = t.accentColor || "#1e40af";
+
+  const rows = t.publicPagePaused
+    ? []
+    : await db
+        .select({ category: products.category })
+        .from(products)
+        .where(
+          and(
+            eq(products.tenantId, t.id),
+            isNull(products.archivedAt),
+            eq(products.storefrontHidden, false),
+          ),
+        );
+
+  return {
+    name: t.name,
+    slug: t.slug,
+    logoUrl: t.logoKey ? publicUrlForKey(t.logoKey) : null,
+    bannerUrl:
+      tierAllows(t.planTier, "bannerImage") && t.bannerKey ? publicUrlForKey(t.bannerKey) : null,
+    accentColor,
+    accentFg: onAccentFor(accentColor, config.onAccentColor),
+    whatsappNumber: t.whatsappNumber,
+    instagramHandle: t.instagramHandle,
+    sharePolicyText: t.sharePolicyText,
+    paused: t.publicPagePaused,
+    tier: t.planTier,
+    config,
+    categories: storefrontChips(t.storefrontCategories, rows.map((r) => r.category)),
+    showPoweredBy: showsPoweredBy(t.planTier, t.storefrontConfig),
+  };
+}
+
+const SORT_ORDER: Record<SortKey, ReturnType<typeof asc>> = {
+  newest: desc(products.createdAt),
+  price_asc: asc(products.price),
+  price_desc: desc(products.price),
 };
 
 function stockStateOf(
@@ -74,16 +154,42 @@ function storefrontChips(
 /** Public read for `/s/{slug}`. `paused` when the owner switched the page off. */
 export async function getStorefront(
   slug: string,
+  opts: { category?: string; sort?: SortKey } = {},
 ): Promise<Storefront | { paused: true; name: string } | null> {
-  const tenant = await db.query.tenants.findFirst({ where: eq(tenants.slug, slug) });
+  const tenant = await tenantBySlug(slug);
   if (!tenant) return null;
   if (tenant.publicPagePaused) return { paused: true, name: tenant.name };
+
+  const config = honoredConfig(tenant.planTier, tenant.storefrontConfig);
+  const sort: SortKey = opts.sort ?? config.defaultSort;
+
+  const where = [
+    eq(products.tenantId, tenant.id),
+    isNull(products.archivedAt),
+    eq(products.storefrontHidden, false),
+  ];
+  if (opts.category) where.push(eq(products.category, opts.category));
 
   const rows = await db
     .select()
     .from(products)
-    .where(and(eq(products.tenantId, tenant.id), isNull(products.archivedAt), eq(products.storefrontHidden, false)))
-    .orderBy(asc(products.name));
+    .where(and(...where))
+    .orderBy(SORT_ORDER[sort], asc(products.name));
+
+  // When a category filter narrows the grid we still need every catalog item
+  // for the cart (a shopper can filter after adding things from another category).
+  const cartRows = opts.category
+    ? await db
+        .select({ id: products.id, name: products.name, price: products.price })
+        .from(products)
+        .where(
+          and(
+            eq(products.tenantId, tenant.id),
+            isNull(products.archivedAt),
+            eq(products.storefrontHidden, false),
+          ),
+        )
+    : null;
 
   const photos = rows.length
     ? await db
@@ -97,17 +203,48 @@ export async function getStorefront(
     if (!firstPhoto.has(ph.productId)) firstPhoto.set(ph.productId, publicUrlForKey(ph.key));
   }
 
+  const bannerUrl =
+    tierAllows(tenant.planTier, "bannerImage") && tenant.bannerKey
+      ? publicUrlForKey(tenant.bannerKey)
+      : null;
+  const masthead =
+    config.sections.banner === false
+      ? null
+      : bannerUrl || config.heroTitle || config.heroSubtitle || config.tagline
+        ? {
+            bannerUrl,
+            title: config.heroTitle ?? null,
+            subtitle: config.heroSubtitle ?? config.tagline ?? null,
+          }
+        : null;
+
+  const shown: StorefrontProduct[] = rows.map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    category: p.category,
+    photoUrl: firstPhoto.get(p.id) ?? null,
+    stockState: stockStateOf(p, tenant.stockTrackingEnabled),
+  }));
+
+  const cartProducts: StorefrontProduct[] = cartRows
+    ? cartRows.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        category: null,
+        photoUrl: firstPhoto.get(p.id) ?? null,
+        stockState: "in",
+      }))
+    : shown;
+
   return {
     tenant: storefrontTenant(tenant),
+    sort,
+    masthead,
     categories: storefrontChips(tenant.storefrontCategories, rows.map((r) => r.category)),
-    products: rows.map((p) => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      category: p.category,
-      photoUrl: firstPhoto.get(p.id) ?? null,
-      stockState: stockStateOf(p, tenant.stockTrackingEnabled),
-    })),
+    products: shown,
+    cartProducts,
   };
 }
 
@@ -129,7 +266,7 @@ export async function getStorefrontProduct(
   slug: string,
   productId: string,
 ): Promise<StorefrontProductDetail | null> {
-  const tenant = await db.query.tenants.findFirst({ where: eq(tenants.slug, slug) });
+  const tenant = await tenantBySlug(slug);
   if (!tenant || tenant.publicPagePaused) return null;
 
   const product = await db.query.products.findFirst({

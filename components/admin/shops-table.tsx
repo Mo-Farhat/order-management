@@ -108,6 +108,8 @@ export function ShopsTable({ rows }: { rows: ShopRow[] }) {
                 <PlanCell
                   tenantId={s.id}
                   planStatus={s.planStatus}
+                  planTier={s.planTier}
+                  proWebsiteDiscount={s.proWebsiteDiscount}
                   trialEndsAt={s.trialEndsAt}
                 />
               </td>

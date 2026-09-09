@@ -154,18 +154,37 @@ layout once orders ≥ 50, products ≥ 30, or account age ≥ 90 days; dismissi
 |---|---|
 | `share_carts` | a public visitor's frozen selection + short reference `code` (unique per tenant), plus their name / phone / address / note. `status` ∈ pending/imported. |
 
-`tenants` gains `accent_color`, `logo_key`, `share_policy_text`,
-`storefront_categories` (ordered chip list, null = every distinct category);
-`whatsapp_number` is the storefront's contact number (edited here, not in
-account settings). `public_page_paused` already existed.
+`tenants` gains `accent_color`, `logo_key`, `banner_key`, `share_policy_text`,
+`storefront_categories` (ordered chip list, null = every distinct category),
+`storefront_config` (jsonb — presentation blob: colours, font, bg tone, hero
+copy, section visibility, default sort), `plan_tier` (enum `basic`/`studio`/`pro`,
+independent of `plan_status`) and `pro_website_discount`. `whatsapp_number` is
+the storefront's contact number (edited here, not in account settings).
+`public_page_paused` already existed. New columns need **no** RLS change
+(`tenants` is policied table-level on `id`) — no `npm run db:rls` re-run.
 
-- **Catalog page** `app/s/[slug]/page.tsx` — `getStorefront` returns the catalog
-  (stock as in/low/out, never a count), the ordered chip list, and tenant
-  presentation. Product tiles link to…
+- **Shell** — `app/s/[slug]/layout.tsx` is async: `getStorefrontChrome(slug)`
+  selects the tenant row + public category list, applies
+  `lib/entitlements.ts#honoredConfig` (tier-gates which config fields render) and
+  `onAccentFor` (bakes the on-accent colour), then `components/share/storefront-shell.tsx`
+  sets `--sf-accent` / `--sf-accent-fg` / `--sf-secondary` + `data-sf-font` /
+  `data-sf-bg` **once** and renders the sticky nav + footer around every state.
+  `tenantBySlug(slug)` is React-`cache()`d so the layout and page share one
+  lookup. `error.tsx` keeps a hardcoded accent fallback.
+- **Catalog page** `app/s/[slug]/page.tsx` — `getStorefront(slug, {category, sort})`
+  server-filters (`eq(products.category, …)`) and server-sorts (newest /
+  price asc / price desc, default from `storefront_config.defaultSort`). Both are
+  URL params (`?category=`, `?sort=`), so a filtered view is reload-safe and
+  shareable. Returns `cartProducts` (full catalog) alongside the filtered grid so
+  the cart still resolves items added from another category.
 - **Product page** `app/s/[slug]/[id]/page.tsx` — `getStorefrontProduct`: photo
-  gallery, full description, add-to-cart.
+  gallery, full description, two-column on desktop; the category eyebrow links to
+  `?category=`.
+- **Fonts** — curated `next/font/google` families (Fraunces, Nunito) loaded in
+  `app/layout.tsx`, applied only under `.sf-theme[data-sf-font=…]` in globals.css.
 - **Cart** — `components/share/use-cart.ts` persists to `localStorage` keyed by
-  slug so it survives navigating between the two pages.
+  slug; a `sf-cart` window event (same tab) + the native `storage` event
+  (other tabs) keep the nav badge and the grid in sync.
 - **Cart sheet** — `components/share/cart-sheet.tsx`: a bottom-sheet with a cart
   view (per-item steppers + remove, live subtotal) → checkout view (per-field
   inline validation, touched/error states) → sending (spinner) → success
@@ -175,9 +194,15 @@ account settings). `public_page_paused` already existed.
   deep-link body (with the customer details) + reference code.
 - **Import** — `/desk/orders/new?code=XXXX` pre-fills the composer (incl.
   address); `createOrderAction` marks the cart `imported`.
-- **Settings** — `app/desk/share/page.tsx`: WhatsApp number, accent colour,
-  category-chip picker (reorderable), policy text, pause toggle
-  (`saveShareSettings`), copyable link + server-rendered SVG QR (`qrcode`).
+- **Settings** — `app/desk/share/page.tsx` + `share-settings-form.tsx`: sectioned
+  (Contact / Branding / Content / Layout / Categories / Policy), tier-gated via a
+  `<Locked>` wrapper. `saveShareSettings` fetches the `before` row, parses a
+  single hidden `storefrontConfig` JSON field, **entitlement-filters it**
+  (`pickAllowedConfig`) so a locked field can't be written even by a tampered
+  form, handles logo/banner upload via `lib/storage.ts#uploadTenantImage`
+  (`deleteObject` on replace), writes a `storefront.settings_updated` audit row
+  (with a no-change guard), and revalidates `/desk/share` + `/s/{slug}` (layout).
+  Copyable link + server-rendered SVG QR (`qrcode`) unchanged.
 
 ## Desk shell (dashboard console)
 
@@ -212,6 +237,12 @@ breakdown, GMV / collected / outstanding), `shopsTable` (per-shop orders / GMV
 orders / GMV / new-shops for the chart — `recharts`). Range selector
 (7 / 30 / 90 / all) via `?range`. The desk sidebar shows an "Operator" link
 only when the signed-in email is an admin.
+
+`setTenantPlan` (`app/actions/admin.ts`, from the shop-table `PlanCell`) sets
+`plan_status`, `plan_tier` and `pro_website_discount` (and can extend the trial)
+in one form; the change is written to a single `tenant.plan_changed` audit row
+(tier + discount in the payload) with a no-change guard. `platformOverview` also
+returns `tierBreakdown`.
 
 ## Authorization
 
