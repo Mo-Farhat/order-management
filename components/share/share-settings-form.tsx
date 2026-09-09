@@ -3,7 +3,7 @@
 import { useActionState, useState, type ReactNode } from "react";
 import { saveShareSettings } from "@/app/actions/share";
 import { FormError } from "@/components/form";
-import { Btn } from "@/components/desk/ui";
+import { SubmitBtn } from "@/components/desk/submit-btn";
 import {
   FONT_CHOICES,
   SORT_KEYS,
@@ -431,7 +431,7 @@ export function ShareSettingsForm({
         />
       </label>
 
-      <Btn type="submit" className="self-start">Save settings</Btn>
+      <SubmitBtn className="self-start" pendingLabel="Saving…">Save settings</SubmitBtn>
     </form>
   );
 }

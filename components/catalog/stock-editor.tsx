@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { quickSetStockAction } from "@/app/actions/catalog";
+import { Spinner } from "@/components/desk/ui";
 
 /**
  * Catalog S4 — quick stock editor. +/- steppers and direct entry, saves on blur
@@ -91,8 +92,16 @@ export function StockEditor({
           +
         </button>
       </div>
-      <span className="font-mono text-[9px] uppercase tracking-wide text-muted">
-        {error ? <span className="text-danger">{error}</span> : pending ? "saving…" : "in stock"}
+      <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wide text-muted">
+        {error ? (
+          <span className="text-danger">{error}</span>
+        ) : pending ? (
+          <>
+            <Spinner /> saving…
+          </>
+        ) : (
+          "in stock"
+        )}
       </span>
     </div>
   );

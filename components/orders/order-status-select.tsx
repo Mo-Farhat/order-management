@@ -8,6 +8,7 @@ import {
   DELIVERY_STATUS_LABEL,
 } from "@/lib/pipeline";
 import { setOrderStatusAction, setDeliveryStatusAction } from "@/app/actions/orders";
+import { Spinner } from "@/components/desk/ui";
 import type { OrderStatus, DeliveryStatus } from "@/db/schema";
 
 type Kind = "order" | "delivery";
@@ -48,6 +49,7 @@ export function StatusSelect({
 
   return (
     <div className="flex flex-col gap-0.5">
+      <div className="relative flex items-center">
       <select
         value={current}
         disabled={pending}
@@ -74,6 +76,10 @@ export function StatusSelect({
           </option>
         ))}
       </select>
+      {pending && (
+        <Spinner className="pointer-events-none absolute right-5 text-muted" />
+      )}
+      </div>
       {err && <span className="text-[10px] text-danger">{err}</span>}
     </div>
   );

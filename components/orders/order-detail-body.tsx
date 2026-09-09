@@ -5,6 +5,7 @@ import type { OrderDetail } from "@/lib/orders";
 import { toCents, fromCents } from "@/lib/money";
 import { StatusSelect } from "@/components/orders/order-status-select";
 import { PaymentPill } from "@/components/orders/status-pill";
+import { Spinner } from "@/components/desk/ui";
 import {
   updatePaymentAction,
   updateOrderNoteAction,
@@ -253,8 +254,13 @@ function CourierField({
         className="h-7 w-32 rounded border border-line bg-surface px-2 text-xs outline-none focus:border-accent"
       />
       {value !== (courier ?? "") && (
-        <button className="text-[10px] font-semibold uppercase tracking-widest text-accent" disabled={pending}>
-          {pending ? "…" : "save"}
+        <button
+          className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-accent disabled:opacity-50"
+          disabled={pending}
+          aria-busy={pending || undefined}
+        >
+          {pending && <Spinner />}
+          save
         </button>
       )}
     </form>
@@ -315,9 +321,11 @@ function PaymentForm({
       {state?.error && <p className="text-xs text-danger">{state.error}</p>}
       <button
         disabled={pending}
-        className="self-start rounded-md border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
+        aria-busy={pending || undefined}
+        className="inline-flex items-center gap-1.5 self-start rounded-md border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
       >
-        {pending ? "…" : "Update payment"}
+        {pending && <Spinner />}
+        {pending ? "Saving…" : "Update payment"}
       </button>
     </form>
   );
@@ -353,9 +361,11 @@ function NoteForm({
       {value !== note && (
         <button
           disabled={pending}
-          className="self-start rounded-md border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
+          aria-busy={pending || undefined}
+          className="inline-flex items-center gap-1.5 self-start rounded-md border border-line px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest disabled:opacity-50"
         >
-          {pending ? "…" : "Save note"}
+          {pending && <Spinner />}
+          {pending ? "Saving…" : "Save note"}
         </button>
       )}
     </form>
@@ -388,9 +398,11 @@ function PendingBar({ orderId, onDone }: { orderId: string; onDone?: () => void 
               else onDone?.();
             })
           }
-          className="rounded-md bg-ok px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+          aria-busy={pending || undefined}
+          className="inline-flex items-center gap-1.5 rounded-md bg-ok px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
         >
-          {pending ? "…" : "Accept order"}
+          {pending && <Spinner />}
+          {pending ? "Accepting…" : "Accept order"}
         </button>
         <form
           action={(fd) =>
@@ -409,8 +421,10 @@ function PendingBar({ orderId, onDone }: { orderId: string; onDone?: () => void 
           />
           <button
             disabled={pending}
-            className="rounded-md border border-danger/50 px-4 py-1.5 text-sm font-semibold text-danger disabled:opacity-50"
+            aria-busy={pending || undefined}
+            className="inline-flex items-center gap-1.5 rounded-md border border-danger/50 px-4 py-1.5 text-sm font-semibold text-danger disabled:opacity-50"
           >
+            {pending && <Spinner />}
             Decline
           </button>
         </form>

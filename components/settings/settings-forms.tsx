@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { saveBusinessSettings, changePassword, type SettingsState } from "@/app/actions/settings";
 import { FormError } from "@/components/form";
-import { Btn } from "@/components/desk/ui";
+import { SubmitBtn } from "@/components/desk/submit-btn";
 
 function Note({ state }: { state: SettingsState }) {
   return (
@@ -130,7 +130,7 @@ export function BusinessSettingsForm({
           className="size-5 accent-[var(--color-accent)]"
         />
       </label>
-      <Btn type="submit" className="self-start">Save</Btn>
+      <SubmitBtn className="self-start" pendingLabel="Saving…">Save</SubmitBtn>
     </form>
   );
 }
@@ -171,7 +171,7 @@ export function ChangePasswordForm({ hasPassword }: { hasPassword: boolean }) {
       <p className="text-xs text-muted">
         Changing your password signs out every other device.
       </p>
-      <Btn type="submit" className="self-start">Change password</Btn>
+      <SubmitBtn className="self-start" pendingLabel="Saving…">Change password</SubmitBtn>
     </form>
   );
 }

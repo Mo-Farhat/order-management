@@ -3,7 +3,8 @@
 import { useActionState, useState, useTransition } from "react";
 import { createApiKeyAction, revokeApiKeyAction } from "@/app/actions/api-keys";
 import { FormError } from "@/components/form";
-import { Btn } from "@/components/desk/ui";
+import { Spinner } from "@/components/desk/ui";
+import { SubmitBtn } from "@/components/desk/submit-btn";
 
 type KeyRow = {
   id: string;
@@ -69,9 +70,11 @@ export function ApiKeys({ keys }: { keys: KeyRow[] }) {
                 <button
                   type="button"
                   disabled={revoking}
+                  aria-busy={revoking || undefined}
                   onClick={() => startRevoke(() => revokeApiKeyAction(k.id).then(() => {}))}
-                  className="shrink-0 rounded border border-danger/40 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-danger disabled:opacity-40"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded border border-danger/40 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-danger disabled:opacity-40"
                 >
+                  {revoking && <Spinner />}
                   Revoke
                 </button>
               )}
@@ -92,7 +95,7 @@ export function ApiKeys({ keys }: { keys: KeyRow[] }) {
             className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-accent"
           />
         </label>
-        <Btn type="submit">Create</Btn>
+        <SubmitBtn pendingLabel="Creating…">Create</SubmitBtn>
       </form>
       <FormError message={state?.error} />
     </div>

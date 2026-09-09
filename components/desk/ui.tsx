@@ -96,13 +96,37 @@ export function StatCard({
   );
 }
 
+/** Inline loading spinner — inherits `currentColor`, sized to the text. */
+export function Spinner({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={`animate-spin ${className}`}
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+      <path
+        d="M21 12a9 9 0 0 0-9-9"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 type BtnProps = {
   variant?: "primary" | "outline" | "ghost" | "danger";
   size?: "sm" | "md";
+  /** Show a spinner and disable the button while an action is in flight. */
+  loading?: boolean;
   children: ReactNode;
 };
 
-function btnCls({ variant = "primary", size = "md" }: BtnProps) {
+function btnCls({ variant = "primary", size = "md" }: Omit<BtnProps, "children">) {
   const base =
     "inline-flex items-center justify-center gap-1.5 rounded-md font-mono font-semibold uppercase tracking-widest transition-colors disabled:opacity-40";
   const sizes = { sm: "h-8 px-3 text-[10px]", md: "h-10 px-4 text-[11px]" };
@@ -120,9 +144,9 @@ export function BtnLink({
   size,
   children,
   ...rest
-}: BtnProps & ComponentProps<typeof Link>) {
+}: Omit<BtnProps, "loading"> & ComponentProps<typeof Link>) {
   return (
-    <Link className={btnCls({ variant, size, children })} {...rest}>
+    <Link className={btnCls({ variant, size })} {...rest}>
       {children}
     </Link>
   );
@@ -131,12 +155,20 @@ export function BtnLink({
 export function Btn({
   variant,
   size,
+  loading = false,
   children,
   className = "",
+  disabled,
   ...rest
 }: BtnProps & ComponentProps<"button"> & { className?: string }) {
   return (
-    <button className={`${btnCls({ variant, size, children })} ${className}`} {...rest}>
+    <button
+      className={`${btnCls({ variant, size })} ${className}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...rest}
+    >
+      {loading && <Spinner />}
       {children}
     </button>
   );

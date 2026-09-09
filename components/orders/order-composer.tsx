@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import type { OrderState } from "@/app/actions/orders";
 import { computeTotals, toCents } from "@/lib/money";
 import { FormError } from "@/components/form";
+import { Spinner } from "@/components/desk/ui";
 
 type Product = {
   id: string;
@@ -403,16 +405,20 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function SubmitBtn({ label, build }: { label: string; build: () => string }) {
+  const { pending } = useFormStatus();
   return (
     <button
       type="submit"
+      disabled={pending}
+      aria-busy={pending || undefined}
       onClick={() => {
         const el = document.getElementById("order-payload") as HTMLInputElement | null;
         if (el) el.value = build();
       }}
-      className="h-11 rounded-md bg-accent px-5 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg"
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-accent px-5 font-mono text-xs font-semibold uppercase tracking-widest text-accent-fg transition-opacity disabled:opacity-50"
     >
-      {label}
+      {pending && <Spinner />}
+      {pending ? "Saving…" : label}
     </button>
   );
 }

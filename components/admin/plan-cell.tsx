@@ -4,6 +4,7 @@ import { useFormStatus } from "react-dom";
 import { setTenantPlan } from "@/app/actions/admin";
 import { PLAN_OPTIONS } from "@/lib/plans";
 import { TIER_OPTIONS } from "@/lib/entitlements";
+import { Spinner } from "@/components/desk/ui";
 import type { PlanStatus, PlanTier } from "@/db/schema";
 
 const TONE: Record<PlanStatus, string> = {
@@ -39,7 +40,8 @@ function Controls({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex gap-1">
+      <div className="flex items-center gap-1">
+        {pending && <Spinner className="text-muted" />}
         <select
           name="planStatus"
           defaultValue={planStatus}

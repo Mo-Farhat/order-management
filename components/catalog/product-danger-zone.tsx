@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { archiveProductAction, deleteProductAction } from "@/app/actions/catalog";
+import { Spinner } from "@/components/desk/ui";
 
 export function ProductDangerZone({
   productId,
@@ -27,9 +28,11 @@ export function ProductDangerZone({
       <button
         type="button"
         disabled={pending}
+        aria-busy={pending || undefined}
         onClick={() => start(() => archiveProductAction(productId, !archived))}
-        className="self-start rounded-md border border-line px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 self-start rounded-md border border-line px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest disabled:opacity-50"
       >
+        {pending && <Spinner />}
         {archived ? "Unarchive" : "Archive"}
       </button>
       <p className="text-xs text-muted">
@@ -50,8 +53,10 @@ export function ProductDangerZone({
                     if (res?.error) setError(res.error);
                   })
                 }
-                className="rounded-md bg-danger px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-white disabled:opacity-50"
+                aria-busy={pending || undefined}
+                className="inline-flex items-center gap-1.5 rounded-md bg-danger px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-white disabled:opacity-50"
               >
+                {pending && <Spinner />}
                 Delete for good
               </button>
               <button

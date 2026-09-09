@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/catalog";
 import type { ImportPreview } from "@/lib/csv-import";
 import { FormError, SubmitButton } from "@/components/form";
+import { Spinner } from "@/components/desk/ui";
 
 const TEMPLATE = "name,price,stock,category,sku\nRose bouquet,3500,12,Flowers,RB-01\nGift card,1000,0,,GC";
 
@@ -61,7 +62,11 @@ export function ImportForm() {
         />
       </div>
 
-      {pending && <p className="text-sm text-muted">Checking…</p>}
+      {pending && (
+        <p className="flex items-center gap-1.5 text-sm text-muted">
+          <Spinner /> Checking…
+        </p>
+      )}
       {previewError && <FormError message={previewError} />}
 
       {preview && (

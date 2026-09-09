@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
+import { Spinner } from "@/components/desk/ui";
 
 export function CatalogSearch({
   defaultQuery,
@@ -17,7 +18,7 @@ export function CatalogSearch({
   const router = useRouter();
   const params = useSearchParams();
   const [q, setQ] = useState(defaultQuery);
-  const [, startTransition] = useTransition();
+  const [busy, startTransition] = useTransition();
 
   function push(next: URLSearchParams) {
     startTransition(() => router.replace(`/desk/catalog?${next.toString()}`));
@@ -47,12 +48,17 @@ export function CatalogSearch({
 
   return (
     <div className="flex flex-col gap-2">
-      <input
-        value={q}
-        onChange={(e) => onSearch(e.target.value)}
-        placeholder="Search by name"
-        className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-ink"
-      />
+      <div className="relative">
+        <input
+          value={q}
+          onChange={(e) => onSearch(e.target.value)}
+          placeholder="Search by name"
+          className="h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm outline-none focus:border-ink"
+        />
+        {busy && (
+          <Spinner className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted" />
+        )}
+      </div>
       {/* Category chips only appear once there are 2+ categories (UX S1). */}
       {categories.length >= 2 && (
         <div className="flex flex-wrap gap-1.5">
