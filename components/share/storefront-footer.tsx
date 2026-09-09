@@ -12,15 +12,15 @@ export function StorefrontFooter({ chrome }: { chrome: StorefrontChrome }) {
     chrome.config.sections.policyNote !== false && Boolean(chrome.sharePolicyText);
 
   return (
-    <footer className="mt-8 border-t border-line bg-card">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm">
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
+    <footer className="mt-12 border-t border-line bg-card">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-8">
+        <div className="sf-eyebrow flex flex-wrap gap-x-5 gap-y-1.5">
           {wa && (
             <a
               href={`https://wa.me/${wa}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[var(--sf-accent)] hover:underline"
+              className="text-[var(--sf-accent)] hover:opacity-70"
             >
               WhatsApp
             </a>
@@ -30,7 +30,7 @@ export function StorefrontFooter({ chrome }: { chrome: StorefrontChrome }) {
               href={`https://ig.me/m/${chrome.instagramHandle}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[var(--sf-accent)] hover:underline"
+              className="text-[var(--sf-accent)] hover:opacity-70"
             >
               Instagram
             </a>
@@ -38,14 +38,14 @@ export function StorefrontFooter({ chrome }: { chrome: StorefrontChrome }) {
         </div>
 
         {showPolicy && (
-          <p className="max-w-prose whitespace-pre-line text-xs text-muted">
+          <p className="max-w-prose whitespace-pre-line text-xs leading-relaxed text-muted">
             {chrome.sharePolicyText}
           </p>
         )}
 
         {chrome.showPoweredBy && (
-          <p className="text-xs text-muted">
-            Powered by <span className="font-medium">{APP_NAME}</span>
+          <p className="sf-eyebrow text-muted">
+            Powered by {APP_NAME}
           </p>
         )}
       </div>

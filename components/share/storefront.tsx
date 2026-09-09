@@ -61,39 +61,43 @@ export function Storefront({
 
   return (
     <>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-4">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6">
         {masthead && (
-          <section className="mb-6 overflow-hidden rounded-2xl border border-line bg-card">
+          <section className="mb-8">
             {masthead.bannerUrl && (
-              <div className="aspect-[3/1] w-full">
+              <div className="aspect-[3/1] w-full overflow-hidden rounded-[4px] border border-line">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={masthead.bannerUrl} alt="" className="size-full object-cover" />
               </div>
             )}
             {(masthead.title || masthead.subtitle) && (
-              <div className="px-5 py-4">
+              <div className={masthead.bannerUrl ? "mt-4" : ""}>
                 {masthead.title && (
-                  <h1 className="text-xl font-semibold">{masthead.title}</h1>
+                  <h1 className="text-[1.7rem] font-semibold leading-tight tracking-tight">
+                    {masthead.title}
+                  </h1>
                 )}
                 {masthead.subtitle && (
-                  <p className="mt-1 text-sm text-muted">{masthead.subtitle}</p>
+                  <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-muted">
+                    {masthead.subtitle}
+                  </p>
                 )}
               </div>
             )}
           </section>
         )}
 
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <p className="text-sm text-muted">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-line pb-2">
+          <p className="sf-eyebrow text-muted">
             {products.length} item{products.length === 1 ? "" : "s"}
-            {category && ` in ${category}`}
+            {category && ` · ${category}`}
           </p>
-          <label className="flex items-center gap-2 text-xs text-muted">
+          <label className="sf-eyebrow flex items-center gap-2 text-muted">
             Sort
             <select
               value={sort ?? storefront.sort}
               onChange={(e) => changeSort(e.target.value)}
-              className="h-9 rounded-lg border border-line bg-card px-2 text-sm text-ink outline-none focus:border-[var(--sf-accent)]"
+              className="h-8 rounded-[2px] border border-line bg-card px-2 text-xs text-ink outline-none focus:border-[var(--sf-accent)]"
             >
               {SORT_KEYS.map((k) => (
                 <option key={k} value={k}>
@@ -105,21 +109,27 @@ export function Storefront({
         </div>
 
         {products.length === 0 ? (
-          <p className="py-16 text-center text-sm text-muted">
+          <p className="py-20 text-center text-sm text-muted">
             {category ? `Nothing in ${category} right now.` : "This shop hasn't added products yet."}
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[4px] border border-line bg-line sm:grid-cols-3 lg:grid-cols-4">
             {products.map((p) => {
               const q = lines[p.id] ?? 0;
               const out = p.stockState === "out";
               return (
                 <div
                   key={p.id}
-                  className={`flex flex-col overflow-hidden rounded-xl border bg-card transition-transform ${
-                    q > 0 ? "border-[var(--sf-accent)]" : "border-line"
-                  } ${out ? "opacity-60" : ""} ${pulse === p.id ? "scale-[1.03]" : ""}`}
+                  className={`relative flex flex-col bg-card transition-colors ${
+                    out ? "opacity-60" : ""
+                  } ${pulse === p.id ? "bg-surface" : ""}`}
                 >
+                  {q > 0 && (
+                    <span
+                      className="pointer-events-none absolute inset-0 z-10 border"
+                      style={{ borderColor: "var(--sf-accent)" }}
+                    />
+                  )}
                   <Link href={`/s/${slug}/${p.id}`} className="block aspect-square">
                     {p.photoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -128,17 +138,17 @@ export function Storefront({
                       <Placeholder />
                     )}
                   </Link>
-                  <div className="flex flex-1 flex-col gap-1 p-2.5">
+                  <div className="flex flex-1 flex-col gap-1.5 p-3">
                     <Link
                       href={`/s/${slug}/${p.id}`}
-                      className="line-clamp-2 text-sm font-medium hover:underline"
+                      className="line-clamp-2 text-sm font-medium leading-snug tracking-tight hover:underline"
                     >
                       {p.name}
                     </Link>
-                    <p className="text-sm text-muted">
+                    <p className="font-mono text-[11px] tabular-nums text-muted">
                       {cur} {p.price}
                       {p.stockState === "low" && " · low stock"}
-                      {out && " · out of stock"}
+                      {out && " · sold out"}
                     </p>
                     <div className="mt-auto pt-2">
                       {q > 0 ? (
@@ -152,7 +162,7 @@ export function Storefront({
                           type="button"
                           disabled={out}
                           onClick={() => add(p.id, 1)}
-                          className="w-full rounded-lg py-1.5 text-xs font-semibold text-[var(--sf-accent-fg)] disabled:opacity-40"
+                          className="sf-eyebrow w-full rounded-[2px] py-2 text-[var(--sf-accent-fg)] disabled:opacity-40"
                           style={{ background: "var(--sf-accent)" }}
                         >
                           Add
@@ -171,16 +181,16 @@ export function Storefront({
         <button
           type="button"
           onClick={() => setCartOpen(true)}
-          className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card p-4"
+          className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card p-3"
         >
           <span
-            className="mx-auto flex h-12 max-w-6xl items-center justify-between rounded-lg px-5 text-sm font-semibold text-[var(--sf-accent-fg)]"
+            className="sf-eyebrow mx-auto flex h-11 max-w-6xl items-center justify-between rounded-[2px] px-5 text-[var(--sf-accent-fg)]"
             style={{ background: "var(--sf-accent)" }}
           >
             <span>
               {count} item{count === 1 ? "" : "s"}
             </span>
-            <span>
+            <span className="tabular-nums">
               {cur} {(subtotalCents / 100).toFixed(2)} · View order →
             </span>
           </span>

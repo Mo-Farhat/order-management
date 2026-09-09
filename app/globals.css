@@ -97,10 +97,31 @@ body {
  * error / not-found states (no tenant) still render correctly. `data-sf-bg`
  * retones the neutral palette; `data-sf-font` swaps the family. */
 .sf-theme {
+  /* Crisper neutrals than the shared .mkt set — whiter ground, tighter lines. */
+  --background: #ffffff;
+  --card: #ffffff;
+  --surface: #f4f5f7;
+  --ink: #0e1116;
+  --muted: #5b6472;
+  --line: #e4e6ea;
+
   --sf-accent: #1e40af;
   --sf-accent-fg: #ffffff;
   --sf-secondary: #475569;
   font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.006em;
+}
+.sf-theme h1,
+.sf-theme h2 {
+  letter-spacing: -0.02em;
+}
+/* mono uppercase micro-label used across the storefront (colour set by caller) */
+.sf-eyebrow {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 .sf-theme[data-sf-bg="warm"] {
   --background: #faf7f2;

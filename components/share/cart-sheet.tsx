@@ -91,12 +91,12 @@ export function CartSheet({
 
   const fieldErr = (f: Field) => (touched[f] || showAll ? errs[f] : undefined);
   const inputCls = (f: Field) =>
-    `h-11 w-full rounded-lg border bg-surface px-3 text-sm outline-none focus:border-[var(--sf-accent)] ${
+    `h-11 w-full rounded-[3px] border bg-surface px-3 text-sm outline-none focus:border-[var(--sf-accent)] ${
       fieldErr(f) ? "border-danger" : "border-line"
     }`;
 
   const accentBtn =
-    "flex h-12 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold text-[var(--sf-accent-fg)] disabled:opacity-50";
+    "flex h-12 w-full items-center justify-center gap-2 rounded-[3px] text-sm font-semibold text-[var(--sf-accent-fg)] disabled:opacity-50";
 
   async function copyMessage(): Promise<boolean> {
     try {
@@ -125,7 +125,7 @@ export function CartSheet({
         role="dialog"
         aria-modal="true"
         aria-label={heading}
-        className="absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-2xl border-t border-line bg-card"
+        className="absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-[10px] border-t border-line bg-card"
       >
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export function CartSheet({
               <button
                 onClick={() => setView(view === "confirm" ? "details" : "cart")}
                 aria-label="Back"
-                className="flex size-7 items-center justify-center rounded-md border border-line text-sm"
+                className="flex size-7 items-center justify-center rounded-[3px] border border-line text-sm"
               >
                 ←
               </button>
@@ -214,7 +214,7 @@ export function CartSheet({
                   value={sent.message}
                   onFocus={(e) => e.currentTarget.select()}
                   rows={6}
-                  className="mt-1 w-full resize-none rounded-lg border border-line bg-surface p-2 text-[11px] leading-relaxed text-muted"
+                  className="mt-1 w-full resize-none rounded-[3px] border border-line bg-surface p-2 text-[11px] leading-relaxed text-muted"
                 />
                 {copied === "fail" && (
                   <p className="mt-1 text-[11px] text-danger">
@@ -236,7 +236,7 @@ export function CartSheet({
               <ul className="flex flex-col divide-y divide-line">
                 {items.map(({ product, quantity }) => (
                   <li key={product.id} className="flex items-center gap-3 py-3">
-                    <div className="size-12 shrink-0 overflow-hidden rounded-lg">
+                    <div className="size-12 shrink-0 overflow-hidden rounded-[3px]">
                       {product.photoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={product.photoUrl} alt="" className="size-full object-cover" />
@@ -289,14 +289,14 @@ export function CartSheet({
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={2}
-                  className="rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-[var(--sf-accent)]"
+                  className="rounded-[3px] border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-[var(--sf-accent)]"
                 />
               </label>
             </div>
           ) : (
             /* CONFIRM */
             <div className="flex flex-col gap-3 py-2 text-sm">
-              <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
+              <ul className="flex flex-col divide-y divide-line rounded-[3px] border border-line">
                 {items.map(({ product, quantity }) => (
                   <li key={product.id} className="flex justify-between gap-2 px-3 py-2">
                     <span>
@@ -308,14 +308,14 @@ export function CartSheet({
                   </li>
                 ))}
               </ul>
-              <div className="rounded-lg border border-line bg-surface px-3 py-2 text-xs">
+              <div className="rounded-[3px] border border-line bg-surface px-3 py-2 text-xs">
                 <p className="font-medium">{form.name}</p>
                 <p className="text-muted">{form.phone}</p>
                 <p className="whitespace-pre-line text-muted">{form.address}</p>
                 {note.trim() && <p className="mt-1 text-muted">Note: {note.trim()}</p>}
               </div>
               {error && (
-                <p className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+                <p className="rounded-[3px] border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
                   {error}
                 </p>
               )}

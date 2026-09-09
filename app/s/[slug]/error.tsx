@@ -21,7 +21,7 @@ export default function StorefrontError({
       </p>
       <button
         onClick={reset}
-        className="mt-2 inline-flex h-11 items-center rounded-lg px-5 text-sm font-semibold text-white"
+        className="mt-2 inline-flex h-11 items-center rounded-[3px] px-5 text-sm font-semibold text-white"
         style={{ background: "var(--sf-accent, #1e40af)" }}
       >
         Try again

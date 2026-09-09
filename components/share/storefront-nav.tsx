@@ -28,32 +28,32 @@ export function StorefrontNav({
     c ? `/s/${slug}?category=${encodeURIComponent(c)}` : `/s/${slug}`;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3">
+    <header className="sticky top-0 z-30 border-b border-line bg-card">
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3.5">
         <Link href={`/s/${slug}`} className="flex items-center gap-2.5">
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="" className="size-9 rounded-lg object-cover" />
+            <img src={logoUrl} alt="" className="size-8 rounded-[2px] object-cover" />
           ) : (
             <span
-              className="flex size-9 items-center justify-center rounded-lg text-sm font-bold"
+              className="flex size-8 items-center justify-center rounded-[2px] text-sm font-bold"
               style={{ background: "var(--sf-accent)", color: "var(--sf-accent-fg)" }}
             >
               {name.charAt(0)}
             </span>
           )}
-          <span className="text-base font-semibold">{name}</span>
+          <span className="text-[15px] font-semibold tracking-tight">{name}</span>
         </Link>
 
         <Link
           href={`/s/${slug}?cart=1`}
-          className="ml-auto relative flex h-9 items-center gap-2 rounded-lg border border-line px-3 text-sm font-medium"
+          className="sf-eyebrow ml-auto flex h-9 text-ink items-center gap-2 rounded-[2px] border border-line px-3 text-ink"
         >
           Order
           {count > 0 && (
             <span
-              className="flex min-w-5 items-center justify-center rounded-full px-1 text-xs font-semibold"
-              style={{ background: "var(--sf-accent)", color: "var(--sf-accent-fg)" }}
+              className="min-w-4 text-center text-[11px] font-semibold tabular-nums"
+              style={{ color: "var(--sf-accent)" }}
             >
               {count}
             </span>
@@ -62,7 +62,7 @@ export function StorefrontNav({
       </div>
 
       {categories.length > 0 && (
-        <nav className="mx-auto flex w-full max-w-6xl gap-1.5 overflow-x-auto px-4 pb-2">
+        <nav className="mx-auto flex w-full max-w-6xl gap-5 overflow-x-auto border-t border-line px-4">
           <CatLink href={catHref("")} active={active === ""}>
             All
           </CatLink>
@@ -90,10 +90,11 @@ function CatLink({
     <Link
       href={href}
       scroll={false}
-      className={`whitespace-nowrap rounded-md border px-3 py-1 text-xs transition-colors ${
-        active ? "text-[var(--sf-accent-fg)]" : "border-line text-muted"
-      }`}
-      style={active ? { background: "var(--sf-accent)", borderColor: "var(--sf-accent)" } : undefined}
+      className="sf-eyebrow -mb-px whitespace-nowrap text-muted border-b-2 py-2.5 transition-colors"
+      style={{
+        color: active ? "var(--sf-accent)" : undefined,
+        borderColor: active ? "var(--sf-accent)" : "transparent",
+      }}
     >
       {children}
     </Link>

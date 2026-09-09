@@ -7,7 +7,7 @@ export function Step({ onClick, children }: { onClick: () => void; children: Rea
     <button
       type="button"
       onClick={onClick}
-      className="flex size-7 items-center justify-center rounded-lg border border-line text-sm"
+      className="flex size-7 items-center justify-center rounded-[3px] border border-line text-sm"
     >
       {children}
     </button>
