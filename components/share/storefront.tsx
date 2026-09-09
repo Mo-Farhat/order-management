@@ -2,32 +2,45 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Storefront as StorefrontData } from "@/lib/share";
+import { SORT_KEYS, type SortKey } from "@/lib/validation";
 import { toCents } from "@/lib/money";
 import { useStorefrontCart } from "@/components/share/use-cart";
-import { accentVars, StorefrontHeader, Step, Placeholder } from "@/components/share/shared";
+import { Step, Placeholder } from "@/components/share/shared";
 import { CartSheet } from "@/components/share/cart-sheet";
+
+const SORT_LABELS: Record<SortKey, string> = {
+  newest: "Newest",
+  price_asc: "Price: low to high",
+  price_desc: "Price: high to low",
+};
 
 export function Storefront({
   slug,
   storefront,
   openCart = false,
+  category = "",
+  sort = null,
 }: {
   slug: string;
   storefront: StorefrontData;
   openCart?: boolean;
+  category?: string;
+  sort?: SortKey | null;
 }) {
-  const { tenant, products, categories } = storefront;
+  const { tenant, products, cartProducts, masthead } = storefront;
   const cur = tenant.currency;
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
 
   const { lines, setQty, count } = useStorefrontCart(slug);
-  const [category, setCategory] = useState<string>("");
   const [cartOpen, setCartOpen] = useState(openCart);
   const [pulse, setPulse] = useState<string | null>(null);
 
-  const shown = category ? products.filter((p) => p.category === category) : products;
   const subtotalCents = Object.entries(lines).reduce((n, [id, q]) => {
-    const p = products.find((x) => x.id === id);
+    const p = cartProducts.find((x) => x.id === id);
     return p ? n + toCents(p.price) * q : n;
   }, 0);
 
@@ -39,55 +52,65 @@ export function Storefront({
     }
   }
 
+  function changeSort(next: string) {
+    const sp = new URLSearchParams(params);
+    if (next === "newest") sp.delete("sort");
+    else sp.set("sort", next);
+    router.push(`${pathname}?${sp.toString()}`, { scroll: false });
+  }
+
   return (
-    <div style={accentVars(tenant)} className="flex min-h-[100dvh] flex-col">
-      <header className="sticky top-0 z-30 border-b border-line bg-card/95 backdrop-blur">
-        <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
-          <div className="flex-1">
-            <StorefrontHeader tenant={tenant} />
-          </div>
-          <button
-            type="button"
-            onClick={() => setCartOpen(true)}
-            className="relative flex h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-medium"
-          >
-            Order
-            {count > 0 && (
-              <span
-                className="flex min-w-5 items-center justify-center rounded-full px-1 text-xs font-semibold text-white"
-                style={{ background: "var(--sf-accent)" }}
-              >
-                {count}
-              </span>
+    <>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-4">
+        {masthead && (
+          <section className="mb-6 overflow-hidden rounded-2xl border border-line bg-card">
+            {masthead.bannerUrl && (
+              <div className="aspect-[3/1] w-full">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={masthead.bannerUrl} alt="" className="size-full object-cover" />
+              </div>
             )}
-          </button>
-        </div>
-        {categories.length > 0 && (
-          <div className="mx-auto flex max-w-lg gap-1.5 overflow-x-auto px-4 pb-2">
-            <Chip active={category === ""} onClick={() => setCategory("")}>All</Chip>
-            {categories.map((c) => (
-              <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-                {c}
-              </Chip>
-            ))}
-          </div>
+            {(masthead.title || masthead.subtitle) && (
+              <div className="px-5 py-4">
+                {masthead.title && (
+                  <h1 className="text-xl font-semibold">{masthead.title}</h1>
+                )}
+                {masthead.subtitle && (
+                  <p className="mt-1 text-sm text-muted">{masthead.subtitle}</p>
+                )}
+              </div>
+            )}
+          </section>
         )}
-      </header>
 
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 pb-28 pt-4">
-        {tenant.sharePolicyText && (
-          <p className="mb-4 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted">
-            {tenant.sharePolicyText}
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <p className="text-sm text-muted">
+            {products.length} item{products.length === 1 ? "" : "s"}
+            {category && ` in ${category}`}
           </p>
-        )}
+          <label className="flex items-center gap-2 text-xs text-muted">
+            Sort
+            <select
+              value={sort ?? storefront.sort}
+              onChange={(e) => changeSort(e.target.value)}
+              className="h-9 rounded-lg border border-line bg-card px-2 text-sm text-ink outline-none focus:border-[var(--sf-accent)]"
+            >
+              {SORT_KEYS.map((k) => (
+                <option key={k} value={k}>
+                  {SORT_LABELS[k]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-        {shown.length === 0 ? (
+        {products.length === 0 ? (
           <p className="py-16 text-center text-sm text-muted">
             {category ? `Nothing in ${category} right now.` : "This shop hasn't added products yet."}
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {shown.map((p) => {
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {products.map((p) => {
               const q = lines[p.id] ?? 0;
               const out = p.stockState === "out";
               return (
@@ -108,11 +131,11 @@ export function Storefront({
                   <div className="flex flex-1 flex-col gap-1 p-2.5">
                     <Link
                       href={`/s/${slug}/${p.id}`}
-                      className="line-clamp-2 text-xs font-medium hover:underline"
+                      className="line-clamp-2 text-sm font-medium hover:underline"
                     >
                       {p.name}
                     </Link>
-                    <p className="text-xs text-muted">
+                    <p className="text-sm text-muted">
                       {cur} {p.price}
                       {p.stockState === "low" && " · low stock"}
                       {out && " · out of stock"}
@@ -129,7 +152,7 @@ export function Storefront({
                           type="button"
                           disabled={out}
                           onClick={() => add(p.id, 1)}
-                          className="w-full rounded-lg py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+                          className="w-full rounded-lg py-1.5 text-xs font-semibold text-[var(--sf-accent-fg)] disabled:opacity-40"
                           style={{ background: "var(--sf-accent)" }}
                         >
                           Add
@@ -151,7 +174,7 @@ export function Storefront({
           className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card p-4"
         >
           <span
-            className="mx-auto flex h-12 max-w-lg items-center justify-between rounded-lg px-5 text-sm font-semibold text-white"
+            className="mx-auto flex h-12 max-w-6xl items-center justify-between rounded-lg px-5 text-sm font-semibold text-[var(--sf-accent-fg)]"
             style={{ background: "var(--sf-accent)" }}
           >
             <span>
@@ -168,34 +191,10 @@ export function Storefront({
         <CartSheet
           slug={slug}
           tenant={tenant}
-          products={products}
+          products={cartProducts}
           onClose={() => setCartOpen(false)}
         />
       )}
-    </div>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`whitespace-nowrap rounded-md border px-3 py-1 text-xs transition-colors ${
-        active
-          ? "border-[var(--sf-accent)] bg-[var(--sf-accent)] text-white"
-          : "border-line text-muted"
-      }`}
-    >
-      {children}
-    </button>
+    </>
   );
 }

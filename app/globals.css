@@ -91,6 +91,43 @@ body {
   color: var(--foreground);
 }
 
+/* ---- Public storefront: per-shop theming ----------------------------- *
+ * `--sf-accent` (+ derived `--sf-accent-fg`) and `--sf-secondary` are set on
+ * the shell wrapper from the tenant row; these are the fallbacks so the
+ * error / not-found states (no tenant) still render correctly. `data-sf-bg`
+ * retones the neutral palette; `data-sf-font` swaps the family. */
+.sf-theme {
+  --sf-accent: #1e40af;
+  --sf-accent-fg: #ffffff;
+  --sf-secondary: #475569;
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+}
+.sf-theme[data-sf-bg="warm"] {
+  --background: #faf7f2;
+  --surface: #f2ece1;
+  --line: #e7ddcc;
+}
+.sf-theme[data-sf-bg="cool"] {
+  --background: #f2f6fb;
+  --surface: #e6eef7;
+  --line: #d8e3f0;
+}
+.sf-theme[data-sf-bg="contrast"] {
+  --background: #ffffff;
+  --surface: #f1f5f9;
+  --ink: #0b1220;
+  --line: #cbd5e1;
+}
+.sf-theme[data-sf-font="serif"] {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+.sf-theme[data-sf-font="rounded"] {
+  font-family: var(--font-nunito), ui-rounded, "Segoe UI", system-ui, sans-serif;
+}
+.sf-theme[data-sf-font="mono"] {
+  font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
 .mkt-haze {
   background:
     radial-gradient(60% 55% at 50% -10%, #dbe6ff 0%, rgba(219, 230, 255, 0) 60%),

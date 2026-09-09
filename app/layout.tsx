@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Spline_Sans, Geist } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Spline_Sans, Geist, Fraunces, Nunito } from "next/font/google";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
 
@@ -29,6 +29,21 @@ const splineSans = Spline_Sans({
   display: "swap",
 });
 
+// Public storefront only: curated optional families, scoped to `.sf-theme`
+// via `data-sf-font` in globals.css.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: `${APP_NAME} — take orders from your DMs`,
   description:
@@ -39,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${plexSans.variable} ${plexMono.variable} ${geist.variable} ${splineSans.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable} ${geist.variable} ${splineSans.variable} ${fraunces.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

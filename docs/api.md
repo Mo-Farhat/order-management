@@ -7,6 +7,8 @@ touching the Order Desk database.
 ## Auth
 
 Create a key in the desk: **Settings → API access**. The plaintext is shown once.
+**Key creation requires the Pro plan tier** (`plan_tier = 'pro'`); keys created
+before a downgrade keep working, but the "create key" action is refused below Pro.
 
 ```
 Authorization: Bearer sd_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
