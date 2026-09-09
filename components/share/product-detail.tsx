@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { StorefrontProductDetail } from "@/lib/share";
 import { useStorefrontCart } from "@/components/share/use-cart";
-import { accentVars, StorefrontHeader, Step, Placeholder } from "@/components/share/shared";
+import { Step, Placeholder } from "@/components/share/shared";
 
 export function ProductDetail({
   slug,
@@ -30,67 +30,76 @@ export function ProductDetail({
   }
 
   return (
-    <main style={accentVars(tenant)} className="mx-auto w-full max-w-lg flex-1 px-4 pb-32 pt-6">
-      <StorefrontHeader tenant={tenant} backHref={`/s/${slug}`} />
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-32 pt-5">
+      <nav className="mb-4 flex items-center gap-1.5 text-xs text-muted">
+        <Link href={`/s/${slug}`} className="hover:text-ink">
+          Shop
+        </Link>
+        {product.category && (
+          <>
+            <span>/</span>
+            <Link
+              href={`/s/${slug}?category=${encodeURIComponent(product.category)}`}
+              className="hover:text-ink"
+            >
+              {product.category}
+            </Link>
+          </>
+        )}
+      </nav>
 
-      <div className="mt-5 overflow-hidden rounded-2xl border border-line bg-card">
-        <div className="aspect-square">
-          {product.photos.length > 0 ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={product.photos[active]}
-              alt={product.name}
-              className="size-full object-cover"
-            />
-          ) : (
-            <Placeholder />
+      <div className="md:grid md:grid-cols-2 md:gap-8">
+        <div className="overflow-hidden rounded-2xl border border-line bg-card">
+          <div className="aspect-square">
+            {product.photos.length > 0 ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.photos[active]}
+                alt={product.name}
+                className="size-full object-cover"
+              />
+            ) : (
+              <Placeholder />
+            )}
+          </div>
+          {product.photos.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto p-2">
+              {product.photos.map((src, i) => (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  className={`size-14 shrink-0 overflow-hidden rounded-lg border ${
+                    i === active ? "border-[var(--sf-accent)]" : "border-line"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" className="size-full object-cover" />
+                </button>
+              ))}
+            </div>
           )}
         </div>
-        {product.photos.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto p-2">
-            {product.photos.map((src, i) => (
-              <button
-                key={src}
-                type="button"
-                onClick={() => setActive(i)}
-                className={`size-14 shrink-0 overflow-hidden rounded-lg border ${
-                  i === active ? "border-[var(--sf-accent)]" : "border-line"
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" className="size-full object-cover" />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
 
-      <div className="mt-4 flex flex-col gap-2">
-        {product.category && (
-          <Link
-            href={`/s/${slug}`}
-            className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted hover:text-ink"
-          >
-            {product.category}
-          </Link>
-        )}
-        <h1 className="text-xl font-semibold">{product.name}</h1>
-        <p className="text-lg">
-          {cur} {product.price}
-          {product.stockState === "low" && (
-            <span className="ml-2 text-sm text-muted">low stock</span>
-          )}
-          {out && <span className="ml-2 text-sm text-danger">out of stock</span>}
-        </p>
-        {product.description && (
-          <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-muted">
-            {product.description}
+        <div className="mt-4 flex flex-col gap-2 md:mt-0">
+          <h1 className="text-2xl font-semibold">{product.name}</h1>
+          <p className="text-lg">
+            {cur} {product.price}
+            {product.stockState === "low" && (
+              <span className="ml-2 text-sm text-muted">low stock</span>
+            )}
+            {out && <span className="ml-2 text-sm text-danger">out of stock</span>}
           </p>
-        )}
+          {product.description && (
+            <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-muted">
+              {product.description}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card p-4">
-        <div className="mx-auto flex max-w-lg items-center gap-3">
+        <div className="mx-auto flex max-w-4xl items-center gap-3">
           {qty > 0 ? (
             <div className="flex items-center gap-3 rounded-lg border border-line px-2 py-1">
               <Step onClick={() => add(qty - 1)}>−</Step>
@@ -102,7 +111,7 @@ export function ProductDetail({
               type="button"
               disabled={out}
               onClick={() => add(1)}
-              className="h-11 flex-1 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-40"
+              className="h-11 flex-1 rounded-lg text-sm font-semibold text-[var(--sf-accent-fg)] transition-colors disabled:opacity-40"
               style={{ background: "var(--sf-accent)" }}
             >
               {added ? "Added ✓" : "Add to order"}

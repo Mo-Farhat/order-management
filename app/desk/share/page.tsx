@@ -7,6 +7,8 @@ import { tenants } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { pendingStorefrontOrders } from "@/lib/share";
 import { distinctCategories } from "@/lib/catalog";
+import { isStorageConfigured, publicUrlForKey } from "@/lib/storage";
+import { TIER_OPTIONS } from "@/lib/entitlements";
 import { PageHeader, Card, EmptyState } from "@/components/desk/ui";
 import { ShareSettingsForm } from "@/components/share/share-settings-form";
 import { CopyLink } from "@/components/share/copy-link";
@@ -25,6 +27,8 @@ export default async function SharePage() {
   const slug = tenant?.slug ?? ctx.tenantSlug;
   const url = `${proto}://${host}/s/${slug}`;
   const currency = tenant?.currency ?? "";
+  const tier = tenant?.planTier ?? "basic";
+  const tierName = TIER_OPTIONS.find((t) => t.value === tier)?.label ?? "Basic";
 
   let qrSvg: string | null = null;
   try {
@@ -75,6 +79,9 @@ export default async function SharePage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card title="Settings">
+            <p className="mb-3 text-xs text-muted">
+              Your plan: <strong>{tierName}</strong>. Fields marked ✦ unlock on a higher tier.
+            </p>
             <ShareSettingsForm
               whatsappNumber={tenant?.whatsappNumber ?? ""}
               instagramHandle={tenant?.instagramHandle ?? ""}
@@ -83,6 +90,11 @@ export default async function SharePage() {
               accentColor={tenant?.accentColor ?? null}
               sharePolicyText={tenant?.sharePolicyText ?? null}
               paused={tenant?.publicPagePaused ?? false}
+              tier={tier}
+              config={tenant?.storefrontConfig ?? {}}
+              logoUrl={tenant?.logoKey ? publicUrlForKey(tenant.logoKey) : null}
+              bannerUrl={tenant?.bannerKey ? publicUrlForKey(tenant.bannerKey) : null}
+              storageEnabled={isStorageConfigured()}
             />
           </Card>
         </div>

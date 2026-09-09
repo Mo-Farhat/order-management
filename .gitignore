@@ -31,7 +31,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
 !.env.example
 .dev.vars
 
@@ -56,3 +55,4 @@ ds-bundle/
 
 .design-sync/pkg/styles.css
 .design-sync/_safelist.txt
+config.bat
