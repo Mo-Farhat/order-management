@@ -3,7 +3,7 @@ import { and, count, desc, gte, ne, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { customers, orders, products, tenants } from "@/db/schema";
-import type { PlanStatus } from "@/db/schema";
+import type { PlanStatus, PlanTier } from "@/db/schema";
 
 /**
  * Platform-operator analytics — reads every tenant via the owner `db`
@@ -23,6 +23,7 @@ export type PlatformOverview = {
   newShops30: number;
   activeShops30: number;
   planBreakdown: Record<string, number>;
+  tierBreakdown: Record<string, number>;
   orderCount: number;
   gmv: number;
   collected: number;
@@ -41,6 +42,7 @@ export async function platformOverview(): Promise<PlatformOverview> {
     [new30],
     [active30],
     plans,
+    tiers,
     [orderAgg],
     [collectedAgg],
     [outstandingAgg],
@@ -56,6 +58,7 @@ export async function platformOverview(): Promise<PlatformOverview> {
       .from(orders)
       .where(gte(orders.createdAt, daysAgo(30))),
     db.select({ plan: tenants.planStatus, n: count() }).from(tenants).groupBy(tenants.planStatus),
+    db.select({ tier: tenants.planTier, n: count() }).from(tenants).groupBy(tenants.planTier),
     db
       .select({
         n: count(),
@@ -80,6 +83,8 @@ export async function platformOverview(): Promise<PlatformOverview> {
 
   const planBreakdown: Record<string, number> = {};
   for (const p of plans) planBreakdown[p.plan] = num(p.n);
+  const tierBreakdown: Record<string, number> = {};
+  for (const t of tiers) tierBreakdown[t.tier] = num(t.n);
 
   return {
     shopCount: num(shops?.n),
@@ -87,6 +92,7 @@ export async function platformOverview(): Promise<PlatformOverview> {
     newShops30: num(new30?.n),
     activeShops30: num(active30?.n),
     planBreakdown,
+    tierBreakdown,
     orderCount: num(orderAgg?.n),
     gmv: num(orderAgg?.gmv),
     collected: num(collectedAgg?.v),
@@ -103,6 +109,8 @@ export type ShopRow = {
   slug: string;
   currency: string;
   planStatus: PlanStatus;
+  planTier: PlanTier;
+  proWebsiteDiscount: boolean;
   trialEndsAt: string | null;
   createdAt: string;
   orders: number;
@@ -149,6 +157,8 @@ export async function shopsTable(rangeDays: number): Promise<ShopRow[]> {
       slug: t.slug,
       currency: t.currency,
       planStatus: t.planStatus,
+      planTier: t.planTier,
+      proWebsiteDiscount: t.proWebsiteDiscount,
       trialEndsAt: t.trialEndsAt ? t.trialEndsAt.toISOString() : null,
       createdAt: t.createdAt.toISOString(),
       orders: rangeDays > 0 ? num(o?.nInRange) : num(o?.n),

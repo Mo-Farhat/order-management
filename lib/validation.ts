@@ -250,6 +250,89 @@ export const orderNoteSchema = z.object({
 
 // --- Share link (Phase 4) -------------------------------------------
 
+/** hex `#rrggbb` or empty string — the storefront colour-field pattern. */
+const hexColor = z.union([
+  z.literal(""),
+  z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #1e40af." }),
+]);
+
+export type FontChoice = "sans" | "serif" | "rounded" | "mono";
+export type BgTone = "default" | "warm" | "cool" | "contrast";
+export type SortKey = "newest" | "price_asc" | "price_desc";
+
+export const SORT_KEYS: SortKey[] = ["newest", "price_asc", "price_desc"];
+export const FONT_CHOICES: FontChoice[] = ["sans", "serif", "rounded", "mono"];
+export const BG_TONES: BgTone[] = ["default", "warm", "cool", "contrast"];
+
+/**
+ * Per-shop storefront presentation. Persisted as one jsonb blob on
+ * `tenants.storefront_config`; `null` = never configured = all defaults.
+ * Which fields are honoured is gated by the shop's plan tier at render time
+ * (`lib/entitlements.ts#honoredConfig`) — a downgrade keeps the values but
+ * stops rendering the tier-gated ones.
+ */
+export type StorefrontConfig = {
+  tagline?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  onAccentColor?: string; // "" / undefined = auto (contrast-derived)
+  secondaryColor?: string;
+  bgTone?: BgTone;
+  font?: FontChoice;
+  defaultSort?: SortKey;
+  sections?: {
+    banner?: boolean;
+    policyNote?: boolean;
+    categoryNav?: boolean;
+    poweredBy?: boolean;
+  };
+};
+
+export const STOREFRONT_DEFAULTS = {
+  font: "sans" as FontChoice,
+  bgTone: "default" as BgTone,
+  defaultSort: "newest" as SortKey,
+};
+
+export const storefrontConfigSchema = z
+  .object({
+    tagline: z.string().trim().max(120).optional(),
+    heroTitle: z.string().trim().max(80).optional(),
+    heroSubtitle: z.string().trim().max(160).optional(),
+    onAccentColor: hexColor.optional(),
+    secondaryColor: hexColor.optional(),
+    bgTone: z.enum(["default", "warm", "cool", "contrast"]).optional(),
+    font: z.enum(["sans", "serif", "rounded", "mono"]).optional(),
+    defaultSort: z.enum(["newest", "price_asc", "price_desc"]).optional(),
+    sections: z
+      .object({
+        banner: z.boolean(),
+        policyNote: z.boolean(),
+        categoryNav: z.boolean(),
+        poweredBy: z.boolean(),
+      })
+      .partial()
+      .optional(),
+  })
+  .partial();
+
+/**
+ * Text/icon colour to sit on top of the accent. Manual hex wins; otherwise
+ * black or white by WCAG relative luminance. Safe for `#rgb`/`#rrggbb`.
+ */
+export function onAccentFor(accentHex: string | null | undefined, manual?: string | null): string {
+  if (manual && /^#[0-9a-fA-F]{6}$/.test(manual)) return manual;
+  const hex = (accentHex ?? "#1e40af").replace("#", "");
+  const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
+  if (full.length !== 6) return "#ffffff";
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(full.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum > 0.4 ? "#0f172a" : "#ffffff";
+}
+
 export const shareSettingsSchema = z
   .object({
     accentColor: z

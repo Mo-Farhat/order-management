@@ -13,6 +13,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
+import type { StorefrontConfig } from "@/lib/validation";
 
 /**
  * Phase 1 schema: tenancy, auth, and the RBAC skeleton.
@@ -31,6 +32,11 @@ export const planStatusEnum = pgEnum("plan_status", [
   "read_only",
   "cancelled",
 ]);
+
+// Feature tier — orthogonal to plan_status. Set manually by a platform operator
+// (app/actions/admin.ts) until billing is wired. Gates storefront customization
+// (see lib/entitlements.ts). `basic` = the default everyone starts on.
+export const planTierEnum = pgEnum("plan_tier", ["basic", "studio", "pro"]);
 
 // Order lifecycle. `draft/packed/shipped/delivered` are legacy values kept in
 // the type for historical `order_events` rows. The app uses:
@@ -96,6 +102,18 @@ export const tenants = pgTable("tenants", {
   // Billing (schema now, UI in Phase 5).
   planStatus: planStatusEnum("plan_status").notNull().default("trialing"),
   trialEndsAt: timestamp("trial_ends_at", { mode: "date", withTimezone: true }),
+  // Feature tier — gates storefront customization (lib/entitlements.ts).
+  planTier: planTierEnum("plan_tier").notNull().default("basic"),
+  // FR-23: Pro tenants get a discount on a full-website build. Explicit flag so
+  // a Pro tenant can exist without the offer.
+  proWebsiteDiscount: boolean("pro_website_discount").notNull().default(false),
+
+  // Storefront presentation (FR-20). Storage keys stay discrete columns so
+  // replace/cleanup logic (deleteObject on the old key) is simple. The rest —
+  // tagline, hero copy, colours, font, section toggles, default sort — is one
+  // jsonb blob so new tier knobs need no migration.
+  bannerKey: text("banner_key"),
+  storefrontConfig: jsonb("storefront_config").$type<StorefrontConfig>(),
 
   // FR-23: when the owner last dismissed the "upgrade to a website" banner.
   upsellDismissedAt: timestamp("upsell_dismissed_at", { withTimezone: true }),
@@ -509,3 +527,4 @@ export type OrderSource = (typeof orderSourceEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
 export type PlanStatus = (typeof planStatusEnum.enumValues)[number];
+export type PlanTier = (typeof planTierEnum.enumValues)[number];
