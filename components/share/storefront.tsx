@@ -113,23 +113,17 @@ export function Storefront({
             {category ? `Nothing in ${category} right now.` : "This shop hasn't added products yet."}
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[4px] border border-line bg-line sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {products.map((p) => {
               const q = lines[p.id] ?? 0;
               const out = p.stockState === "out";
               return (
                 <div
                   key={p.id}
-                  className={`relative flex flex-col bg-card transition-colors ${
-                    out ? "opacity-60" : ""
-                  } ${pulse === p.id ? "bg-surface" : ""}`}
+                  className={`relative flex flex-col overflow-hidden rounded-[3px] border bg-card transition-colors ${
+                    q > 0 ? "border-[var(--sf-accent)]" : "border-line"
+                  } ${out ? "opacity-60" : ""} ${pulse === p.id ? "bg-surface" : ""}`}
                 >
-                  {q > 0 && (
-                    <span
-                      className="pointer-events-none absolute inset-0 z-10 border"
-                      style={{ borderColor: "var(--sf-accent)" }}
-                    />
-                  )}
                   <Link href={`/s/${slug}/${p.id}`} className="block aspect-square">
                     {p.photoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
