@@ -437,6 +437,8 @@ type StorefrontOrderInput = {
   deliveryAddress: string;
   items: { productId: string; quantity: number }[];
   note?: string;
+  /** The shop's default delivery fee, carried onto the pending order. */
+  deliveryFee?: string;
 };
 
 async function insertOrderRow(
@@ -565,6 +567,7 @@ export async function createStorefrontOrder(
       customerPhone: input.customerPhone,
       deliveryAddress: input.deliveryAddress,
       items: input.items,
+      deliveryFee: input.deliveryFee || "",
       discountType: "none",
       paymentStatus: "unpaid",
       note: input.note,

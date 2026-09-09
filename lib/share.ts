@@ -37,6 +37,8 @@ export type StorefrontTenant = {
   accentColor: string | null;
   logoUrl: string | null;
   sharePolicyText: string | null;
+  /** Default delivery fee, added to the order summary. "0" / null = none shown. */
+  deliveryFee: string | null;
 };
 
 function storefrontTenant(t: typeof tenants.$inferSelect): StorefrontTenant {
@@ -49,6 +51,7 @@ function storefrontTenant(t: typeof tenants.$inferSelect): StorefrontTenant {
     accentColor: t.accentColor,
     logoUrl: t.logoKey ? publicUrlForKey(t.logoKey) : null,
     sharePolicyText: t.sharePolicyText,
+    deliveryFee: t.deliveryFeeDefault,
   };
 }
 
@@ -380,13 +383,15 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     if (!p) throw new Error("One of the items is no longer available.");
     return { name: p.name, price: p.price, priceCents: toCents(p.price), quantity: i.quantity };
   });
+  const deliveryFeeCents = toCents(tenant.deliveryFeeDefault ?? "0");
   const totals = computeTotals({
     items: lines.map((l) => ({ priceCents: l.priceCents, quantity: l.quantity })),
-    deliveryFeeCents: 0,
+    deliveryFeeCents,
     discountType: "none",
     discountValue: 0,
   });
   const subtotal = fromCents(totals.subtotalCents);
+  const total = fromCents(totals.totalCents);
 
   const { createStorefrontOrder } = await import("@/lib/orders");
   const order = await createStorefrontOrder(tenant.id, {
@@ -395,6 +400,7 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     deliveryAddress: input.deliveryAddress.trim(),
     items: clean,
     note: input.note?.trim() || undefined,
+    deliveryFee: deliveryFeeCents > 0 ? fromCents(deliveryFeeCents) : undefined,
   });
 
   const cur = tenant.currency;
@@ -403,6 +409,9 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     ...lines.map((l) => `• ${l.quantity} × ${l.name} (${cur} ${l.price})`),
     ``,
     `Subtotal: ${cur} ${subtotal}`,
+    ...(deliveryFeeCents > 0
+      ? [`Delivery: ${cur} ${fromCents(deliveryFeeCents)}`, `Total: ${cur} ${total}`]
+      : []),
     ``,
     `Name: ${input.customerName.trim()}`,
     `Phone: ${input.customerPhone.trim()}`,
@@ -421,7 +430,7 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
       customerName: input.customerName.trim(),
       customerPhone: input.customerPhone.trim(),
       currency: cur,
-      total: subtotal,
+      total,
       items: lines.map((l) => `${l.quantity} × ${l.name} (${cur} ${l.price})`),
       note: input.note?.trim() || undefined,
     });

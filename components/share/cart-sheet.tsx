@@ -52,6 +52,9 @@ export function CartSheet({
     .filter(([id, q]) => q > 0 && byId.has(id))
     .map(([id, q]) => ({ product: byId.get(id)!, quantity: q }));
   const subtotalCents = items.reduce((n, i) => n + toCents(i.product.price) * i.quantity, 0);
+  const deliveryCents = toCents(tenant.deliveryFee ?? "0");
+  const totalCents = subtotalCents + deliveryCents;
+  const money = (c: number) => `${cur} ${(c / 100).toFixed(2)}`;
   const errs = validate(form);
   const isValid = Object.keys(errs).length === 0;
 
@@ -308,6 +311,22 @@ export function CartSheet({
                   </li>
                 ))}
               </ul>
+              <div className="flex flex-col gap-1 px-1 text-sm">
+                <div className="flex justify-between text-muted">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums">{money(subtotalCents)}</span>
+                </div>
+                {deliveryCents > 0 && (
+                  <div className="flex justify-between text-muted">
+                    <span>Delivery</span>
+                    <span className="tabular-nums">{money(deliveryCents)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-medium">
+                  <span>Total</span>
+                  <span className="tabular-nums">{money(totalCents)}</span>
+                </div>
+              </div>
               <div className="rounded-[3px] border border-line bg-surface px-3 py-2 text-xs">
                 <p className="font-medium">{form.name}</p>
                 <p className="text-muted">{form.phone}</p>
@@ -325,11 +344,21 @@ export function CartSheet({
 
         {view !== "sent" && (
           <div className="border-t border-line px-4 py-3">
-            <div className="mb-2 flex justify-between text-sm">
-              <span className="text-muted">Subtotal</span>
-              <span className="font-medium tabular-nums">
-                {cur} {(subtotalCents / 100).toFixed(2)}
-              </span>
+            <div className="mb-2 flex flex-col gap-1 text-sm">
+              <div className="flex justify-between text-muted">
+                <span>Subtotal</span>
+                <span className="tabular-nums">{money(subtotalCents)}</span>
+              </div>
+              {deliveryCents > 0 && (
+                <div className="flex justify-between text-muted">
+                  <span>Delivery</span>
+                  <span className="tabular-nums">{money(deliveryCents)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-medium">
+                <span>Total</span>
+                <span className="tabular-nums">{money(totalCents)}</span>
+              </div>
             </div>
             {view === "cart" && (
               <button
