@@ -6,6 +6,7 @@ import { FormError } from "@/components/form";
 import { SubmitBtn } from "@/components/desk/submit-btn";
 import {
   FONT_CHOICES,
+  SF_DEFAULT_ACCENT,
   SORT_KEYS,
   type BgTone,
   type FontChoice,
@@ -92,7 +93,7 @@ export function ShareSettingsForm({
   storageEnabled: boolean;
 }) {
   const [state, action] = useActionState(saveShareSettings, undefined);
-  const [color, setColor] = useState(accentColor || "#1e40af");
+  const [color, setColor] = useState(accentColor || SF_DEFAULT_ACCENT);
   const [cfg, setCfg] = useState<StorefrontConfig>(config ?? {});
 
   const [order, setOrder] = useState<string[]>(

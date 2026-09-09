@@ -10,7 +10,7 @@ import { computeTotals, fromCents, toCents } from "@/lib/money";
 import { normalizePhone, toWhatsAppNumber } from "@/lib/phone";
 import { sendNewOrderEmail } from "@/lib/email";
 import { appUrl } from "@/lib/constants";
-import { onAccentFor, type SortKey, type StorefrontConfig } from "@/lib/validation";
+import { onAccentFor, SF_DEFAULT_ACCENT, type SortKey, type StorefrontConfig } from "@/lib/validation";
 import { honoredConfig, showsPoweredBy, tierAllows } from "@/lib/entitlements";
 import type { ActiveContext } from "@/lib/session";
 
@@ -89,7 +89,7 @@ export async function getStorefrontChrome(slug: string): Promise<StorefrontChrom
   if (!t) return null;
 
   const config = honoredConfig(t.planTier, t.storefrontConfig);
-  const accentColor = t.accentColor || "#1e40af";
+  const accentColor = t.accentColor || SF_DEFAULT_ACCENT;
 
   const rows = t.publicPagePaused
     ? []

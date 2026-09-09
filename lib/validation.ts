@@ -256,6 +256,12 @@ const hexColor = z.union([
   z.string().regex(/^#[0-9a-fA-F]{6}$/, { error: "Use a hex colour like #1e40af." }),
 ]);
 
+/**
+ * Storefront default accent — a near-black monotone. An owner who never picks a
+ * colour gets a clean editorial look; picking one swaps `--sf-accent`.
+ */
+export const SF_DEFAULT_ACCENT = "#0e1116";
+
 export type FontChoice = "sans" | "serif" | "rounded" | "mono";
 export type BgTone = "default" | "warm" | "cool" | "contrast";
 export type SortKey = "newest" | "price_asc" | "price_desc";
@@ -322,7 +328,7 @@ export const storefrontConfigSchema = z
  */
 export function onAccentFor(accentHex: string | null | undefined, manual?: string | null): string {
   if (manual && /^#[0-9a-fA-F]{6}$/.test(manual)) return manual;
-  const hex = (accentHex ?? "#1e40af").replace("#", "");
+  const hex = (accentHex ?? SF_DEFAULT_ACCENT).replace("#", "");
   const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
   if (full.length !== 6) return "#ffffff";
   const [r, g, b] = [0, 2, 4].map((i) => {

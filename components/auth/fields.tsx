@@ -187,13 +187,13 @@ export function AuthSelect({
   );
 }
 
-const SWATCHES = ["#1e40af", "#0f766e", "#b91c1c", "#7c3aed", "#c2410c", "#0f172a"];
+const SWATCHES = ["#0e1116", "#1e40af", "#0f766e", "#b91c1c", "#7c3aed", "#c2410c"];
 
 /** Storefront accent colour: preset swatches plus a free colour picker. */
 export function AuthColorField({
   label,
   name,
-  defaultValue = "#1e40af",
+  defaultValue = "#0e1116",
   hint,
 }: {
   label: string;

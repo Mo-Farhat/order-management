@@ -105,7 +105,7 @@ body {
   --muted: #5b6472;
   --line: #e4e6ea;
 
-  --sf-accent: #1e40af;
+  --sf-accent: #0e1116; /* monotone default — owners can override */
   --sf-accent-fg: #ffffff;
   --sf-secondary: #475569;
   font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
