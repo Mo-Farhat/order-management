@@ -12,6 +12,7 @@ import { auditLog, memberships, tenants, users } from "@/db/schema";
 import { signupWithBusinessSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/password";
 import { resolveSlug, trialEndsAt } from "@/lib/provisioning";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export type FormState = {
   error?: string;
@@ -37,6 +38,18 @@ function isRedirect(err: unknown): boolean {
  * straight in the desk. There is no second step to get stuck on.
  */
 export async function signup(_prev: FormState, formData: FormData): Promise<FormState> {
+  // Signup creates a tenant, a trial and a mailbox entry, so an unthrottled
+  // endpoint is a cheap way for a script to burn the Neon and Resend quotas.
+  // Generous enough that a family sharing an IP never notices.
+  const ip = await clientIp();
+  const burst = await rateLimit(`signup:${ip}`, 5, 60 * 60);
+  const daily = await rateLimit(`signup-day:${ip}`, 15, 24 * 60 * 60);
+  if (!burst.ok || !daily.ok) {
+    return {
+      error: "Too many accounts created from this connection. Try again later, or email us if you're stuck.",
+    };
+  }
+
   const parsed = signupWithBusinessSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

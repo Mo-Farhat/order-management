@@ -91,7 +91,7 @@ export default function PrivacyPage() {
       <p>
         You can access, correct, export (self-serve CSV export of customers, products, and orders),
         or delete your data. To delete your account entirely, contact us at{" "}
-        <strong>[contact email]</strong>.
+        <a href="mailto:support@sfdesk.lk" className="underline">support@sfdesk.lk</a>.
       </p>
       <p>
         If one of <em>your</em> customers asks us to access or delete their data, we&apos;ll pass the
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
 
       <h2>11. Contact</h2>
       <p>
-        Privacy questions or requests: <strong>[contact email]</strong>.
+        Privacy questions or requests: <a href="mailto:support@sfdesk.lk" className="underline">support@sfdesk.lk</a>.
       </p>
     </>
   );

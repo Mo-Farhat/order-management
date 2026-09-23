@@ -4,7 +4,8 @@ import { APP_NAME } from "@/lib/constants";
 export const metadata: Metadata = { title: `Terms of Service · ${APP_NAME}` };
 
 // ⚠️ Starting template — have a lawyer review and fill the [bracketed] fields
-// before public launch. Placeholders: legal entity, jurisdiction, contact.
+// Jurisdiction and contact are set; a registered legal entity name still
+// needs adding here once the company is incorporated.
 
 export default function TermsPage() {
   return (
@@ -96,13 +97,13 @@ export default function TermsPage() {
 
       <h2>11. Governing law</h2>
       <p>
-        These terms are governed by the laws of <strong>[jurisdiction]</strong>, and
+        These terms are governed by the laws of <strong>Sri Lanka</strong>, and
         disputes are subject to the courts of that jurisdiction.
       </p>
 
       <h2>12. Contact</h2>
       <p>
-        Questions about these terms: <strong>[contact email]</strong>.
+        Questions about these terms: <a href="mailto:support@sfdesk.lk" className="underline">support@sfdesk.lk</a>.
       </p>
     </>
   );

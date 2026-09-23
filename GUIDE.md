@@ -181,31 +181,75 @@ The product still needs its own name before public signup (PRD §14).
 
 ---
 
-## 4c. Next.js cache backing store  **[required before the first deploy]**
+## 4c. Next.js cache backing store  **[done]**
 
 The storefront reads are cached and invalidated per shop (`lib/share.ts`), which
-is what keeps a busy shop off Postgres — a warm storefront serves in ~10 ms with
-zero queries instead of ~1 s. On Workers that cache needs somewhere to live, so
+keeps a busy shop off Postgres — a warm storefront serves in ~10 ms with zero
+queries instead of ~1 s. On Workers that cache needs somewhere to live, so
 `open-next.config.ts` points it at R2 (the payloads) and D1 (which tags are
-stale). **Both resources must exist or the Worker fails to start.**
+stale).
 
-```bash
-# 1. Bucket for the cached payloads — separate from your media bucket
-npx wrangler r2 bucket create sfdesk-next-cache
+Both resources now exist on your account and `wrangler.jsonc` carries the
+bindings, so there is nothing to do here:
 
-# 2. Database for cache tags. Copy the printed database_id into
-#    wrangler.jsonc, replacing REPLACE_WITH_ID_FROM_WRANGLER_D1_CREATE
-npx wrangler d1 create sfdesk-next-tags
+| Resource | Name | Binding |
+|---|---|---|
+| R2 bucket | `sfdesk-next-cache` | `NEXT_INC_CACHE_R2_BUCKET` |
+| D1 database | `sfdesk-next-tags` | `NEXT_TAG_CACHE_D1` |
 
-# 3. Create the table OpenNext expects
-npx wrangler d1 execute sfdesk-next-tags --remote --command \
-  "CREATE TABLE IF NOT EXISTS revalidations (tag TEXT PRIMARY KEY, revalidatedAt INTEGER, stale INTEGER, expire INTEGER);"
-```
+The D1 `revalidations` table is created. Both sit inside the free tier at this
+scale (R2 10 GB; D1 5 GB, 5M reads/day). Storefront HTML also carries
+`s-maxage=60` (`next.config.ts`) so Cloudflare's edge serves repeat visitors
+without waking the Worker — the biggest lever on cost, since Workers bills CPU
+per invocation.
 
-Both sit inside Cloudflare's free tier at this scale (R2: 10 GB; D1: 5 GB,
-5M reads/day). Storefront HTML also carries `s-maxage=60` (`next.config.ts`) so
-Cloudflare's edge serves repeat visitors without waking the Worker at all — the
-single biggest lever on cost, since Workers bills CPU per invocation.
+---
+
+## 4d. Move Neon to Singapore  **[need from you: a new Neon project]**
+
+The database currently lives in **`us-east-2` (Ohio)**. Every query from Sri
+Lanka is a ~250 ms round trip, which is why a cold storefront render takes
+seconds. Neon cannot move a project between regions, so this is a create-and-
+restore. Roughly 15 minutes, and it is the single biggest UX win available.
+
+1. Neon console → **New Project** → region **AWS ap-southeast-1 (Singapore)**.
+2. Copy its pooled connection string.
+3. Dump and restore (run from this repo):
+
+   ```bash
+   pg_dump "$OLD_DATABASE_URL" --no-owner --no-acl -Fc -f /tmp/sfdesk.dump
+   pg_restore -d "$NEW_DATABASE_URL" --no-owner --no-acl /tmp/sfdesk.dump
+   ```
+
+4. Point `DATABASE_URL` / `DATABASE_URL_RUNTIME` at the new project in
+   `.env.local` and in the Worker secrets.
+5. Re-apply row-level security on the new database: `npm run db:rls`
+   (with `RUNTIME_DB_PASSWORD` set, so `app_runtime` is provisioned there too).
+6. Verify: `npm run db:generate` should say "No schema changes".
+
+Keep the old project until you have confirmed orders and logins work.
+
+---
+
+## 4e. Serve media from your own domain  **[blocked: register sfdesk.lk first]**
+
+Product photos are currently served from the bucket's `pub-*.r2.dev` URL.
+Cloudflare rate-limits that and documents it as development-only, so it will
+start failing under real traffic.
+
+`sfdesk.lk` is not registered yet (no nameservers resolve). Once it is and the
+zone is on Cloudflare:
+
+1. **R2 → `sfdesk-media` → Settings → Public access → Connect Domain** →
+   `media.sfdesk.lk`.
+2. Set `STORAGE_PUBLIC_BASE_URL=https://media.sfdesk.lk` in `.env.local` and in
+   the Worker secrets, then redeploy.
+3. Existing photo rows store only the object key, so they pick up the new
+   domain automatically — no data migration.
+
+While you are there: add `desk.sfdesk.lk` as the Worker's custom domain (4b),
+set `AUTH_URL` to match, and verify the domain in Resend so order emails land
+in inboxes rather than spam.
 
 ---
 
