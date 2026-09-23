@@ -374,6 +374,17 @@ export const shareSettingsSchema = z
     path: ["whatsappNumber"],
   });
 
+/** Payment methods a storefront customer can pick, with display labels. */
+export const PAYMENT_METHODS = [
+  { value: "cash_on_delivery", label: "Cash on delivery" },
+  { value: "bank_transfer", label: "Bank transfer" },
+] as const;
+export type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethodValue, string> = {
+  cash_on_delivery: "Cash on delivery",
+  bank_transfer: "Bank transfer",
+};
+
 export const shareHandoffSchema = z.object({
   slug: z.string().trim().min(1).max(60),
   items: z
@@ -392,6 +403,14 @@ export const shareHandoffSchema = z.object({
     .trim()
     .min(5, { error: "Enter your delivery address." })
     .max(500),
+  city: z
+    .string()
+    .trim()
+    .min(2, { error: "Enter your city." })
+    .max(80, { error: "That city name is too long." }),
+  paymentMethod: z.enum(["cash_on_delivery", "bank_transfer"], {
+    error: "Pick how you'll pay.",
+  }),
 });
 
 /** Turns "Jane's Boutique" into "janes-boutique". */

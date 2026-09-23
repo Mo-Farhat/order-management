@@ -17,6 +17,7 @@ import {
   type OrderSource,
   type DeliveryStatus,
   type PaymentStatus,
+  type PaymentMethod,
 } from "@/db/schema";
 import { can } from "@/lib/rbac";
 import { computeTotals, fromCents, toCents, type DiscountType } from "@/lib/money";
@@ -191,6 +192,8 @@ export type OrderDetail = {
   dispatchedAt: string | null;
   deliveredAt: string | null;
   customer: { name: string; phone: string | null; address: string | null } | null;
+  city: string | null;
+  paymentMethod: PaymentMethod | null;
   items: {
     id: string;
     name: string;
@@ -227,6 +230,8 @@ export async function getOrderDetail(ctx: ActiveContext, id: string): Promise<Or
     customer: customer
       ? { name: customer.name, phone: customer.phone, address: order.deliveryAddress }
       : null,
+    city: order.city,
+    paymentMethod: order.paymentMethod,
     items: items.map((it) => ({
       id: it.id,
       name: it.nameSnapshot,
@@ -439,6 +444,8 @@ type StorefrontOrderInput = {
   note?: string;
   /** The shop's default delivery fee, carried onto the pending order. */
   deliveryFee?: string;
+  city: string;
+  paymentMethod: PaymentMethod;
 };
 
 async function insertOrderRow(
@@ -447,6 +454,8 @@ async function insertOrderRow(
   input: OrderDraftInput,
   status: OrderStatus,
   source: OrderSource,
+  /** Storefront-only details the desk composer doesn't collect. */
+  extra?: { city?: string; paymentMethod?: PaymentMethod },
 ): Promise<{ id: string; orderNumber: number; totalCents: number }> {
   const customerId = await resolveCustomer(tx, ctx, input);
   const priced = await priceItems(tx, ctx, input.items);
@@ -485,7 +494,9 @@ async function insertOrderRow(
       subtotal: fromCents(totals.subtotalCents),
       total: fromCents(totals.totalCents),
       deliveryAddress: input.deliveryAddress?.trim() || null,
+      city: extra?.city?.trim() || null,
       paymentStatus: input.paymentStatus ?? "unpaid",
+      paymentMethod: extra?.paymentMethod ?? null,
       amountPaid: fromCents(toCents(input.amountPaid || "0")),
       note: input.note?.trim() || null,
       stockCommitted: commit,
@@ -573,7 +584,10 @@ export async function createStorefrontOrder(
       note: input.note,
       confirm: false,
     };
-    const r = await insertOrderRow(tx, { tenantId, userId: null }, draft, "pending", "storefront");
+    const r = await insertOrderRow(tx, { tenantId, userId: null }, draft, "pending", "storefront", {
+      city: input.city,
+      paymentMethod: input.paymentMethod,
+    });
     await tx.insert(auditLog).values({
       tenantId,
       action: "order.created",

@@ -92,6 +92,13 @@
       "when": 1788961043006,
       "tag": "0012_known_grandmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790188499903,
+      "tag": "0013_abandoned_lester",
+      "breakpoints": true
     }
   ]
 }

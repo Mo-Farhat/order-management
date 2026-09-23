@@ -22,10 +22,12 @@ export function OrdersTable({
         <table className="w-full min-w-[900px] text-sm">
           <thead className="border-b border-line bg-surface">
             <tr>
+              {/* "Order" appears twice on purpose: the number, then the order-status
+                  axis alongside Payment and Delivery. Key by index, not label. */}
               {["Order", "Customer", "Product", "Sale date", "Dispatched", "Total", "Paid", "Balance", "Payment", "Delivery", "Order"].map(
-                (h) => (
+                (h, i) => (
                   <th
-                    key={h}
+                    key={`${h}-${i}`}
                     className="whitespace-nowrap px-3 py-2.5 text-left font-mono text-[10px] font-semibold uppercase tracking-widest text-muted"
                   >
                     {h}

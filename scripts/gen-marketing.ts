@@ -179,6 +179,8 @@ async function seed() {
     customerName: "Jane Doe",
     customerPhone: "+1 555 981 2210",
     deliveryAddress: "27 Alder Street, Apt 4, Riverside",
+    city: "Riverside",
+    paymentMethod: "cash_on_delivery" as const,
     items: [{ productId: pid("Merino"), quantity: 1 }, { productId: pid("Boxy"), quantity: 2 }],
     note: "Please gift-wrap the scarf.",
   });
@@ -186,6 +188,8 @@ async function seed() {
     customerName: "Chris Bennett",
     customerPhone: "+1 555 604 7788",
     deliveryAddress: "9 Kestrel Court, Northgate",
+    city: "Northgate",
+    paymentMethod: "bank_transfer" as const,
     items: [{ productId: pid("Straight-Leg"), quantity: 1 }],
   });
 
@@ -194,6 +198,8 @@ async function seed() {
     customerName: "Priya Anand",
     customerPhone: "+1 555 220 9043",
     deliveryAddress: "154 Bramble Lane, Eastwick",
+    city: "Eastwick",
+    paymentMethod: "cash_on_delivery" as const,
     items: [{ productId: pid("Wool-Blend"), quantity: 1 }],
   });
   await acceptStorefrontOrder(ctx, o3.id);
@@ -205,6 +211,8 @@ async function seed() {
     customerName: "Marco Reyes",
     customerPhone: "+1 555 771 3320",
     deliveryAddress: "3 Wharf Road, Southbank",
+    city: "Southbank",
+    paymentMethod: "bank_transfer" as const,
     items: [{ productId: pid("Cotton Twill"), quantity: 2 }, { productId: pid("Cable-Knit"), quantity: 1 }],
   });
   await acceptStorefrontOrder(ctx, o4.id);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Storefront as StorefrontData } from "@/lib/share";
@@ -38,6 +38,23 @@ export function Storefront({
   const { lines, setQty, count } = useStorefrontCart(slug);
   const [cartOpen, setCartOpen] = useState(openCart);
   const [pulse, setPulse] = useState<string | null>(null);
+
+  // `?cart=1` is what opens the sheet, including when the nav links to it from
+  // this same page — a client navigation re-renders without remounting, so the
+  // initial useState value alone would never fire.
+  useEffect(() => {
+    if (openCart) setCartOpen(true);
+  }, [openCart]);
+
+  function closeCart() {
+    setCartOpen(false);
+    if (params.get("cart")) {
+      const sp = new URLSearchParams(params);
+      sp.delete("cart");
+      const qs = sp.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    }
+  }
 
   const subtotalCents = Object.entries(lines).reduce((n, [id, q]) => {
     const p = cartProducts.find((x) => x.id === id);
@@ -196,7 +213,7 @@ export function Storefront({
           slug={slug}
           tenant={tenant}
           products={cartProducts}
-          onClose={() => setCartOpen(false)}
+          onClose={closeCart}
         />
       )}
     </>

@@ -67,6 +67,9 @@ export const discountTypeEnum = pgEnum("discount_type", ["none", "flat", "percen
 
 export const paymentStatusEnum = pgEnum("payment_status", ["unpaid", "partial", "paid"]);
 
+/** How the customer intends to pay. Captured on storefront orders; null on desk orders. */
+export const paymentMethodEnum = pgEnum("payment_method", ["cash_on_delivery", "bank_transfer"]);
+
 export const stockMovementReasonEnum = pgEnum("stock_movement_reason", [
   "initial", // set when the product is created
   "manual_adjustment", // quick stock editor / edit form
@@ -294,7 +297,9 @@ export const orders = pgTable(
 
     // Fulfilment + payment details captured on the order itself.
     deliveryAddress: text("delivery_address"),
+    city: text("city"),
     paymentStatus: paymentStatusEnum("payment_status").notNull().default("unpaid"),
+    paymentMethod: paymentMethodEnum("payment_method"),
     amountPaid: numeric("amount_paid", { precision: 12, scale: 2 }).notNull().default("0"),
 
     note: text("note"),
@@ -526,5 +531,6 @@ export type DeliveryStatus = (typeof deliveryStatusEnum.enumValues)[number];
 export type OrderSource = (typeof orderSourceEnum.enumValues)[number];
 export type DiscountType = (typeof discountTypeEnum.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number];
+export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
 export type PlanStatus = (typeof planStatusEnum.enumValues)[number];
 export type PlanTier = (typeof planTierEnum.enumValues)[number];

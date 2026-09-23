@@ -6,15 +6,28 @@ import type { StorefrontProduct, StorefrontTenant } from "@/lib/share";
 import { toCents } from "@/lib/money";
 import { Step, Placeholder } from "@/components/share/shared";
 import { useStorefrontCart } from "@/components/share/use-cart";
+import {
+  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABEL,
+  type PaymentMethodValue,
+} from "@/lib/validation";
 
-type Field = "name" | "phone" | "address";
+type Field = "name" | "phone" | "address" | "city";
 type View = "cart" | "details" | "confirm" | "sent";
+
+const FIELD_LABEL: Record<Field, string> = {
+  name: "Your name",
+  phone: "Phone",
+  address: "Delivery address",
+  city: "City",
+};
 
 function validate(v: Record<Field, string>): Partial<Record<Field, string>> {
   const e: Partial<Record<Field, string>> = {};
   if (v.name.trim().length < 1) e.name = "Enter your name.";
   if (!/^\+?[0-9\s-]{6,}$/.test(v.phone.trim())) e.phone = "Enter a valid phone number.";
   if (v.address.trim().length < 5) e.address = "Enter your full delivery address.";
+  if (v.city.trim().length < 2) e.city = "Enter your city.";
   return e;
 }
 
@@ -34,7 +47,10 @@ export function CartSheet({
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
   const [view, setView] = useState<View>("cart");
-  const [form, setForm] = useState<Record<Field, string>>({ name: "", phone: "", address: "" });
+  const [form, setForm] = useState<Record<Field, string>>({
+    name: "", phone: "", address: "", city: "",
+  });
+  const [payMethod, setPayMethod] = useState<PaymentMethodValue>("cash_on_delivery");
   const [note, setNote] = useState("");
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [showAll, setShowAll] = useState(false);
@@ -81,6 +97,8 @@ export function CartSheet({
         customerName: form.name.trim(),
         customerPhone: form.phone.trim(),
         deliveryAddress: form.address.trim(),
+        city: form.city.trim(),
+        paymentMethod: payMethod,
       });
       if (!res.ok) {
         setError(res.error);
@@ -269,14 +287,20 @@ export function CartSheet({
             )
           ) : view === "details" ? (
             <div className="flex flex-col gap-3 py-2">
-              {(["name", "phone", "address"] as Field[]).map((f) => (
+              {(["name", "phone", "address", "city"] as Field[]).map((f) => (
                 <label key={f} className="flex flex-col gap-1">
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
-                    {f === "name" ? "Your name" : f === "phone" ? "Phone" : "Delivery address"}
+                    {FIELD_LABEL[f]}
                   </span>
                   <input
                     value={form[f]}
                     inputMode={f === "phone" ? "tel" : "text"}
+                    autoComplete={
+                      f === "name" ? "name"
+                        : f === "phone" ? "tel"
+                        : f === "address" ? "street-address"
+                        : "address-level2"
+                    }
                     onChange={(e) => setForm({ ...form, [f]: e.target.value })}
                     onBlur={() => setTouched({ ...touched, [f]: true })}
                     className={inputCls(f)}
@@ -284,6 +308,32 @@ export function CartSheet({
                   {fieldErr(f) && <span className="text-xs text-danger">{fieldErr(f)}</span>}
                 </label>
               ))}
+
+              <fieldset className="flex flex-col gap-1.5 border-0 p-0">
+                <legend className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
+                  How you&apos;ll pay
+                </legend>
+                <div className="flex flex-col gap-2">
+                  {PAYMENT_METHODS.map((m) => (
+                    <label
+                      key={m.value}
+                      className={`flex cursor-pointer items-center gap-2.5 rounded-[3px] border px-3 py-2.5 text-sm ${
+                        payMethod === m.value ? "border-[var(--sf-accent)]" : "border-line"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={m.value}
+                        checked={payMethod === m.value}
+                        onChange={() => setPayMethod(m.value)}
+                        className="accent-[var(--sf-accent)]"
+                      />
+                      {m.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               <label className="flex flex-col gap-1">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
                   Note for the seller <span className="normal-case text-muted/70">(optional)</span>
@@ -331,6 +381,13 @@ export function CartSheet({
                 <p className="font-medium">{form.name}</p>
                 <p className="text-muted">{form.phone}</p>
                 <p className="whitespace-pre-line text-muted">{form.address}</p>
+                <p className="text-muted">{form.city}</p>
+                <p className="mt-1.5 text-ink">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
+                    Paying by
+                  </span>{" "}
+                  {PAYMENT_METHOD_LABEL[payMethod]}
+                </p>
                 {note.trim() && <p className="mt-1 text-muted">Note: {note.trim()}</p>}
               </div>
               {error && (

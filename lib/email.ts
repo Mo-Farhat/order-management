@@ -53,6 +53,8 @@ export async function sendNewOrderEmail(
     orderNumber: number;
     customerName: string;
     customerPhone: string;
+    city?: string;
+    paymentMethod?: string;
     currency: string;
     total: string;
     items: string[];
@@ -71,6 +73,8 @@ export async function sendNewOrderEmail(
       ``,
       `Total: ${o.currency} ${o.total}`,
       `Phone: ${o.customerPhone}`,
+      o.city ? `City: ${o.city}` : null,
+      o.paymentMethod ? `Payment: ${o.paymentMethod}` : null,
       o.note ? `Note: ${o.note}` : null,
       ``,
       `It's waiting in your desk as Pending — accept or decline it:`,

@@ -10,7 +10,14 @@ import { computeTotals, fromCents, toCents } from "@/lib/money";
 import { normalizePhone, toWhatsAppNumber } from "@/lib/phone";
 import { sendNewOrderEmail } from "@/lib/email";
 import { appUrl } from "@/lib/constants";
-import { onAccentFor, SF_DEFAULT_ACCENT, type SortKey, type StorefrontConfig } from "@/lib/validation";
+import {
+  onAccentFor,
+  PAYMENT_METHOD_LABEL,
+  SF_DEFAULT_ACCENT,
+  type PaymentMethodValue,
+  type SortKey,
+  type StorefrontConfig,
+} from "@/lib/validation";
 import { honoredConfig, showsPoweredBy, tierAllows } from "@/lib/entitlements";
 import type { ActiveContext } from "@/lib/session";
 
@@ -309,6 +316,8 @@ export type HandoffInput = {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
+  city: string;
+  paymentMethod: PaymentMethodValue;
 };
 
 export type HandoffResult = {
@@ -331,6 +340,8 @@ async function notifyOwnersOfStorefrontOrder(args: {
   orderNumber: number;
   customerName: string;
   customerPhone: string;
+  city: string;
+  paymentMethod: string;
   currency: string;
   total: string;
   items: string[];
@@ -350,6 +361,8 @@ async function notifyOwnersOfStorefrontOrder(args: {
     orderNumber: args.orderNumber,
     customerName: args.customerName,
     customerPhone: args.customerPhone,
+    city: args.city,
+    paymentMethod: args.paymentMethod,
     currency: args.currency,
     total: args.total,
     items: args.items,
@@ -401,6 +414,8 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     items: clean,
     note: input.note?.trim() || undefined,
     deliveryFee: deliveryFeeCents > 0 ? fromCents(deliveryFeeCents) : undefined,
+    city: input.city.trim(),
+    paymentMethod: input.paymentMethod,
   });
 
   const cur = tenant.currency;
@@ -416,6 +431,8 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     `Name: ${input.customerName.trim()}`,
     `Phone: ${input.customerPhone.trim()}`,
     `Address: ${input.deliveryAddress.trim()}`,
+    `City: ${input.city.trim()}`,
+    `Payment: ${PAYMENT_METHOD_LABEL[input.paymentMethod]}`,
     input.note?.trim() ? `Note: ${input.note.trim()}` : ``,
   ]
     .filter(Boolean)
@@ -429,6 +446,8 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
       orderNumber: order.orderNumber,
       customerName: input.customerName.trim(),
       customerPhone: input.customerPhone.trim(),
+      city: input.city.trim(),
+      paymentMethod: PAYMENT_METHOD_LABEL[input.paymentMethod],
       currency: cur,
       total,
       items: lines.map((l) => `${l.quantity} × ${l.name} (${cur} ${l.price})`),

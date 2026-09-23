@@ -6,6 +6,7 @@ import { toCents, fromCents } from "@/lib/money";
 import { StatusSelect } from "@/components/orders/order-status-select";
 import { PaymentPill } from "@/components/orders/status-pill";
 import { Spinner } from "@/components/desk/ui";
+import { PAYMENT_METHOD_LABEL } from "@/lib/validation";
 import {
   updatePaymentAction,
   updateOrderNoteAction,
@@ -71,6 +72,10 @@ export function OrderDetailBody({
               <span className="w-24 shrink-0 text-muted">Address</span>
               <span className="whitespace-pre-line">{order.customer.address}</span>
             </div>
+          )}
+          {order.city && <Meta k="City" v={order.city} />}
+          {order.paymentMethod && (
+            <Meta k="Pays by" v={PAYMENT_METHOD_LABEL[order.paymentMethod]} />
           )}
         </div>
 
