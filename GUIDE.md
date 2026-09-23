@@ -181,6 +181,34 @@ The product still needs its own name before public signup (PRD §14).
 
 ---
 
+## 4c. Next.js cache backing store  **[required before the first deploy]**
+
+The storefront reads are cached and invalidated per shop (`lib/share.ts`), which
+is what keeps a busy shop off Postgres — a warm storefront serves in ~10 ms with
+zero queries instead of ~1 s. On Workers that cache needs somewhere to live, so
+`open-next.config.ts` points it at R2 (the payloads) and D1 (which tags are
+stale). **Both resources must exist or the Worker fails to start.**
+
+```bash
+# 1. Bucket for the cached payloads — separate from your media bucket
+npx wrangler r2 bucket create sfdesk-next-cache
+
+# 2. Database for cache tags. Copy the printed database_id into
+#    wrangler.jsonc, replacing REPLACE_WITH_ID_FROM_WRANGLER_D1_CREATE
+npx wrangler d1 create sfdesk-next-tags
+
+# 3. Create the table OpenNext expects
+npx wrangler d1 execute sfdesk-next-tags --remote --command \
+  "CREATE TABLE IF NOT EXISTS revalidations (tag TEXT PRIMARY KEY, revalidatedAt INTEGER, stale INTEGER, expire INTEGER);"
+```
+
+Both sit inside Cloudflare's free tier at this scale (R2: 10 GB; D1: 5 GB,
+5M reads/day). Storefront HTML also carries `s-maxage=60` (`next.config.ts`) so
+Cloudflare's edge serves repeat visitors without waking the Worker at all — the
+single biggest lever on cost, since Workers bills CPU per invocation.
+
+---
+
 ## 5. Summary — what to send me
 
 | Priority | Value | From |

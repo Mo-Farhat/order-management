@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/lib/share";
 import { redirect } from "next/navigation";
 import type { ZodError } from "zod";
 
@@ -92,6 +93,7 @@ export async function createOrderAction(
 
   revalidateOrder(result.id);
   revalidatePath("/desk/share");
+  revalidateStorefront(ctx.tenantSlug);
   redirect(`/desk/orders/${result.id}`);
 }
 
@@ -134,6 +136,7 @@ export async function acceptOrderAction(orderId: string): Promise<OrderState> {
   const ctx = await requireCapability("order:advance");
   const r = await run(orderId, (id) => acceptStorefrontOrder(ctx, id));
   revalidatePath("/desk/share");
+  revalidateStorefront(ctx.tenantSlug);
   return r?.error ? r : { ok: "Order accepted." };
 }
 
@@ -146,6 +149,7 @@ export async function declineOrderAction(
   const reason = String(formData.get("reason") ?? "");
   const r = await run(orderId, (id) => declineStorefrontOrder(ctx, id, reason));
   revalidatePath("/desk/share");
+  revalidateStorefront(ctx.tenantSlug);
   return r?.error ? r : { ok: "Order declined." };
 }
 

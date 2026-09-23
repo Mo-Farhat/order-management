@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { CatalogState } from "@/app/actions/catalog";
 import { removePhotoAction } from "@/app/actions/catalog";
 import { Field, FormError, SubmitButton } from "@/components/form";
+import { ImageUploadInput } from "@/components/image-upload-input";
 
 type Photo = { id: string; url: string };
 
@@ -64,14 +65,12 @@ export function ProductForm({
               ))}
             </div>
           )}
-          <input
-            type="file"
+          <ImageUploadInput
             name="photos"
-            accept="image/jpeg,image/png,image/webp"
+            preset="product"
             multiple
-            className="text-xs text-muted"
+            hint="Up to 4 per product. Large photos are shrunk on your device before upload."
           />
-          <span className="text-xs text-muted">Up to 6, JPEG/PNG/WebP, 6 MB each.</span>
         </div>
       )}
 

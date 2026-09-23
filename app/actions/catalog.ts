@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateStorefront } from "@/lib/share";
 import { redirect } from "next/navigation";
 
 import { requireCapability } from "@/lib/session";
@@ -81,6 +82,7 @@ export async function createProductAction(
   }
 
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
   redirect("/desk/catalog");
 }
 
@@ -101,6 +103,7 @@ export async function updateProductAction(
   }
 
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
   revalidatePath(`/desk/catalog/${productId}`);
   return { ok: "Saved." };
 }
@@ -124,6 +127,7 @@ export async function adjustStockAction(
   }
 
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
   revalidatePath(`/desk/catalog/${productId}`);
   return { ok: "Stock updated." };
 }
@@ -140,6 +144,7 @@ export async function quickSetStockAction(
   try {
     const next = await setStock(ctx, productId, stockQty);
     revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
     return { ok: true, stockQty: next };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Couldn't update stock." };
@@ -150,6 +155,7 @@ export async function archiveProductAction(productId: string, archived: boolean)
   const ctx = await requireCapability("catalog:edit");
   await setArchived(ctx, productId, archived);
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
   revalidatePath(`/desk/catalog/${productId}`);
 }
 
@@ -165,6 +171,7 @@ export async function deleteProductAction(productId: string): Promise<CatalogSta
     throw err;
   }
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
   redirect("/desk/catalog");
 }
 
@@ -173,6 +180,7 @@ export async function removePhotoAction(photoId: string) {
   const key = await removeProductPhoto(ctx, photoId);
   if (key) await deleteObject(key);
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
 }
 
 export async function previewImportAction(
@@ -203,5 +211,6 @@ export async function commitImportAction(
   }
 
   revalidatePath("/desk/catalog");
+  revalidateStorefront(ctx.tenantSlug);
   redirect(`/desk/catalog?imported=${imported}`);
 }

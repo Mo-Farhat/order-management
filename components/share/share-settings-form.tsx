@@ -4,6 +4,7 @@ import { useActionState, useState, type ReactNode } from "react";
 import { saveShareSettings } from "@/app/actions/share";
 import { FormError } from "@/components/form";
 import { SubmitBtn } from "@/components/desk/submit-btn";
+import { ImageUploadInput } from "@/components/image-upload-input";
 import {
   FONT_CHOICES,
   SF_DEFAULT_ACCENT,
@@ -182,7 +183,7 @@ export function ShareSettingsForm({
           )}
           {storageEnabled ? (
             <>
-              <input type="file" name="logo" accept="image/jpeg,image/png,image/webp" className="text-xs" />
+              <ImageUploadInput name="logo" preset="logo" />
               {logoUrl && (
                 <label className="flex items-center gap-2 text-xs text-muted">
                   <input type="checkbox" name="removeLogo" /> Remove current logo
@@ -236,7 +237,7 @@ export function ShareSettingsForm({
             )}
             {storageEnabled && (
               <>
-                <input type="file" name="banner" accept="image/jpeg,image/png,image/webp" className="text-xs" />
+                <ImageUploadInput name="banner" preset="banner" />
                 {bannerUrl && (
                   <label className="flex items-center gap-2 text-xs text-muted">
                     <input type="checkbox" name="removeBanner" /> Remove current banner

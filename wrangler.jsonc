@@ -8,6 +8,25 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+
+  // Next.js cache backing store (see open-next.config.ts). Both must exist
+  // before the first deploy — GUIDE.md step 4c has the two wrangler commands.
+  // These are separate from the product-photo bucket, which the app reaches
+  // over the S3 API using the STORAGE_* secrets, not a binding.
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "sfdesk-next-cache"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "sfdesk-next-tags",
+      "database_id": "REPLACE_WITH_ID_FROM_WRANGLER_D1_CREATE"
+    }
+  ],
+
   "observability": { "enabled": true }
   // Secrets (set with `wrangler secret put NAME`, not here):
   //   DATABASE_URL, DATABASE_URL_RUNTIME, AUTH_SECRET,

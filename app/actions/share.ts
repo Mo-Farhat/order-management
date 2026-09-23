@@ -14,7 +14,7 @@ import {
   type StorefrontConfig,
 } from "@/lib/validation";
 import { pickAllowedConfig, tierAllows } from "@/lib/entitlements";
-import { createShareHandoff, type HandoffResult } from "@/lib/share";
+import { createShareHandoff, revalidateStorefront, type HandoffResult } from "@/lib/share";
 import { deleteObject, isStorageConfigured, uploadTenantImage } from "@/lib/storage";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
@@ -144,6 +144,7 @@ export async function saveShareSettings(
 
   revalidatePath("/desk/share");
   revalidatePath(`/s/${before.slug}`, "layout");
+  revalidateStorefront(before.slug);
   return { ok: "Saved." };
 }
 

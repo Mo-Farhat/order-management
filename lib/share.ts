@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache, updateTag } from "next/cache";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -94,7 +95,7 @@ export type StorefrontChrome = {
   showPoweredBy: boolean;
 };
 
-export async function getStorefrontChrome(slug: string): Promise<StorefrontChrome | null> {
+async function loadStorefrontChrome(slug: string): Promise<StorefrontChrome | null> {
   const t = await tenantBySlug(slug);
   if (!t) return null;
 
@@ -133,6 +134,58 @@ export async function getStorefrontChrome(slug: string): Promise<StorefrontChrom
   };
 }
 
+/**
+ * Cache tag for everything public about one shop. Every desk mutation that can
+ * change what a customer sees calls `revalidateStorefront(slug)`.
+ */
+export function storefrontTag(slug: string): string {
+  return `storefront:${slug}`;
+}
+
+/**
+ * Drop the cached storefront for one shop. `updateTag` (not `revalidateTag`)
+ * because these callers are Server Actions where the owner just changed
+ * something and expects to see it — and because stock hitting zero must not be
+ * served stale.
+ */
+export function revalidateStorefront(slug: string | null | undefined): void {
+  if (slug) updateTag(storefrontTag(slug));
+}
+
+/**
+ * Public reads are cached per shop and invalidated by tag, so a storefront that
+ * nobody edited serves without touching Postgres. The `revalidate` window is a
+ * backstop in case a mutation path ever forgets to invalidate.
+ */
+const CACHE_SECONDS = 300;
+
+export function getStorefrontChrome(slug: string): Promise<StorefrontChrome | null> {
+  return unstable_cache(loadStorefrontChrome, ["sf-chrome", slug], {
+    tags: [storefrontTag(slug)],
+    revalidate: CACHE_SECONDS,
+  })(slug);
+}
+
+export function getStorefront(
+  slug: string,
+  opts: { category?: string; sort?: SortKey } = {},
+): Promise<Storefront | { paused: true; name: string } | null> {
+  return unstable_cache(loadStorefront, ["sf-catalog", slug], {
+    tags: [storefrontTag(slug)],
+    revalidate: CACHE_SECONDS,
+  })(slug, opts);
+}
+
+export function getStorefrontProduct(
+  slug: string,
+  productId: string,
+): Promise<StorefrontProductDetail | null> {
+  return unstable_cache(loadStorefrontProduct, ["sf-product", slug], {
+    tags: [storefrontTag(slug)],
+    revalidate: CACHE_SECONDS,
+  })(slug, productId);
+}
+
 const SORT_ORDER: Record<SortKey, ReturnType<typeof asc>> = {
   newest: desc(products.createdAt),
   price_asc: asc(products.price),
@@ -162,7 +215,7 @@ function storefrontChips(
 }
 
 /** Public read for `/s/{slug}`. `paused` when the owner switched the page off. */
-export async function getStorefront(
+async function loadStorefront(
   slug: string,
   opts: { category?: string; sort?: SortKey } = {},
 ): Promise<Storefront | { paused: true; name: string } | null> {
@@ -272,7 +325,7 @@ export type StorefrontProductDetail = {
 };
 
 /** Public read for `/s/{slug}/{id}` — the per-product page. */
-export async function getStorefrontProduct(
+async function loadStorefrontProduct(
   slug: string,
   productId: string,
 ): Promise<StorefrontProductDetail | null> {
