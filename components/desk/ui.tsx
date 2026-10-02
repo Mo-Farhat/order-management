@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 
 /* Shared "packaging" for every desk screen — consistent headers, cards, tables,
  * buttons and stat tiles so the app reads as one dashboard, not a pile of pages. */
@@ -193,9 +193,31 @@ export function EmptyState({
 }
 
 /* Table helpers — use as: <Table><THead>…</THead><tbody>…</tbody></Table> */
+/**
+ * CSS-only "scroll shadow" for a horizontally-scrollable table: fade masks
+ * scroll with the content (so they only cover already-scrolled-past edges),
+ * shadows stay fixed and only show while there's more to scroll — no JS, so
+ * a seller on mobile gets a visible hint these tables scroll sideways rather
+ * than silently cutting columns off past the viewport edge. Reused by every
+ * hand-rolled desk table (orders, order line items, admin shops) — not just
+ * this component.
+ */
+export const scrollShadowStyle: CSSProperties = {
+  background:
+    "linear-gradient(to right, var(--card) 30%, rgba(255,255,255,0)), " +
+    "linear-gradient(to right, rgba(255,255,255,0), var(--card) 70%) 100% 0, " +
+    "radial-gradient(farthest-side at 0 50%, rgba(20,32,29,0.38), rgba(20,32,29,0)), " +
+    "radial-gradient(farthest-side at 100% 50%, rgba(20,32,29,0.38), rgba(20,32,29,0)) 100% 0",
+  backgroundRepeat: "no-repeat",
+  backgroundColor: "var(--card)",
+  backgroundSize: "20px 100%, 20px 100%, 14px 100%, 14px 100%",
+  backgroundPosition: "0 0, 100% 0, 0 0, 100% 0",
+  backgroundAttachment: "local, local, scroll, scroll",
+};
+
 export function Table({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" style={scrollShadowStyle}>
       <table className="w-full text-sm">{children}</table>
     </div>
   );

@@ -6,6 +6,7 @@ import { toCents, fromCents } from "@/lib/money";
 import { StatusSelect } from "@/components/orders/order-status-select";
 import { PaymentPill } from "@/components/orders/status-pill";
 import { OrderModal } from "@/components/orders/order-modal";
+import { scrollShadowStyle } from "@/components/desk/ui";
 
 export function OrdersTable({
   rows,
@@ -18,7 +19,7 @@ export function OrdersTable({
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={scrollShadowStyle}>
         <table className="w-full min-w-[900px] text-sm">
           <thead className="border-b border-line bg-surface">
             <tr>

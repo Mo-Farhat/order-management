@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { ShopRow } from "@/lib/admin";
 import { PlanCell } from "@/components/admin/plan-cell";
+import { scrollShadowStyle } from "@/components/desk/ui";
 
 type SortKey = "name" | "createdAt" | "orders" | "gmv" | "lastOrderAt" | "customers";
 
@@ -74,7 +75,7 @@ export function ShopsTable({ rows }: { rows: ShopRow[] }) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" style={scrollShadowStyle}>
       <table className="w-full min-w-[860px] text-sm">
         <thead className="border-b border-line bg-surface">
           <tr>

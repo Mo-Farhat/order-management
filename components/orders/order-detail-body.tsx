@@ -5,7 +5,7 @@ import type { OrderDetail } from "@/lib/orders";
 import { toCents, fromCents } from "@/lib/money";
 import { StatusSelect } from "@/components/orders/order-status-select";
 import { PaymentPill } from "@/components/orders/status-pill";
-import { Spinner } from "@/components/desk/ui";
+import { Spinner, scrollShadowStyle } from "@/components/desk/ui";
 import { PAYMENT_METHOD_LABEL } from "@/lib/validation";
 import {
   updatePaymentAction,
@@ -96,7 +96,7 @@ export function OrderDetailBody({
       </div>
 
       {/* products */}
-      <div className="overflow-x-auto rounded-lg border border-line">
+      <div className="overflow-x-auto rounded-lg border border-line" style={scrollShadowStyle}>
         <table className="w-full text-sm">
           <thead className="border-b border-line bg-surface">
             <tr>

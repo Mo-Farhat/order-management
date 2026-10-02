@@ -27,10 +27,9 @@ export function AuthShell({
   return (
     <div className="mkt flex min-h-[100dvh] flex-col lg:flex-row">
       <aside className="mkt-auth-aside relative hidden w-[42%] max-w-lg flex-col justify-between p-12 text-white lg:flex">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
-          <span className="mkt-serif text-xl">{APP_NAME}</span>
+          <img src="/brand/logo.svg" alt={APP_NAME} className="h-8 w-auto" />
         </Link>
 
         <div>
@@ -62,14 +61,9 @@ export function AuthShell({
 
       <main className="mkt-auth-bg flex flex-1 flex-col items-center justify-center overflow-y-auto px-5 py-8 lg:py-10">
         <div className={`w-full ${cardWidth}`}>
-          <Link
-            href="/"
-            className="mb-6 flex items-center gap-2 lg:hidden"
-            aria-label={`${APP_NAME} home`}
-          >
+          <Link href="/" className="mb-6 flex items-center lg:hidden" aria-label={`${APP_NAME} home`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
-            <span className="mkt-serif text-lg text-ink">{APP_NAME}</span>
+            <img src="/brand/lockup-allcaps.svg" alt={APP_NAME} className="h-7 w-auto" />
           </Link>
 
           <div className="rounded-2xl border border-line bg-card p-7 shadow-[0_24px_60px_-30px_rgba(15,30,90,0.35)] sm:p-8">
