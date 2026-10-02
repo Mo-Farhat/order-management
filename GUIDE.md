@@ -205,51 +205,47 @@ per invocation.
 
 ---
 
-## 4d. Move Neon to Singapore  **[need from you: a new Neon project]**
+## 4d. Move Neon to Singapore  **[done]**
 
-The database currently lives in **`us-east-2` (Ohio)**. Every query from Sri
-Lanka is a ~250 ms round trip, which is why a cold storefront render takes
-seconds. Neon cannot move a project between regions, so this is a create-and-
-restore. Roughly 15 minutes, and it is the single biggest UX win available.
+Migrated from `us-east-2` (Ohio) to a new project in **`ap-southeast-1`
+(Singapore)** via dump/restore — Neon can't move a project between regions.
+RLS + `app_runtime` re-provisioned on the new project (`npm run db:rls`);
+`db:generate` confirms no schema drift. The old Ohio project is kept around
+as a safety net — delete it once a few days of production traffic confirm
+the new one is solid.
 
-1. Neon console → **New Project** → region **AWS ap-southeast-1 (Singapore)**.
-2. Copy its pooled connection string.
-3. Dump and restore (run from this repo):
+**Gotcha if you ever do this again:** Neon's Postgres version can be ahead of
+your local `pg_dump`/`pg_restore` (this box had 14, Neon was on 18) — `pg_dump`
+refuses to dump from a newer major version. Run both through a matching-version
+Postgres Docker image instead of installing a new client locally:
 
-   ```bash
-   pg_dump "$OLD_DATABASE_URL" --no-owner --no-acl -Fc -f /tmp/sfdesk.dump
-   pg_restore -d "$NEW_DATABASE_URL" --no-owner --no-acl /tmp/sfdesk.dump
-   ```
+```bash
+docker run --rm -v /tmp/sfdesk-dump:/dump postgres:18 \
+  pg_dump "$OLD_DATABASE_URL" --no-owner --no-acl -Fc -f /dump/sfdesk.dump
+docker run --rm -v /tmp/sfdesk-dump:/dump postgres:18 \
+  pg_restore -d "$NEW_DATABASE_URL" --no-owner --no-acl /dump/sfdesk.dump
+```
 
-4. Point `DATABASE_URL` / `DATABASE_URL_RUNTIME` at the new project in
-   `.env.local` and in the Worker secrets.
-5. Re-apply row-level security on the new database: `npm run db:rls`
-   (with `RUNTIME_DB_PASSWORD` set, so `app_runtime` is provisioned there too).
-6. Verify: `npm run db:generate` should say "No schema changes".
-
-Keep the old project until you have confirmed orders and logins work.
+Also: don't bother debugging `search_path` with a plain `psql`/TCP connection
+against Neon's pooled endpoint — it can report an empty `search_path` there
+for reasons that don't affect the app at all. The app only ever talks to Neon
+through `@neondatabase/serverless` (`neon()` over HTTP, `Pool` over WebSocket),
+and both resolve `public` correctly regardless of what `psql` reports.
 
 ---
 
-## 4e. Serve media from your own domain  **[blocked: register sfdesk.lk first]**
+## 4e. Serve media from your own domain  **[done]**
 
-Product photos are currently served from the bucket's `pub-*.r2.dev` URL.
-Cloudflare rate-limits that and documents it as development-only, so it will
-start failing under real traffic.
-
-`sfdesk.lk` is not registered yet (no nameservers resolve). Once it is and the
-zone is on Cloudflare:
-
-1. **R2 → `sfdesk-media` → Settings → Public access → Connect Domain** →
-   `media.sfdesk.lk`.
-2. Set `STORAGE_PUBLIC_BASE_URL=https://media.sfdesk.lk` in `.env.local` and in
-   the Worker secrets, then redeploy.
-3. Existing photo rows store only the object key, so they pick up the new
-   domain automatically — no data migration.
-
-While you are there: add `desk.sfdesk.lk` as the Worker's custom domain (4b),
-set `AUTH_URL` to match, and verify the domain in Resend so order emails land
-in inboxes rather than spam.
+`sfdesk.lk` is registered, on Cloudflare, and `media.sfdesk.lk` is connected as
+the R2 bucket's custom domain — `STORAGE_PUBLIC_BASE_URL` points at it.
+Existing photo rows only ever stored the object key, so they picked up the
+new domain automatically, no data migration needed. The Worker's custom
+domain ended up being the bare apex (`sfdesk.lk`), not `desk.sfdesk.lk` as
+originally planned here — it's all one Next.js app (marketing, storefront,
+desk, admin), and storefront links are customer-facing, so the clean apex
+URL wins over an app-subdomain convention that doesn't apply when there's
+only one deployment. `AUTH_URL` matches, and the domain is verified in Resend
+(DKIM + SPF, `send.sfdesk.lk`) so order emails land in inboxes.
 
 ---
 
