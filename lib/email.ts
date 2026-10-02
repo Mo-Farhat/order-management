@@ -34,7 +34,10 @@ const SANS = "-apple-system,'Segoe UI',Helvetica,Arial,sans-serif";
 
 /** Wraps a content fragment in the shared branded shell (eyebrow header + footer). */
 function emailShell(eyebrow: string, bodyHtml: string): string {
-  const logoUrl = appUrl("/brand/icon-512.png");
+  // The full lockup (icon + wordmark baked into one image), same asset as the
+  // marketing footer — never render the icon next to a separately-coded
+  // APP_NAME string as a fake lockup.
+  const logoUrl = appUrl("/brand/lockup-allcaps-email.png");
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#ffffff;-webkit-text-size-adjust:100%;">
@@ -47,10 +50,7 @@ function emailShell(eyebrow: string, bodyHtml: string): string {
               <td style="padding:20px 2px 18px;border-bottom:1px solid ${BRAND.line};">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
                   <td style="vertical-align:middle;">
-                    <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                      <td style="padding-right:8px;"><img src="${logoUrl}" width="20" height="20" alt="" style="display:block;border-radius:4px;"></td>
-                      <td style="font-size:14px;font-weight:700;letter-spacing:-0.01em;color:${BRAND.ink};">${APP_NAME}</td>
-                    </tr></table>
+                    <img src="${logoUrl}" width="86" height="22" alt="${APP_NAME}" style="display:block;">
                   </td>
                   <td align="right" style="vertical-align:middle;font-family:${MONO};font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:${BRAND.muted};">
                     ${eyebrow}

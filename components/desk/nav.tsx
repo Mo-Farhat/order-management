@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { APP_NAME } from "@/lib/constants";
 
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 type Group = { heading?: string; items: Item[] };
@@ -95,12 +96,11 @@ function NavList({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin?: b
   );
 }
 
-export function SidebarBrand({ appName }: { appName: string }) {
+export function SidebarBrand() {
   return (
-    <div className="flex items-center gap-2 border-b border-line px-4 py-4">
+    <div className="flex items-center border-b border-line px-4 py-4">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
-      <span className="text-sm font-semibold text-ink">{appName}</span>
+      <img src="/brand/lockup-allcaps.svg" alt={APP_NAME} className="h-6 w-auto" />
     </div>
   );
 }
@@ -123,19 +123,17 @@ function SidebarFooter({ email, role }: { email?: string; role?: string }) {
 }
 
 export function DesktopSidebar({
-  appName,
   isAdmin,
   email,
   role,
 }: {
-  appName: string;
   isAdmin?: boolean;
   email?: string;
   role?: string;
 }) {
   return (
     <aside className="hidden h-full w-60 shrink-0 flex-col border-r border-line bg-sidebar md:flex">
-      <SidebarBrand appName={appName} />
+      <SidebarBrand />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <NavList isAdmin={isAdmin} />
       </div>
@@ -145,12 +143,10 @@ export function DesktopSidebar({
 }
 
 export function MobileNav({
-  appName,
   isAdmin,
   email,
   role,
 }: {
-  appName: string;
   isAdmin?: boolean;
   email?: string;
   role?: string;
@@ -170,7 +166,7 @@ export function MobileNav({
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 left-0 flex w-64 flex-col border-r border-line bg-sidebar">
-            <SidebarBrand appName={appName} />
+            <SidebarBrand />
             <div className="min-h-0 flex-1 overflow-y-auto">
               <NavList onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
             </div>
