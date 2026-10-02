@@ -327,11 +327,13 @@ async function run() {
   const addBtns = page.locator("main button", { hasText: /^Add$/ });
   await addBtns.nth(0).click();
   await addBtns.nth(1).click();
-  await page.locator("header button", { hasText: "Order" }).first().click();
+  // The cart trigger lives in the shell nav and is a link to `?cart=1`.
+  await page.locator("header a", { hasText: "Order" }).first().click();
   await page.getByRole("button", { name: /^Continue$/ }).click();
   await page.locator('label:has-text("Your name") input').fill("Jane Doe");
   await page.locator('label:has-text("Phone") input').fill("+1 555 981 2210");
   await page.locator('label:has-text("Delivery address") input').fill("27 Alder Street, Apt 4, Riverside");
+  await page.locator('label:has-text("City") input').fill("Riverside");
   await page.getByRole("button", { name: /review order/i }).click();
   await page.waitForTimeout(400);
   await shot(page, "03-storefront-cart.png");
