@@ -27,11 +27,22 @@
     }
   ],
 
+  // Custom domain — previously set only via the dashboard, which a deploy
+  // from this file (with no "routes" block) silently strips. Must live here
+  // so it survives every deploy.
+  "routes": [{ "pattern": "sfdesk.lk", "custom_domain": true }],
+
+  // Plain vars — safe to commit, not secret. Same reasoning as "routes" above:
+  // dashboard-only vars get wiped by a deploy from a config that omits them.
+  "vars": {
+    "APP_NAME": "SFDesk",
+    "AUTH_URL": "https://sfdesk.lk",
+    "EMAIL_FROM": "SFDesk <support@send.sfdesk.lk>"
+  },
+
   "observability": { "enabled": true }
   // Secrets (set with `wrangler secret put NAME`, not here):
   //   DATABASE_URL, DATABASE_URL_RUNTIME, AUTH_SECRET, RESEND_API_KEY,
   //   STORAGE_ENDPOINT, STORAGE_REGION, STORAGE_ACCESS_KEY_ID,
   //   STORAGE_SECRET_ACCESS_KEY, STORAGE_BUCKET, STORAGE_PUBLIC_BASE_URL
-  // Plain vars (safe to commit) go in "vars": { ... } — e.g. APP_NAME, AUTH_URL,
-  // EMAIL_FROM.
 }
