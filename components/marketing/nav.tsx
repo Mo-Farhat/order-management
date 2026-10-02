@@ -19,9 +19,8 @@ export function MarketingNav() {
      <div className="relative mx-auto max-w-3xl">
       <nav className="mkt-nav pointer-events-auto flex items-center justify-between gap-3 rounded-lg py-2 pl-4 pr-2 text-white">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid size-6 place-items-center rounded-md bg-accent text-[11px] font-bold text-accent-fg">
-            {APP_NAME.charAt(0)}
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/icon.svg" alt="" className="size-6 shrink-0" />
           <span className="mkt-serif text-lg">{APP_NAME}</span>
         </Link>
 

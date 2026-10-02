@@ -28,9 +28,8 @@ export function AuthShell({
     <div className="mkt flex min-h-[100dvh] flex-col lg:flex-row">
       <aside className="mkt-auth-aside relative hidden w-[42%] max-w-lg flex-col justify-between p-12 text-white lg:flex">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid size-7 place-items-center rounded-md bg-white/15 text-sm font-bold">
-            {APP_NAME.charAt(0)}
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
           <span className="mkt-serif text-xl">{APP_NAME}</span>
         </Link>
 
@@ -68,9 +67,8 @@ export function AuthShell({
             className="mb-6 flex items-center gap-2 lg:hidden"
             aria-label={`${APP_NAME} home`}
           >
-            <span className="grid size-7 place-items-center rounded-md bg-accent text-sm font-bold text-accent-fg">
-              {APP_NAME.charAt(0)}
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
             <span className="mkt-serif text-lg text-ink">{APP_NAME}</span>
           </Link>
 

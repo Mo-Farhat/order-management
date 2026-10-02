@@ -98,9 +98,8 @@ function NavList({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin?: b
 export function SidebarBrand({ appName }: { appName: string }) {
   return (
     <div className="flex items-center gap-2 border-b border-line px-4 py-4">
-      <span className="flex size-7 items-center justify-center rounded-md bg-accent text-sm font-bold text-accent-fg">
-        {appName.charAt(0)}
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
       <span className="text-sm font-semibold text-ink">{appName}</span>
     </div>
   );

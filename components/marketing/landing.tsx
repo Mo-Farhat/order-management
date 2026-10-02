@@ -255,9 +255,8 @@ export function Landing() {
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div className="max-w-xs">
               <span className="flex items-center gap-2">
-                <span className="grid size-7 place-items-center rounded-md bg-accent text-xs font-bold text-accent-fg">
-                  {APP_NAME.charAt(0)}
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
                 <span className="mkt-serif text-lg">{APP_NAME}</span>
               </span>
               <p className="mt-3 text-sm text-muted">
