@@ -254,11 +254,8 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-5 py-14">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div className="max-w-xs">
-              <span className="flex items-center gap-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/icon.svg" alt="" className="size-7 shrink-0" />
-                <span className="mkt-serif text-lg">{APP_NAME}</span>
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/lockup-allcaps.svg" alt={APP_NAME} className="h-9 w-auto" />
               <p className="mt-3 text-sm text-muted">
                 A mini storefront and an order desk for sellers who take orders on Instagram
                 and WhatsApp.
