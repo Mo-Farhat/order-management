@@ -168,8 +168,9 @@ body {
   scroll-margin-top: 5rem;
 }
 
-/* Marketing typography: Geist for display headlines, Spline Sans for body.
- * Scoped to .mkt so the app keeps IBM Plex. */
+/* Marketing typography: Poppins for actual page headings (matches the logo,
+ * set in Poppins Bold), Spline Sans for body. Scoped to .mkt so the app keeps
+ * IBM Plex. */
 .mkt {
   font-family: var(--font-spline), ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
@@ -179,7 +180,14 @@ body {
 }
 .mkt h1,
 .mkt h2,
-.mkt .mkt-display,
+.mkt .mkt-display {
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+}
+/* Shorter wordmark-style labels (auth headlines, price display, mockup
+ * captions) stay on Geist — only real page h1/h2s moved to Poppins. */
 .mkt-serif {
   font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;

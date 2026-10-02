@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Spline_Sans, Geist, Fraunces, Nunito } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Spline_Sans, Geist, Poppins, Fraunces, Nunito } from "next/font/google";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
 
@@ -15,10 +15,19 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-// Marketing site only: Geist for display headlines, Spline Sans for body.
+// Marketing site: Geist for the shorter wordmark-style labels (`.mkt-serif` —
+// auth headlines, price display), Poppins for the actual page h1/h2s (matches
+// the logo, which is set in Poppins Bold), Spline Sans for body.
 const geist = Geist({
   variable: "--font-geist",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "600"],
   display: "swap",
 });
 
@@ -54,7 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${plexSans.variable} ${plexMono.variable} ${geist.variable} ${splineSans.variable} ${fraunces.variable} ${nunito.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable} ${geist.variable} ${poppins.variable} ${splineSans.variable} ${fraunces.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
