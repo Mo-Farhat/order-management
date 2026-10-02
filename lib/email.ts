@@ -16,46 +16,55 @@ type Mail = { to: string | string[]; subject: string; text: string; html?: strin
  * clients don't read CSS variables. Email clients also don't render
  * `next/font` or SVG reliably, so the logo is a static PNG served from
  * `public/brand/icon-512.png` (absolute URL — relative paths break in a
- * mail client) and the wordmark is a web-safe bold sans, approximating
- * Geist rather than loading it.
+ * mail client) and the wordmark/eyebrow use a web-safe stack rather than
+ * loading Geist or Plex Mono.
+ *
+ * Styled flat and document-like on purpose — editorial, not a rounded
+ * "notification card" on a pastel page. Matches the "borders, not shadows;
+ * mono uppercase micro-labels" language the rest of the product uses.
  */
 const BRAND = {
   blue: "#1e40af",
   ink: "#0f172a",
   muted: "#64748b",
   line: "#e2e8f0",
-  bg: "#f8fafc",
 };
+const MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+const SANS = "-apple-system,'Segoe UI',Helvetica,Arial,sans-serif";
 
-/** Wraps a content fragment in the shared branded shell (logo header + footer). */
-function emailShell(bodyHtml: string): string {
+/** Wraps a content fragment in the shared branded shell (eyebrow header + footer). */
+function emailShell(eyebrow: string, bodyHtml: string): string {
   const logoUrl = appUrl("/brand/icon-512.png");
   return `<!doctype html>
 <html>
-  <body style="margin:0;padding:0;background:${BRAND.bg};-webkit-text-size-adjust:100%;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.bg};padding:32px 16px;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <body style="margin:0;padding:0;background:#ffffff;-webkit-text-size-adjust:100%;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;font-family:${SANS};">
       <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border:1px solid ${BRAND.line};border-radius:12px;">
+        <td align="center" style="padding:0 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+            <tr><td style="height:3px;line-height:3px;font-size:0;background:${BRAND.blue};">&nbsp;</td></tr>
             <tr>
-              <td style="padding:22px 28px;border-bottom:1px solid ${BRAND.line};">
-                <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                  <td style="padding-right:9px;">
-                    <img src="${logoUrl}" width="26" height="26" alt="" style="display:block;border-radius:6px;">
+              <td style="padding:20px 2px 18px;border-bottom:1px solid ${BRAND.line};">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                  <td style="vertical-align:middle;">
+                    <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                      <td style="padding-right:8px;"><img src="${logoUrl}" width="20" height="20" alt="" style="display:block;border-radius:4px;"></td>
+                      <td style="font-size:14px;font-weight:700;letter-spacing:-0.01em;color:${BRAND.ink};">${APP_NAME}</td>
+                    </tr></table>
                   </td>
-                  <td style="font-size:17px;font-weight:700;letter-spacing:-0.02em;color:${BRAND.ink};">
-                    ${APP_NAME}
+                  <td align="right" style="vertical-align:middle;font-family:${MONO};font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:${BRAND.muted};">
+                    ${eyebrow}
                   </td>
                 </tr></table>
               </td>
             </tr>
             <tr>
-              <td style="padding:28px;color:${BRAND.ink};font-size:14px;line-height:1.65;">
+              <td style="padding:26px 2px;color:${BRAND.ink};font-size:14px;line-height:1.6;">
                 ${bodyHtml}
               </td>
             </tr>
             <tr>
-              <td style="padding:16px 28px;border-top:1px solid ${BRAND.line};color:${BRAND.muted};font-size:12px;">
+              <td style="padding:14px 2px 28px;border-top:1px solid ${BRAND.line};font-family:${MONO};font-size:10.5px;letter-spacing:0.04em;color:${BRAND.muted};">
                 ${APP_NAME} · take orders from your DMs
               </td>
             </tr>
@@ -65,6 +74,14 @@ function emailShell(bodyHtml: string): string {
     </table>
   </body>
 </html>`;
+}
+
+/** A solid filled button, matching the app's Btn component (mono uppercase, tracked). */
+function emailButton(href: string, label: string): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0 2px;"><tr>
+<td style="background:${BRAND.blue};border-radius:6px;">
+<a href="${href}" style="display:inline-block;padding:11px 20px;font-family:${MONO};font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#ffffff;text-decoration:none;">${label}</a>
+</td></tr></table>`;
 }
 
 export async function sendEmail({ to, subject, text, html }: Mail): Promise<void> {
@@ -96,10 +113,12 @@ export async function sendPasswordResetEmail(to: string, url: string): Promise<v
     to,
     subject: `Reset your ${APP_NAME} password`,
     text: `Someone asked to reset the password for your ${APP_NAME} account.\n\nReset it here (expires in 1 hour):\n${url}\n\nIf this wasn't you, ignore this email — your password won't change.`,
-    html: emailShell(`<p style="margin:0 0 16px">Someone asked to reset the password for your <strong>${APP_NAME}</strong> account.</p>
-<p style="margin:0 0 16px"><a href="${url}" style="color:${BRAND.blue};font-weight:600;text-decoration:none">Reset your password →</a><br>
-<span style="color:${BRAND.muted};font-size:13px">This link expires in 1 hour.</span></p>
-<p style="margin:0;color:${BRAND.muted};font-size:13px">If this wasn't you, ignore this email — your password won't change.</p>`),
+    html: emailShell(
+      "Password reset",
+      `<p style="margin:0">Someone asked to reset the password for your <strong>${APP_NAME}</strong> account.</p>
+${emailButton(url, "Reset password →")}
+<p style="margin:14px 0 0;font-size:12.5px;color:${BRAND.muted}">This link expires in 1 hour. If this wasn't you, ignore this email — your password won't change.</p>`,
+    ),
   });
 }
 
@@ -140,14 +159,27 @@ export async function sendNewOrderEmail(
     ]
       .filter((x) => x !== null)
       .join("\n"),
-    html: emailShell(`<p style="margin:0 0 16px"><strong>${escapeHtml(o.customerName)}</strong> placed order <strong>#${o.orderNumber}</strong> on your ${escapeHtml(o.shopName)} storefront.</p>
-<ul style="margin:0 0 16px;padding-left:20px">${o.items.map((l) => `<li style="margin-bottom:4px">${escapeHtml(l)}</li>`).join("")}</ul>
-<p style="margin:0 0 16px;border-top:1px solid ${BRAND.line};padding-top:14px">
-<strong>Total: ${o.currency} ${escapeHtml(o.total)}</strong><br>
-Phone: ${escapeHtml(o.customerPhone)}${o.city ? `<br>City: ${escapeHtml(o.city)}` : ""}${o.paymentMethod ? `<br>Payment: ${escapeHtml(o.paymentMethod)}` : ""}${o.note ? `<br>Note: ${escapeHtml(o.note)}` : ""}
-</p>
-<p style="margin:0">It's waiting in your desk as <strong style="color:#b7791f">Pending</strong>.<br>
-<a href="${o.url}" style="color:${BRAND.blue};font-weight:600;text-decoration:none">Open it to accept or decline →</a></p>`),
+    html: emailShell(
+      `Order #${o.orderNumber}`,
+      `<p style="margin:0 0 4px"><strong>${escapeHtml(o.customerName)}</strong> placed an order on your ${escapeHtml(o.shopName)} storefront.</p>
+<p style="margin:0 0 18px;font-family:${MONO};font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#b7791f">Pending</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${BRAND.line};">
+${o.items
+  .map(
+    (l) =>
+      `<tr><td style="padding:9px 0;border-bottom:1px solid ${BRAND.line};font-size:13.5px;">${escapeHtml(l)}</td></tr>`,
+  )
+  .join("")}
+<tr><td style="padding:12px 0 0;font-family:${MONO};font-size:15px;font-weight:600;">Total&nbsp; ${o.currency} ${escapeHtml(o.total)}</td></tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;font-size:13px;color:${BRAND.muted};">
+<tr><td style="padding:3px 0;width:72px;">Phone</td><td style="padding:3px 0;color:${BRAND.ink};">${escapeHtml(o.customerPhone)}</td></tr>
+${o.city ? `<tr><td style="padding:3px 0;">City</td><td style="padding:3px 0;color:${BRAND.ink};">${escapeHtml(o.city)}</td></tr>` : ""}
+${o.paymentMethod ? `<tr><td style="padding:3px 0;">Payment</td><td style="padding:3px 0;color:${BRAND.ink};">${escapeHtml(o.paymentMethod)}</td></tr>` : ""}
+${o.note ? `<tr><td style="padding:3px 0;">Note</td><td style="padding:3px 0;color:${BRAND.ink};">${escapeHtml(o.note)}</td></tr>` : ""}
+</table>
+${emailButton(o.url, "Open in desk →")}`,
+    ),
   });
 }
 

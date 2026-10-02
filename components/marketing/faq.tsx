@@ -18,7 +18,7 @@ const ITEMS: [string, string][] = [
   ],
   [
     "What happens after the free trial?",
-    "You get 14 days free with no card. After that it's LKR 1,500/month to keep going. Your data stays put if you pause.",
+    "You get 14 days free with no card. Pricing for Basic, Studio and Pro is still being finalised — we'll tell you well before anything's charged. Your data stays put if you pause.",
   ],
   [
     "Can I get a real website later?",

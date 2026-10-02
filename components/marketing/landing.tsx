@@ -203,11 +203,11 @@ export function Landing() {
           <Reveal className="text-center">
             <Eyebrow>Pricing</Eyebrow>
             <h2 className="mt-3 text-[2rem] leading-[1.1] sm:text-[2.6rem]">
-              One simple plan to <em>start</em>
+              Plans are <em>on the way</em>
             </h2>
             <p className="mx-auto mt-3 max-w-md text-sm text-muted">
-              Start free for 14 days. Keep going for LKR 1,500 a month. Bigger plans are on the
-              way as you grow.
+              We're still shaping Basic, Studio and Pro. Sign up and we'll let you know the
+              moment pricing lands.
             </p>
           </Reveal>
           <Reveal delay={80} className="mt-14 block">

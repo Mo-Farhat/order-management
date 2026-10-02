@@ -1,11 +1,11 @@
 import type { PlanTier } from "@/db/schema";
-import { PLAN_PRICE_LKR } from "@/lib/constants";
 
 /**
  * Marketing-facing plan tiers. Single source of truth for the pricing page.
  * `priceLKR: null` = "coming soon" (founder fills the number before launch).
- * Feature copy is deliberately customer-language, not the internal
- * `STOREFRONT_FEATURES` slugs.
+ * All three are null right now — tiers/pricing not yet decided (see the
+ * capabilities + tier-recommendation doc). Feature copy is deliberately
+ * customer-language, not the internal `STOREFRONT_FEATURES` slugs.
  */
 export type Tier = {
   key: PlanTier;
@@ -19,7 +19,7 @@ export const TIERS: Tier[] = [
   {
     key: "basic",
     name: "Basic",
-    priceLKR: PLAN_PRICE_LKR,
+    priceLKR: null,
     tagline: "Everything you need to take orders from your DMs.",
     features: [
       "Your mini storefront (Instagram + WhatsApp)",
