@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { MessageCircle } from "lucide-react";
 import type { OrderDetail } from "@/lib/orders";
 import { toCents, fromCents } from "@/lib/money";
 import { StatusSelect } from "@/components/orders/order-status-select";
@@ -12,6 +14,8 @@ import {
   updatePaymentAction,
   updateOrderNoteAction,
   setCourierAction,
+  setDeliveryStatusAction,
+  setOrderStatusAction,
   acceptOrderAction,
   declineOrderAction,
   type OrderState,
@@ -47,7 +51,7 @@ export function OrderDetailBody({
   const isPending = order.status === "pending";
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-1 flex-col gap-5">
       {isPending && <PendingBar orderId={order.id} onDone={onChange} />}
 
       {/* top meta grid */}
@@ -102,8 +106,24 @@ export function OrderDetailBody({
         </div>
       </div>
 
-      {/* products */}
-      <div className="overflow-x-auto rounded-lg border border-line" style={scrollShadowStyle}>
+      {/* products — a plain list on a phone, the table from sm up */}
+      <ul className="flex flex-col divide-y divide-line rounded-lg border border-line text-sm sm:hidden">
+        {order.items.map((it) => (
+          <li key={it.id} className="flex items-start justify-between gap-3 px-3 py-2.5">
+            <div className="min-w-0">
+              <p>
+                {it.name} <span className="text-muted">× {it.quantity}</span>
+              </p>
+              {it.note && <p className="text-xs text-muted">{it.note}</p>}
+              {it.quantity > 1 && (
+                <p className="text-xs text-muted">{cur} {it.unitPrice} each</p>
+              )}
+            </div>
+            <span className="shrink-0 tabular-nums">{cur} {it.lineTotal}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto rounded-lg border border-line sm:block" style={scrollShadowStyle}>
         <table className="w-full text-sm">
           <thead className="border-b border-line bg-surface">
             <tr>
@@ -192,6 +212,114 @@ export function OrderDetailBody({
             </li>
           ))}
         </ul>
+      </div>
+
+      <NextStepBar order={order} onDone={onChange} />
+    </div>
+  );
+}
+
+/**
+ * Phone only: the one or two things you'd do next with this order, pinned to
+ * the bottom of the screen — Accept, Mark dispatched / delivered / completed,
+ * Mark paid — plus WhatsApp to the customer. Everything else stays in the
+ * full controls above.
+ */
+function NextStepBar({ order, onDone }: { order: OrderDetail; onDone?: () => void }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const wa = toWhatsAppNumber(order.customer?.phone);
+
+  type Step = { key: string; label: string; run: () => Promise<OrderState> };
+  const steps: Step[] = [];
+  const closed = order.status === "cancelled" || order.status === "returned";
+
+  if (order.status === "pending") {
+    steps.push({ key: "accept", label: "Accept order", run: () => acceptOrderAction(order.id) });
+  } else if (!closed) {
+    if (order.deliveryStatus === "pending") {
+      steps.push({
+        key: "dispatch",
+        label: "Mark dispatched",
+        run: () => setDeliveryStatusAction(order.id, "dispatched"),
+      });
+    } else if (order.deliveryStatus === "dispatched") {
+      steps.push({
+        key: "deliver",
+        label: "Mark delivered",
+        run: () => setDeliveryStatusAction(order.id, "delivered"),
+      });
+    } else if (order.status === "confirmed") {
+      steps.push({
+        key: "complete",
+        label: "Mark completed",
+        run: () => setOrderStatusAction(order.id, "completed"),
+      });
+    }
+    if (order.paymentStatus !== "paid") {
+      steps.push({
+        key: "paid",
+        label: "Mark paid",
+        run: () => {
+          const fd = new FormData();
+          fd.set("paymentStatus", "paid");
+          fd.set("amountPaid", order.total);
+          return updatePaymentAction(order.id, undefined, fd);
+        },
+      });
+    }
+  }
+
+  if (steps.length === 0 && !wa) return null;
+
+  function go(s: Step) {
+    setErr(null);
+    setBusy(s.key);
+    start(async () => {
+      const res = await s.run();
+      setBusy(null);
+      if (res?.error) setErr(res.error);
+      else if (onDone) onDone();
+      else router.refresh();
+    });
+  }
+
+  return (
+    <div className="sticky bottom-0 z-10 -mx-4 mt-auto border-t border-line bg-card px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden">
+      {err && <p className="mb-2 text-xs text-danger">{err}</p>}
+      <div className="flex items-center gap-2">
+        {wa && (
+          <a
+            href={`https://wa.me/${wa}`}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="WhatsApp the customer"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-line text-ok"
+          >
+            <MessageCircle size={20} />
+          </a>
+        )}
+        {steps.map((s, i) => (
+          <button
+            key={s.key}
+            type="button"
+            disabled={pending}
+            onClick={() => go(s)}
+            aria-busy={busy === s.key || undefined}
+            className={`inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 font-mono text-[11px] font-semibold uppercase tracking-wider disabled:opacity-50 ${
+              i === 0
+                ? s.key === "accept"
+                  ? "bg-ok text-white"
+                  : "bg-accent text-accent-fg"
+                : "border border-line bg-card text-ink"
+            }`}
+          >
+            {busy === s.key && <Spinner />}
+            {s.label}
+          </button>
+        ))}
       </div>
     </div>
   );

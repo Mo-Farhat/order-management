@@ -70,6 +70,46 @@ export default async function CatalogPage({
             )}
           </div>
         ) : (
+          <>
+          {/* phone: one compact row per product — tap the name to edit, stock inline */}
+          <ul className="flex flex-col divide-y divide-line md:hidden">
+            {items.map((p) => (
+              <li key={p.id} className="flex items-center gap-3 px-4 py-3">
+                <Link href={`/desk/catalog/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="size-12 shrink-0 overflow-hidden rounded-lg bg-surface">
+                    {p.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.photoUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      <div className="flex size-full items-center justify-center font-mono text-[9px] text-muted">
+                        —
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{p.name}</p>
+                    <p className="truncate text-xs text-muted">
+                      {p.price}
+                      {p.category ? ` · ${p.category}` : ""}
+                    </p>
+                    {(p.archivedAt || p.storefrontHidden || p.isLowStock) && (
+                      <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide">
+                        {p.archivedAt ? (
+                          <span className="text-muted">archived</span>
+                        ) : p.isLowStock ? (
+                          <span className="text-warn">low stock</span>
+                        ) : (
+                          <span className="text-muted">hidden</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+                <StockEditor productId={p.id} stockQty={p.stockQty} />
+              </li>
+            ))}
+          </ul>
+          <div className="hidden md:block">
           <Table>
             <thead className="border-b border-line bg-surface">
               <tr>
@@ -128,6 +168,8 @@ export default async function CatalogPage({
               ))}
             </tbody>
           </Table>
+          </div>
+          </>
         )}
       </Card>
     </>

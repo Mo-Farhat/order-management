@@ -58,35 +58,39 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
       <OrderFilters />
 
       <Card bodyClassName="p-0">
-        {rows.length === 0 && total > 0 ? (
-          <div className="flex flex-col items-center gap-3 p-8 text-center text-sm text-muted">
-            <p>Nothing on this page.</p>
-            <Pager page={page} pageCount={pageCount} />
-          </div>
-        ) : rows.length === 0 ? (
-          <div className="p-4">
-            {hasFilters ? (
-              <EmptyState>No orders match. Adjust the filters, or hit &ldquo;+ New order&rdquo;.</EmptyState>
+        <OrdersTable
+          rows={rows}
+          currency={currency}
+          empty={
+            total > 0 ? (
+              <div className="flex flex-col items-center gap-3 p-8 text-center text-sm text-muted">
+                <p>Nothing on this page.</p>
+                <Pager page={page} pageCount={pageCount} />
+              </div>
             ) : (
-              <EmptyState
-                title="No orders yet"
-                action={<BtnLink href="/desk/orders/new">Create an order</BtnLink>}
-              >
-                Add one by hand, or share your storefront link and let customers send
-                theirs straight to your DMs.
-              </EmptyState>
-            )}
-          </div>
-        ) : (
-          <>
-            <OrdersTable rows={rows} currency={currency} />
-            {pageCount > 1 && (
+              <div className="p-4">
+                {hasFilters ? (
+                  <EmptyState>No orders match. Adjust the filters, or hit &ldquo;+ New order&rdquo;.</EmptyState>
+                ) : (
+                  <EmptyState
+                    title="No orders yet"
+                    action={<BtnLink href="/desk/orders/new">Create an order</BtnLink>}
+                  >
+                    Add one by hand, or share your storefront link and let customers send
+                    theirs straight to your DMs.
+                  </EmptyState>
+                )}
+              </div>
+            )
+          }
+          footer={
+            pageCount > 1 && (
               <div className="border-t border-line p-3">
                 <Pager page={page} pageCount={pageCount} />
               </div>
-            )}
-          </>
-        )}
+            )
+          }
+        />
       </Card>
     </>
   );

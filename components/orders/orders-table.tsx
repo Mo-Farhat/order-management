@@ -1,25 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { OrderListRow } from "@/lib/orders";
 import { toCents, fromCents } from "@/lib/money";
 import { StatusSelect } from "@/components/orders/order-status-select";
 import { PaymentPill } from "@/components/orders/status-pill";
 import { OrderModal } from "@/components/orders/order-modal";
 import { scrollShadowStyle } from "@/components/desk/ui";
+import { OrderRows } from "@/components/orders/order-rows";
 
+/**
+ * Stays mounted even when `rows` comes back empty (`empty` renders instead):
+ * acting on an order from its panel can drop it out of a filtered list, and
+ * unmounting here would close the panel mid-task.
+ */
 export function OrdersTable({
   rows,
   currency,
+  empty,
+  footer,
 }: {
   rows: OrderListRow[];
   currency: string;
+  empty?: ReactNode;
+  footer?: ReactNode;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
 
+  if (rows.length === 0) {
+    return (
+      <>
+        {empty}
+        {openId && (
+          <OrderModal orderId={openId} currency={currency} onClose={() => setOpenId(null)} />
+        )}
+      </>
+    );
+  }
+
   return (
     <>
-      <div className="overflow-x-auto" style={scrollShadowStyle}>
+      <div className="md:hidden">
+        <OrderRows rows={rows} currency={currency} onOpen={setOpenId} />
+      </div>
+      <div className="hidden overflow-x-auto md:block" style={scrollShadowStyle}>
         <table className="w-full min-w-[900px] text-sm">
           <thead className="border-b border-line bg-surface">
             <tr>
@@ -98,6 +122,8 @@ export function OrdersTable({
           </tbody>
         </table>
       </div>
+
+      {footer}
 
       {openId && (
         <OrderModal orderId={openId} currency={currency} onClose={() => setOpenId(null)} />

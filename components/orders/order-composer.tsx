@@ -155,7 +155,7 @@ export function OrderComposer({
 
       {/* STEP: details */}
       {step === "details" && (
-        <section className="flex flex-col gap-4 pb-24">
+        <section className="flex flex-col gap-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5">
               <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
@@ -259,9 +259,9 @@ export function OrderComposer({
                     </button>
                     {q > 0 && (
                       <div className="mt-2 flex items-center justify-between">
-                        <button type="button" onClick={() => setQty(p.id, q - 1)} className="flex size-7 items-center justify-center rounded border border-line">−</button>
+                        <button type="button" onClick={() => setQty(p.id, q - 1)} className="flex size-9 items-center justify-center rounded-md border border-line md:size-7">−</button>
                         <span className="text-sm">{q}</span>
-                        <button type="button" onClick={() => setQty(p.id, q + 1)} className="flex size-7 items-center justify-center rounded border border-line">+</button>
+                        <button type="button" onClick={() => setQty(p.id, q + 1)} className="flex size-9 items-center justify-center rounded-md border border-line md:size-7">+</button>
                       </div>
                     )}
                   </div>
@@ -270,7 +270,7 @@ export function OrderComposer({
             </div>
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card p-3 md:left-60">
+          <div className="sticky bottom-0 z-30 -mx-4 border-t border-line bg-card px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-6">
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-2">
               <span className="text-sm">
                 {lines.reduce((n, l) => n + l.quantity, 0)} items · {fmt(totals.subtotalCents)}
@@ -314,17 +314,17 @@ export function OrderComposer({
                   <div className="flex items-center gap-2">
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-xs text-muted">{currency} {p.price}</span>
-                    <button type="button" onClick={() => setQty(l.productId, l.quantity - 1)} className="size-6 rounded border border-line">−</button>
-                    <span className="w-6 text-center">{l.quantity}</span>
-                    <button type="button" onClick={() => setQty(l.productId, l.quantity + 1)} className="size-6 rounded border border-line">+</button>
-                    <button type="button" onClick={() => setQty(l.productId, 0)} className="ml-1 text-xs text-danger">remove</button>
+                    <button type="button" onClick={() => setQty(l.productId, l.quantity - 1)} className="size-9 shrink-0 rounded-md border border-line md:size-7">−</button>
+                    <span className="w-6 shrink-0 text-center">{l.quantity}</span>
+                    <button type="button" onClick={() => setQty(l.productId, l.quantity + 1)} className="size-9 shrink-0 rounded-md border border-line md:size-7">+</button>
+                    <button type="button" onClick={() => setQty(l.productId, 0)} className="ml-1 shrink-0 px-1 py-2 text-xs text-danger">remove</button>
                   </div>
                   <input
                     value={l.note ?? ""}
                     onChange={(e) => setLineNote(l.productId, e.target.value)}
                     maxLength={200}
                     placeholder="Note for this item (size, colour, name…)"
-                    className="h-8 w-full rounded border border-line bg-surface px-2 text-xs outline-none focus:border-accent"
+                    className="h-10 w-full rounded-md border border-line bg-surface px-2 text-base outline-none focus:border-accent md:h-8 md:text-xs"
                   />
                 </li>
               );

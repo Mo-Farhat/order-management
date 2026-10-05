@@ -61,13 +61,13 @@ export function CatalogSearch({
       </div>
       {/* Category chips only appear once there are 2+ categories (UX S1). */}
       {categories.length >= 2 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
               onClick={() => toggleCategory(cat)}
-              className={`rounded-md border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide ${
+              className={`shrink-0 rounded-md border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide ${
                 activeCategory === cat
                   ? "border-accent bg-accent text-accent-fg"
                   : "border-line text-muted"

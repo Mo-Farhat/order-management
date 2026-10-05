@@ -67,7 +67,7 @@ export function StockEditor({
           type="button"
           onClick={() => step(-1)}
           aria-label="Decrease stock"
-          className="flex size-7 items-center justify-center rounded-md border border-line text-sm"
+          className="flex size-9 items-center justify-center rounded-md border border-line text-sm md:size-7"
         >
           −
         </button>
@@ -81,13 +81,13 @@ export function StockEditor({
             else setValue(String(saved));
           }}
           aria-label="Stock quantity"
-          className="h-7 w-12 rounded-md border border-line bg-paper text-center text-sm outline-none focus:border-ink"
+          className="h-9 w-12 rounded-md border border-line bg-paper text-center text-sm outline-none focus:border-ink md:h-7"
         />
         <button
           type="button"
           onClick={() => step(1)}
           aria-label="Increase stock"
-          className="flex size-7 items-center justify-center rounded-md border border-line text-sm"
+          className="flex size-9 items-center justify-center rounded-md border border-line text-sm md:size-7"
         >
           +
         </button>

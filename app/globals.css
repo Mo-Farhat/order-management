@@ -372,3 +372,14 @@ body {
     transition: none;
   }
 }
+
+/* iOS Safari zooms the whole page when a focused field's text is under 16px —
+   on a phone every form field gets 16px. Status pills opt out with
+   `data-compact` (they're tiny on purpose and zoom is a lesser evil there). */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]),
+  textarea,
+  select:not([data-compact]) {
+    font-size: 16px;
+  }
+}

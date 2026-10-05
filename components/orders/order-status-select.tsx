@@ -51,6 +51,7 @@ export function StatusSelect({
     <div className="flex flex-col gap-0.5">
       <div className="relative flex items-center">
       <select
+        data-compact
         value={current}
         disabled={pending}
         onClick={(e) => e.stopPropagation()}
