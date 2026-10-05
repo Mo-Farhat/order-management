@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { tenants } from "@/db/schema";
+import { orders, tenants } from "@/db/schema";
 import { requireActive, isPlatformAdmin } from "@/lib/session";
 import { EARLY_ACCESS } from "@/lib/constants";
-import { DesktopSidebar, MobileNav, Breadcrumbs } from "@/components/desk/nav";
+import { DesktopSidebar, MobileNav, MobileTabBar, Breadcrumbs } from "@/components/desk/nav";
 
 export default async function DeskLayout({
   children,
@@ -12,7 +12,13 @@ export default async function DeskLayout({
 }) {
   const ctx = await requireActive();
   const admin = isPlatformAdmin(ctx.email);
-  const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
+  const [tenant, [pending]] = await Promise.all([
+    db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
+    db
+      .select({ n: count() })
+      .from(orders)
+      .where(and(eq(orders.tenantId, ctx.tenantId), eq(orders.status, "pending"))),
+  ]);
   const trial = EARLY_ACCESS
     ? "Free during early access"
     : tenant?.trialEndsAt && tenant.trialEndsAt.getTime() > Date.now()
@@ -49,6 +55,8 @@ export default async function DeskLayout({
           </footer>
           {/* eslint-enable @next/next/no-html-link-for-pages */}
         </div>
+
+        <MobileTabBar pendingCount={Number(pending?.n ?? 0)} />
       </div>
     </div>
   );

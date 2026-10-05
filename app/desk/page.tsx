@@ -10,6 +10,7 @@ import { listOrders } from "@/lib/orders";
 import { upsellState } from "@/lib/upsell";
 import { GettingStarted, DismissOnboarding } from "@/components/desk/getting-started";
 import { StatusPill, relativeTime } from "@/components/orders/status-pill";
+import { OrderRows } from "@/components/orders/order-rows";
 import { UpsellBanner } from "@/components/desk/upsell-banner";
 import { PageHeader, Card, StatCard, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 
@@ -129,6 +130,11 @@ export default async function DashboardPage() {
             <EmptyState>No orders yet. Create your first one to see it here.</EmptyState>
           </div>
         ) : (
+          <>
+          <div className="md:hidden">
+            <OrderRows rows={recent} currency={currency} />
+          </div>
+          <div className="hidden md:block">
           <Table>
             <thead className="border-b border-line bg-surface">
               <tr>
@@ -155,6 +161,8 @@ export default async function DashboardPage() {
               ))}
             </tbody>
           </Table>
+          </div>
+          </>
         )}
       </Card>
     </>

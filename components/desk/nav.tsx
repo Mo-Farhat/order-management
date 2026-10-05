@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   LogOut,
   Menu,
+  Plus,
   type LucideIcon,
 } from "lucide-react";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -175,6 +176,64 @@ export function MobileNav({
         </div>
       )}
     </>
+  );
+}
+
+/**
+ * Phone-only bottom tab bar for the five screens a seller lives in. Sits at
+ * the foot of the desk's flex column (not `fixed`), so the scroll area and any
+ * sticky bottom bars inside it end right above it. Hidden while composing an
+ * order — that screen has its own sticky action bar and needs the room.
+ */
+const TABS: Item[] = [
+  { href: "/desk", label: "Home", icon: LayoutDashboard, exact: true },
+  { href: "/desk/orders", label: "Orders", icon: ReceiptText },
+  { href: "/desk/orders/new", label: "New", icon: Plus },
+  { href: "/desk/catalog", label: "Products", icon: Package },
+  { href: "/desk/share", label: "Storefront", icon: Store },
+];
+
+export function MobileTabBar({ pendingCount = 0 }: { pendingCount?: number }) {
+  const pathname = usePathname();
+  if (/^\/desk\/orders\/(new|[^/]+\/edit)/.test(pathname)) return null;
+
+  return (
+    <nav
+      aria-label="Main"
+      className="grid shrink-0 grid-cols-5 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
+      {TABS.map((t) => {
+        const Icon = t.icon;
+        const isNew = t.href === "/desk/orders/new";
+        const active = !isNew && isActive(pathname, t);
+        return (
+          <Link
+            key={t.href}
+            href={t.href}
+            aria-current={active ? "page" : undefined}
+            className={`flex h-14 min-w-0 flex-col items-center justify-center gap-0.5 text-[10px] font-medium ${
+              active ? "text-accent" : "text-muted"
+            }`}
+          >
+            {isNew ? (
+              <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-fg">
+                <Icon size={18} strokeWidth={2.5} />
+              </span>
+            ) : (
+              <span className="relative">
+                <Icon size={20} strokeWidth={active ? 2.25 : 1.75} />
+                {t.href === "/desk/orders" && pendingCount > 0 && (
+                  <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-warn px-1 text-[9px] font-bold text-white">
+                    {pendingCount > 9 ? "9+" : pendingCount}
+                  </span>
+                )}
+              </span>
+            )}
+            <span className="max-w-full truncate px-0.5">{t.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 
