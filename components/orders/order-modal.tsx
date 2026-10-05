@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { TERMINAL } from "@/lib/pipeline";
 import type { OrderDetail } from "@/lib/orders";
 import { getOrderDetailAction } from "@/app/actions/orders";
 import { OrderDetailBody } from "@/components/orders/order-detail-body";
@@ -59,6 +61,14 @@ export function OrderModal({
             {order && <StatusPill status={order.status} />}
           </div>
           <div className="flex items-center gap-3">
+            {order && !TERMINAL.includes(order.status) && (
+              <Link
+                href={`/desk/orders/${orderId}/edit`}
+                className="rounded-lg border border-line px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest hover:border-accent/50"
+              >
+                Edit
+              </Link>
+            )}
             {order && (
               <a
                 href={`/invoice/${orderId}`}

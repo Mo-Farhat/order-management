@@ -17,8 +17,8 @@ const ITEMS: [string, string][] = [
     "Yes. Add either or both. WhatsApp opens with the order pre-filled; Instagram copies the order to the clipboard and opens your DMs so the customer can paste it.",
   ],
   [
-    "What happens after the free trial?",
-    "You get 14 days free with no card. Pricing for Basic, Studio and Pro is still being finalised — we'll tell you well before anything's charged. Your data stays put if you pause.",
+    "Is it free?",
+    "Yes — free during early access, no card needed. Pricing for Basic, Studio and Pro is still being finalised; you'll get at least 30 days' notice before paid plans start, and your data stays put either way.",
   ],
   [
     "Can I get a real website later?",

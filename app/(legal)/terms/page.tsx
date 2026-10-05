@@ -62,7 +62,7 @@ export default function TermsPage() {
 
       <h2>6. Fees</h2>
       <ul>
-        <li>New accounts get a 14-day free trial. After that, continued use requires a paid subscription.</li>
+        <li>During early access the Service is free. We&apos;ll give at least 30 days&apos; notice before paid plans start; after that, continued use requires a paid subscription.</li>
         <li>Fees are billed in advance for each period and are non-refundable except where required by law.</li>
         <li>Prices are exclusive of any applicable taxes, which you are responsible for.</li>
         <li>We may change pricing with at least 30 days&apos; notice before your next renewal.</li>

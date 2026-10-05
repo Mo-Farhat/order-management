@@ -206,8 +206,8 @@ export function Landing() {
               Plans are <em>on the way</em>
             </h2>
             <p className="mx-auto mt-3 max-w-md text-sm text-muted">
-              We're still shaping Basic, Studio and Pro. Sign up and we'll let you know the
-              moment pricing lands.
+              Everything is free during early access. We're still shaping Basic, Studio and
+              Pro — you'll get at least 30 days' notice before paid plans start.
             </p>
           </Reveal>
           <Reveal delay={80} className="mt-14 block">
@@ -237,7 +237,7 @@ export function Landing() {
               Take your first order on {APP_NAME} <em>today</em>
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-white/85">
-              Set up your storefront in minutes. Free for 14 days, no card — you decide after.
+              Set up your storefront in minutes. Free during early access, no card.
             </p>
             <Link
               href="/signup"

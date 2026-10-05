@@ -22,6 +22,22 @@ const FIELD_LABEL: Record<Field, string> = {
   city: "City",
 };
 
+/** Per-shop, per-device memory of the buyer's details so a repeat order is two taps. */
+const detailsKey = (slug: string) => `sf-customer:${slug}`;
+const EMPTY_FORM: Record<Field, string> = { name: "", phone: "", address: "", city: "" };
+
+function loadDetails(slug: string): Record<Field, string> {
+  try {
+    const raw = localStorage.getItem(detailsKey(slug));
+    if (!raw) return EMPTY_FORM;
+    const v = JSON.parse(raw) as Partial<Record<Field, unknown>>;
+    const str = (x: unknown) => (typeof x === "string" ? x : "");
+    return { name: str(v.name), phone: str(v.phone), address: str(v.address), city: str(v.city) };
+  } catch {
+    return EMPTY_FORM;
+  }
+}
+
 function validate(v: Record<Field, string>): Partial<Record<Field, string>> {
   const e: Partial<Record<Field, string>> = {};
   if (v.name.trim().length < 1) e.name = "Enter your name.";
@@ -47,9 +63,9 @@ export function CartSheet({
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
   const [view, setView] = useState<View>("cart");
-  const [form, setForm] = useState<Record<Field, string>>({
-    name: "", phone: "", address: "", city: "",
-  });
+  // The sheet only mounts after a tap, never during SSR, so reading
+  // localStorage in the initialiser can't cause a hydration mismatch.
+  const [form, setForm] = useState<Record<Field, string>>(() => loadDetails(slug));
   const [payMethod, setPayMethod] = useState<PaymentMethodValue>("cash_on_delivery");
   const [note, setNote] = useState("");
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
@@ -107,6 +123,11 @@ export function CartSheet({
       setSent(res.result);
       setView("sent");
       clear();
+      try {
+        localStorage.setItem(detailsKey(slug), JSON.stringify(form));
+      } catch {
+        // private mode / storage blocked — they just retype next time
+      }
     });
   }
 
@@ -205,7 +226,7 @@ export function CartSheet({
                     className={`${accentBtn} border`}
                     style={{
                       background: sent.whatsapp ? "transparent" : "var(--sf-accent)",
-                      color: sent.whatsapp ? "var(--sf-accent)" : "#fff",
+                      color: sent.whatsapp ? "var(--sf-accent)" : "var(--sf-accent-fg)",
                       borderColor: "var(--sf-accent)",
                     }}
                   >
@@ -401,7 +422,8 @@ export function CartSheet({
 
         {view !== "sent" && (
           <div className="border-t border-line px-4 py-3">
-            <div className="mb-2 flex flex-col gap-1 text-sm">
+            {/* The confirm step already itemises the totals in its body. */}
+            <div className={`mb-2 flex flex-col gap-1 text-sm ${view === "confirm" ? "hidden" : ""}`}>
               <div className="flex justify-between text-muted">
                 <span>Subtotal</span>
                 <span className="tabular-nums">{money(subtotalCents)}</span>

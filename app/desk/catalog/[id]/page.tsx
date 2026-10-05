@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireActive } from "@/lib/session";
-import { getProduct } from "@/lib/catalog";
+import { distinctCategories, getProduct } from "@/lib/catalog";
 import { isStorageConfigured } from "@/lib/storage";
 import { can } from "@/lib/rbac";
 import { updateProductAction } from "@/app/actions/catalog";
@@ -23,7 +23,7 @@ export default async function ProductPage({
 }) {
   const ctx = await requireActive();
   const { id } = await params;
-  const data = await getProduct(ctx, id);
+  const [data, categories] = await Promise.all([getProduct(ctx, id), distinctCategories(ctx)]);
   if (!data) notFound();
 
   const { product, photos, movements, hasOrderHistory } = data;
@@ -44,6 +44,7 @@ export default async function ProductPage({
         submitLabel="Save changes"
         storageEnabled={isStorageConfigured()}
         photos={photos.map((p) => ({ id: p.id, url: p.url }))}
+        categories={categories}
         defaults={{
           name: product.name,
           price: product.price,

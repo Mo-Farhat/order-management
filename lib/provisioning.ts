@@ -2,12 +2,14 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
+import { EARLY_ACCESS } from "@/lib/constants";
 import { slugify } from "@/lib/validation";
 
-/** FR-19: every new tenant starts on a 14-day trial. */
+/** FR-19: every new tenant starts on a 14-day trial (none during early access). */
 export const TRIAL_DAYS = 14;
 
-export function trialEndsAt(from: Date = new Date()): Date {
+export function trialEndsAt(from: Date = new Date()): Date | null {
+  if (EARLY_ACCESS) return null;
   return new Date(from.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
 }
 

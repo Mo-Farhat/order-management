@@ -42,8 +42,8 @@ export default async function CatalogPage({
       )}
       {!isStorageConfigured() && (
         <p className="rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted">
-          Photo uploads are off until Cloudflare R2 is configured (GUIDE.md step 4a).
-          Products save fine without photos.
+          Photo uploads are temporarily unavailable. Products save fine without photos —
+          you can add them later.
         </p>
       )}
 

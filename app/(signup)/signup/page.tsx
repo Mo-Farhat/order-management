@@ -58,7 +58,7 @@ export default function SignupPage() {
       <div>
         <h1 className="mkt-serif text-[1.75rem] text-ink">Start free</h1>
         <p className="mt-1 text-sm text-muted">
-          One form and your storefront is live. 14 days free, no card.
+          One form and your storefront is live. Free during early access, no card.
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default function SignupPage() {
               name="whatsappNumber"
               inputMode="tel"
               autoComplete="tel"
-              placeholder="+1 555 123 4567"
+              placeholder="+94 77 123 4567"
               required
               maxLength={24}
               hint="Include your country code — that's how WhatsApp links work."

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -69,6 +70,7 @@ export function OrderComposer({
   );
   const [amountPaid, setAmountPaid] = useState(initial?.amountPaid ?? "");
   const [note, setNote] = useState(initial?.note ?? "");
+  const [productQuery, setProductQuery] = useState("");
 
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
@@ -103,6 +105,17 @@ export function OrderComposer({
     setLines((prev) => prev.map((l) => (l.productId === productId ? { ...l, note } : l)));
   }
   const qtyOf = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
+
+  // Search only kicks in once a catalog is big enough to scroll past; picked
+  // items always stay visible so a filter never hides what's in the order.
+  const showSearch = products.length > 8;
+  const visibleProducts = useMemo(() => {
+    const q = productQuery.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter(
+      (p) => p.name.toLowerCase().includes(q) || lines.some((l) => l.productId === p.id),
+    );
+  }, [products, productQuery, lines]);
 
   const detailsReady =
     custName.trim().length >= 1 &&
@@ -164,7 +177,7 @@ export function OrderComposer({
                 value={custPhone}
                 onChange={(e) => setCustPhone(e.target.value)}
                 inputMode="tel"
-                placeholder="+1 555…"
+                placeholder="077 123 4567"
                 disabled={lockCustomer}
                 className={inputCls}
               />
@@ -201,10 +214,28 @@ export function OrderComposer({
               Items
             </span>
             {products.length === 0 && (
-              <p className="text-sm text-muted">No products in your catalog yet.</p>
+              <p className="text-sm text-muted">
+                No products in your catalog yet.{" "}
+                <Link href="/desk/catalog/new" className="text-accent underline underline-offset-2">
+                  Add one first
+                </Link>
+                .
+              </p>
+            )}
+            {showSearch && (
+              <input
+                type="search"
+                value={productQuery}
+                onChange={(e) => setProductQuery(e.target.value)}
+                placeholder={`Search ${products.length} products…`}
+                className={inputCls}
+              />
+            )}
+            {showSearch && visibleProducts.length === 0 && (
+              <p className="text-sm text-muted">No products match &ldquo;{productQuery}&rdquo;.</p>
             )}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {products.map((p) => {
+              {visibleProducts.map((p) => {
                 const q = qtyOf(p.id);
                 const out = stockTracking && p.stockQty <= 0;
                 return (
@@ -239,7 +270,7 @@ export function OrderComposer({
             </div>
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 border-t border-line bg-card p-3">
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card p-3 md:left-60">
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-2">
               <span className="text-sm">
                 {lines.reduce((n, l) => n + l.quantity, 0)} items · {fmt(totals.subtotalCents)}

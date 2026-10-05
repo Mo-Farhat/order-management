@@ -7,6 +7,7 @@ import { StatusSelect } from "@/components/orders/order-status-select";
 import { PaymentPill } from "@/components/orders/status-pill";
 import { Spinner, scrollShadowStyle } from "@/components/desk/ui";
 import { PAYMENT_METHOD_LABEL } from "@/lib/validation";
+import { toWhatsAppNumber } from "@/lib/phone";
 import {
   updatePaymentAction,
   updateOrderNoteAction,
@@ -36,6 +37,11 @@ export function OrderDetailBody({
 }) {
   const cur = currency;
   const balanceCents = toCents(order.total) - toCents(order.amountPaid);
+  // Not stored on the order — derive it from the totals that are.
+  const discountCents = Math.max(
+    0,
+    toCents(order.subtotal) + toCents(order.deliveryFee) - toCents(order.total),
+  );
   const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleDateString() : "—");
 
   const isPending = order.status === "pending";
@@ -67,6 +73,7 @@ export function OrderDetailBody({
         <div className="flex flex-col gap-1">
           <Meta k="Customer" v={order.customer?.name ?? "—"} />
           {order.customer?.phone && <Meta k="Phone" v={order.customer.phone} />}
+          {order.customer?.phone && <ContactLinks phone={order.customer.phone} />}
           {order.customer?.address && (
             <div className="flex gap-2">
               <span className="w-24 shrink-0 text-muted">Address</span>
@@ -131,7 +138,7 @@ export function OrderDetailBody({
           {order.discountType !== "none" && (
             <Row
               k={`Discount ${order.discountType === "percent" ? `(${order.discountValue}%)` : ""}`}
-              v="(−)"
+              v={`(−) ${cur} ${fromCents(discountCents)}`}
             />
           )}
           {Number(order.deliveryFee) > 0 && (
@@ -186,6 +193,25 @@ export function OrderDetailBody({
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+/** One tap to reach the customer — sellers live in WhatsApp, and on a phone. */
+function ContactLinks({ phone }: { phone: string }) {
+  const wa = toWhatsAppNumber(phone);
+  const cls =
+    "inline-flex h-8 items-center rounded-md border border-line px-3 font-mono text-[10px] font-semibold uppercase tracking-widest hover:border-accent/50";
+  return (
+    <div className="flex gap-2 pl-26">
+      {wa && (
+        <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer" className={cls}>
+          WhatsApp
+        </a>
+      )}
+      <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className={cls}>
+        Call
+      </a>
     </div>
   );
 }

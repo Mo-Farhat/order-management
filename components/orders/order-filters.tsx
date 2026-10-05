@@ -5,6 +5,7 @@ import { useState } from "react";
 
 const ORDER_OPTS = [
   ["", "Any order status"],
+  ["pending", "Pending review"],
   ["confirmed", "Confirmed"],
   ["completed", "Completed"],
   ["cancelled", "Cancelled"],

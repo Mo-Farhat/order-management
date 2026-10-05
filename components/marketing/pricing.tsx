@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TIERS } from "@/lib/tiers";
 
 export function Pricing() {
@@ -27,6 +28,15 @@ export function Pricing() {
             </div>
           );
         })}
+      </div>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <p className="text-sm text-muted">It&apos;s free while we&apos;re in early access — no card.</p>
+        <Link
+          href="/signup"
+          className="mkt-btn mkt-btn-primary h-11 px-6 text-[11px] uppercase tracking-[0.16em]"
+        >
+          Start free
+        </Link>
       </div>
     </div>
   );

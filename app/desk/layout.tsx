@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { requireActive, isPlatformAdmin } from "@/lib/session";
+import { EARLY_ACCESS } from "@/lib/constants";
 import { DesktopSidebar, MobileNav, Breadcrumbs } from "@/components/desk/nav";
 
 export default async function DeskLayout({
@@ -12,9 +13,11 @@ export default async function DeskLayout({
   const ctx = await requireActive();
   const admin = isPlatformAdmin(ctx.email);
   const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
-  const trial = tenant?.trialEndsAt
-    ? `Trial ends ${new Date(tenant.trialEndsAt).toLocaleDateString()}`
-    : null;
+  const trial = EARLY_ACCESS
+    ? "Free during early access"
+    : tenant?.trialEndsAt && tenant.trialEndsAt.getTime() > Date.now()
+      ? `Trial ends ${new Date(tenant.trialEndsAt).toLocaleDateString()}`
+      : null;
 
   return (
     <div className="flex h-[100dvh] overflow-hidden">

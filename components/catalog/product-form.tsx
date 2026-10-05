@@ -13,12 +13,15 @@ export function ProductForm({
   submitLabel,
   storageEnabled,
   photos = [],
+  categories = [],
   defaults,
 }: {
   action: (prev: CatalogState, formData: FormData) => Promise<CatalogState>;
   submitLabel: string;
   storageEnabled: boolean;
   photos?: Photo[];
+  /** Existing categories, suggested so "Dress" and "dresses" don't split into two storefront filters. */
+  categories?: string[];
   defaults?: {
     name?: string;
     price?: string;
@@ -129,7 +132,13 @@ export function ProductForm({
               name="category"
               defaultValue={defaults?.category ?? ""}
               errors={state?.fieldErrors?.category}
+              list="product-categories"
             />
+            <datalist id="product-categories">
+              {categories.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
             <Field
               label="Low-stock threshold"
               name="lowStockThreshold"

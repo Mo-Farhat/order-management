@@ -70,6 +70,6 @@ export const config = {
     // `s/` is excluded for the same rolling-cookie reason plus cost: the public
     // storefront needs no auth at all, and a Set-Cookie on those responses
     // would stop Cloudflare's edge caching them (see next.config.ts).
-    "/((?!_next/static|_next/image|favicon.ico|api/health|logout|s/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|api/health|logout|s/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

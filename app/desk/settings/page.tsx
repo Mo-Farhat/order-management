@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { tenants, users } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { can } from "@/lib/rbac";
+import { EARLY_ACCESS } from "@/lib/constants";
 import { tierAllows } from "@/lib/entitlements";
 import { listApiKeys } from "@/lib/api-keys";
 import { PageHeader, Card } from "@/components/desk/ui";
@@ -52,11 +53,18 @@ export default async function SettingsPage() {
         </Card>
       )}
 
-      <p className="text-xs text-muted">
-        Plan: {tenant?.planStatus ?? "trialing"} · {tier} tier
-        {tenant?.trialEndsAt ? ` · trial ends ${new Date(tenant.trialEndsAt).toLocaleDateString()}` : ""}
-        {" "}· billing arrives in a later update.
-      </p>
+      {EARLY_ACCESS ? (
+        <p className="text-xs text-muted">
+          Plan: <strong className="text-ink">free during early access</strong>. Paid plans
+          come later — you&apos;ll get at least 30 days&apos; notice before anything is
+          charged.
+        </p>
+      ) : (
+        <p className="text-xs text-muted">
+          Plan: {tenant?.planStatus ?? "trialing"} · {tier} tier
+          {tenant?.trialEndsAt ? ` · trial ends ${new Date(tenant.trialEndsAt).toLocaleDateString()}` : ""}
+        </p>
+      )}
     </>
   );
 }
