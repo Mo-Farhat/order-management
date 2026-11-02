@@ -114,3 +114,66 @@ export function useStorefrontCart(slug: string) {
 
   return { lines, setQty, clear, count, hydrated };
 }
+
+/**
+ * Cart line keys: `productId` for a simple product, `productId:variantId` when
+ * an option (size, colour…) was picked — so "Dress M" and "Dress L" are
+ * separate lines.
+ */
+export function lineKey(productId: string, variantId?: string | null): string {
+  return variantId ? `${productId}:${variantId}` : productId;
+}
+
+type CartProduct = {
+  id: string;
+  name: string;
+  price: string;
+  photoUrl: string | null;
+  variants: { id: string; label: string; price: string }[];
+};
+
+export type ResolvedLine<P extends CartProduct> = {
+  key: string;
+  product: P;
+  variantId: string | null;
+  /** "Dress — M / Red" */
+  name: string;
+  price: string;
+  quantity: number;
+};
+
+/**
+ * Turn stored cart lines into displayable ones, dropping anything no longer
+ * on sale (a removed product, or an option the seller deleted).
+ */
+export function resolveLines<P extends CartProduct>(
+  lines: Record<string, number>,
+  products: P[],
+): ResolvedLine<P>[] {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const out: ResolvedLine<P>[] = [];
+  for (const [key, quantity] of Object.entries(lines)) {
+    if (quantity <= 0) continue;
+    const [productId, variantId] = key.split(":");
+    const product = byId.get(productId);
+    if (!product) continue;
+    if (variantId) {
+      const v = product.variants.find((x) => x.id === variantId);
+      if (!v) continue;
+      out.push({ key, product, variantId, name: `${product.name} — ${v.label}`, price: v.price, quantity });
+    } else {
+      if (product.variants.length > 0) continue; // options added since — must pick one
+      out.push({ key, product, variantId: null, name: product.name, price: product.price, quantity });
+    }
+  }
+  return out;
+}
+
+/** Total quantity of a product across all its option lines. */
+export function productQty(lines: Record<string, number>, productId: string): number {
+  let n = 0;
+  for (const [key, q] of Object.entries(lines)) {
+    if (key === productId || key.startsWith(`${productId}:`)) n += q;
+  }
+  return n;
+}

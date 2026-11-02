@@ -105,7 +105,11 @@ export default async function CatalogPage({
                     )}
                   </div>
                 </Link>
-                <StockEditor productId={p.id} stockQty={p.stockQty} />
+                {p.variants.length > 0 ? (
+                  <OptionStock href={`/desk/catalog/${p.id}`} stockQty={p.stockQty} options={p.variants.length} />
+                ) : (
+                  <StockEditor productId={p.id} stockQty={p.stockQty} />
+                )}
               </li>
             ))}
           </ul>
@@ -161,7 +165,11 @@ export default async function CatalogPage({
                   <Td className="text-right tabular-nums">{p.price}</Td>
                   <Td className="text-right">
                     <div className="flex justify-end">
-                      <StockEditor productId={p.id} stockQty={p.stockQty} />
+                      {p.variants.length > 0 ? (
+                        <OptionStock href={`/desk/catalog/${p.id}`} stockQty={p.stockQty} options={p.variants.length} />
+                      ) : (
+                        <StockEditor productId={p.id} stockQty={p.stockQty} />
+                      )}
                     </div>
                   </Td>
                 </tr>
@@ -173,5 +181,17 @@ export default async function CatalogPage({
         )}
       </Card>
     </>
+  );
+}
+
+/** Products with options keep stock per option — show the total, edit on the product page. */
+function OptionStock({ href, stockQty, options }: { href: string; stockQty: number; options: number }) {
+  return (
+    <Link href={href} className="flex shrink-0 flex-col items-end gap-0.5 text-right">
+      <span className="text-sm font-medium tabular-nums">{stockQty}</span>
+      <span className="font-mono text-[9px] uppercase tracking-wide text-accent">
+        {options} options · edit
+      </span>
+    </Link>
   );
 }

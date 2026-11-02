@@ -3,7 +3,7 @@ import { and, count, desc, gte, ne, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { customers, orders, products, tenants } from "@/db/schema";
-import type { PlanStatus, PlanTier } from "@/db/schema";
+import type { IndustryValue, PlanStatus, PlanTier } from "@/db/schema";
 
 /**
  * Platform-operator analytics — reads every tenant via the owner `db`
@@ -24,6 +24,10 @@ export type PlatformOverview = {
   activeShops30: number;
   planBreakdown: Record<string, number>;
   tierBreakdown: Record<string, number>;
+  /** Shops per industry; "unset" = never answered. */
+  industryBreakdown: Record<string, number>;
+  productsWithOptions: number;
+  shopsUsingOptions: number;
   orderCount: number;
   gmv: number;
   collected: number;
@@ -49,6 +53,8 @@ export async function platformOverview(): Promise<PlatformOverview> {
     [custAgg],
     [prodAgg],
     currencyRows,
+    industries,
+    [optionAgg],
   ] = await Promise.all([
     db.select({ n: count() }).from(tenants),
     db.select({ n: count() }).from(tenants).where(gte(tenants.createdAt, daysAgo(7))),
@@ -79,12 +85,26 @@ export async function platformOverview(): Promise<PlatformOverview> {
     db.select({ n: count() }).from(customers),
     db.select({ n: count() }).from(products).where(sql`${products.archivedAt} is null`),
     db.selectDistinct({ c: tenants.currency }).from(tenants),
+    db
+      .select({ industry: tenants.industry, n: count() })
+      .from(tenants)
+      .groupBy(tenants.industry),
+    db
+      .select({
+        products: count(),
+        shops: sql<number>`count(distinct ${products.tenantId})`,
+      })
+      .from(products)
+      .where(sql`${products.archivedAt} is null and ${products.option1Name} is not null`),
   ]);
 
   const planBreakdown: Record<string, number> = {};
   for (const p of plans) planBreakdown[p.plan] = num(p.n);
   const tierBreakdown: Record<string, number> = {};
   for (const t of tiers) tierBreakdown[t.tier] = num(t.n);
+  // `unset` = shops created before the "what do you sell?" question existed.
+  const industryBreakdown: Record<string, number> = {};
+  for (const r of industries) industryBreakdown[r.industry ?? "unset"] = num(r.n);
 
   return {
     shopCount: num(shops?.n),
@@ -93,6 +113,9 @@ export async function platformOverview(): Promise<PlatformOverview> {
     activeShops30: num(active30?.n),
     planBreakdown,
     tierBreakdown,
+    industryBreakdown,
+    productsWithOptions: num(optionAgg?.products),
+    shopsUsingOptions: num(optionAgg?.shops),
     orderCount: num(orderAgg?.n),
     gmv: num(orderAgg?.gmv),
     collected: num(collectedAgg?.v),
@@ -110,6 +133,7 @@ export type ShopRow = {
   currency: string;
   planStatus: PlanStatus;
   planTier: PlanTier;
+  industry: IndustryValue | null;
   proWebsiteDiscount: boolean;
   trialEndsAt: string | null;
   createdAt: string;
@@ -118,6 +142,8 @@ export type ShopRow = {
   lastOrderAt: string | null;
   customers: number;
   products: number;
+  /** How many of those products have options (sizes, colours…). */
+  productsWithOptions: number;
   paused: boolean;
 };
 
@@ -139,7 +165,11 @@ export async function shopsTable(rangeDays: number): Promise<ShopRow[]> {
       .groupBy(orders.tenantId),
     db.select({ tenantId: customers.tenantId, n: count() }).from(customers).groupBy(customers.tenantId),
     db
-      .select({ tenantId: products.tenantId, n: count() })
+      .select({
+        tenantId: products.tenantId,
+        n: count(),
+        withOptions: sql<number>`count(*) filter (where ${products.option1Name} is not null)`,
+      })
       .from(products)
       .where(sql`${products.archivedAt} is null`)
       .groupBy(products.tenantId),
@@ -148,6 +178,7 @@ export async function shopsTable(rangeDays: number): Promise<ShopRow[]> {
   const oBy = new Map(orderAgg.map((r) => [r.tenantId, r]));
   const cBy = new Map(custAgg.map((r) => [r.tenantId, num(r.n)]));
   const pBy = new Map(prodAgg.map((r) => [r.tenantId, num(r.n)]));
+  const poBy = new Map(prodAgg.map((r) => [r.tenantId, num(r.withOptions)]));
 
   return rows.map((t) => {
     const o = oBy.get(t.id);
@@ -158,6 +189,7 @@ export async function shopsTable(rangeDays: number): Promise<ShopRow[]> {
       currency: t.currency,
       planStatus: t.planStatus,
       planTier: t.planTier,
+      industry: t.industry,
       proWebsiteDiscount: t.proWebsiteDiscount,
       trialEndsAt: t.trialEndsAt ? t.trialEndsAt.toISOString() : null,
       createdAt: t.createdAt.toISOString(),
@@ -166,6 +198,7 @@ export async function shopsTable(rangeDays: number): Promise<ShopRow[]> {
       lastOrderAt: o?.lastAt ? new Date(o.lastAt).toISOString() : null,
       customers: cBy.get(t.id) ?? 0,
       products: pBy.get(t.id) ?? 0,
+      productsWithOptions: poBy.get(t.id) ?? 0,
       paused: t.publicPagePaused,
     };
   });

@@ -1,15 +1,9 @@
 "use client";
 
-import { OrderComposer, type ComposerInitial } from "@/components/orders/order-composer";
+import { OrderComposer, type ComposerInitial, type ComposerProduct } from "@/components/orders/order-composer";
 import type { OrderState } from "@/app/actions/orders";
 
-type Product = {
-  id: string;
-  name: string;
-  price: string;
-  stockQty: number;
-  photoUrl: string | null;
-};
+type Product = ComposerProduct;
 
 export function EditOrderFlow({
   products,

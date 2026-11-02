@@ -162,12 +162,19 @@ export function AuthSelect({
   options,
   defaultValue,
   hint,
+  placeholder,
+  required,
+  errors,
 }: {
   label: string;
   name: string;
   options: { value: string; label: string }[];
   defaultValue?: string;
   hint?: string;
+  /** Unselectable first option; with `required` the user must pick something. */
+  placeholder?: string;
+  required?: boolean;
+  errors?: string[];
 }) {
   const id = useId();
   return (
@@ -175,14 +182,31 @@ export function AuthSelect({
       <label htmlFor={id} className="mkt-eyebrow text-[11px] text-muted">
         {label}
       </label>
-      <select id={id} name={name} defaultValue={defaultValue} className="mkt-input">
+      <select
+        id={id}
+        name={name}
+        defaultValue={defaultValue ?? (placeholder ? "" : undefined)}
+        required={required}
+        aria-invalid={errors && errors.length > 0}
+        className="mkt-input"
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>
         ))}
       </select>
-      {hint && <p className="text-xs text-muted">{hint}</p>}
+      {hint && !errors?.length && <p className="text-xs text-muted">{hint}</p>}
+      {errors?.map((e) => (
+        <p key={e} className="text-xs text-danger">
+          {e}
+        </p>
+      ))}
     </div>
   );
 }

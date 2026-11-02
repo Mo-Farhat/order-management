@@ -47,6 +47,12 @@ export default async function EditOrderPage({
           price: p.price,
           stockQty: p.stockQty,
           photoUrl: p.photoUrl,
+          variants: p.variants.map((v) => ({
+            id: v.id,
+            label: v.label,
+            price: v.price,
+            stockQty: v.stockQty,
+          })),
         }))}
         currency={tenant?.currency ?? ""}
         stockTracking={tenant?.stockTrackingEnabled ?? true}
@@ -61,6 +67,7 @@ export default async function EditOrderPage({
           courier: order.courier ?? "",
           items: items.map((it) => ({
             productId: it.productId ?? "",
+            variantId: it.variantId ?? undefined,
             quantity: it.quantity,
             note: it.note ?? undefined,
           })),

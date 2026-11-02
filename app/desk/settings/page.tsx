@@ -34,6 +34,7 @@ export default async function SettingsPage() {
             currency={tenant?.currency ?? "LKR"}
             deliveryFeeDefault={tenant?.deliveryFeeDefault ?? ""}
             stockTrackingEnabled={tenant?.stockTrackingEnabled ?? true}
+            industry={tenant?.industry ?? null}
           />
         </Card>
 

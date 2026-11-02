@@ -2,25 +2,70 @@ import "server-only";
 import { and, desc, eq, ilike, inArray, isNull, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { withTenant } from "@/db/tenant";
+import { withTenant, type Tx } from "@/db/tenant";
 import {
   auditLog,
   productPhotos,
+  productVariants,
   products,
   stockMovements,
   type Product,
+  type ProductVariant,
   type StockMovementReason,
 } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import type { ActiveContext } from "@/lib/session";
-import type { ProductInput } from "@/lib/validation";
+import type { ProductInput, ProductOptionsInput } from "@/lib/validation";
+import { variantLabel } from "@/lib/industries";
 
 const ORDER_REASONS: StockMovementReason[] = ["order_confirmed", "order_cancelled"];
 
 export type ProductListItem = Product & {
   photoUrl: string | null;
   isLowStock: boolean;
+  /** Present when the product has options — stock is then edited per variant. */
+  variants: VariantSummary[];
 };
+
+export type VariantSummary = {
+  id: string;
+  label: string;
+  option1: string;
+  option2: string | null;
+  price: string | null;
+  stockQty: number;
+};
+
+function summarize(v: ProductVariant): VariantSummary {
+  return {
+    id: v.id,
+    label: variantLabel(v.option1, v.option2),
+    option1: v.option1,
+    option2: v.option2,
+    price: v.price,
+    stockQty: v.stockQty,
+  };
+}
+
+/** Variants for a set of products, grouped by product id, in display order. */
+export async function variantsFor(
+  tenantId: string,
+  productIds: string[],
+): Promise<Map<string, VariantSummary[]>> {
+  const out = new Map<string, VariantSummary[]>();
+  if (productIds.length === 0) return out;
+  const rows = await db
+    .select()
+    .from(productVariants)
+    .where(and(eq(productVariants.tenantId, tenantId), inArray(productVariants.productId, productIds)))
+    .orderBy(productVariants.sortOrder);
+  for (const v of rows) {
+    const list = out.get(v.productId) ?? [];
+    list.push(summarize(v));
+    out.set(v.productId, list);
+  }
+  return out;
+}
 
 function lowStock(p: Pick<Product, "stockQty" | "lowStockThreshold">): boolean {
   return p.lowStockThreshold != null && p.stockQty <= p.lowStockThreshold;
@@ -59,6 +104,11 @@ export async function listProducts(
 
   if (rows.length === 0) return [];
 
+  const variants = await variantsFor(
+    ctx.tenantId,
+    rows.filter((r) => r.option1Name).map((r) => r.id),
+  );
+
   const photos = await db
     .select()
     .from(productPhotos)
@@ -82,6 +132,7 @@ export async function listProducts(
     ...p,
     photoUrl: firstPhoto.get(p.id) ?? null,
     isLowStock: lowStock(p),
+    variants: variants.get(p.id) ?? [],
   }));
 }
 
@@ -107,7 +158,7 @@ export async function getProduct(ctx: ActiveContext, id: string) {
   });
   if (!product) return null;
 
-  const [photos, movements, orderMovement] = await Promise.all([
+  const [photos, movements, orderMovement, variantRows] = await Promise.all([
     db
       .select()
       .from(productPhotos)
@@ -129,10 +180,19 @@ export async function getProduct(ctx: ActiveContext, id: string) {
         ),
       )
       .limit(1),
+    db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.productId, id))
+      .orderBy(productVariants.sortOrder),
   ]);
+
+  const labelById = new Map(variantRows.map((v) => [v.id, variantLabel(v.option1, v.option2)]));
 
   return {
     product,
+    variants: variantRows.map(summarize),
+    variantLabelById: labelById,
     photos: photos.map((ph) => ({ ...ph, url: publicUrlForKey(ph.key) })),
     movements,
     isLowStock: lowStock(product),
@@ -140,18 +200,99 @@ export async function getProduct(ctx: ActiveContext, id: string) {
   };
 }
 
+/**
+ * Replace a product's options with `opts`: update variants that kept their id,
+ * insert new ones, delete dropped ones, and write a stock movement for every
+ * per-variant stock change. Returns the new total stock (sum of variants), or
+ * null when the product has no options.
+ */
+async function syncVariants(
+  tx: Tx,
+  ctx: ActiveContext,
+  productId: string,
+  opts: ProductOptionsInput,
+  reason: "initial" | "manual_adjustment",
+): Promise<number | null> {
+  const existing = await tx
+    .select()
+    .from(productVariants)
+    .where(and(eq(productVariants.productId, productId), eq(productVariants.tenantId, ctx.tenantId)));
+  const byId = new Map(existing.map((v) => [v.id, v]));
+  const two = Boolean(opts.option2Name);
+
+  const keep = new Set<string>();
+  let total = 0;
+  for (const [i, x] of opts.variants.entries()) {
+    const values = {
+      option1: x.option1,
+      option2: two ? x.option2 || null : null,
+      price: x.price === "" ? null : x.price,
+      stockQty: x.stockQty,
+      sortOrder: i,
+      updatedAt: new Date(),
+    };
+    total += x.stockQty;
+    const prev = x.id ? byId.get(x.id) : undefined;
+    let variantId: string;
+    let delta: number;
+    if (prev) {
+      keep.add(prev.id);
+      variantId = prev.id;
+      delta = x.stockQty - prev.stockQty;
+      await tx.update(productVariants).set(values).where(eq(productVariants.id, prev.id));
+    } else {
+      const [row] = await tx
+        .insert(productVariants)
+        .values({ tenantId: ctx.tenantId, productId, ...values })
+        .returning({ id: productVariants.id });
+      variantId = row.id;
+      delta = x.stockQty;
+    }
+    if (delta !== 0) {
+      await tx.insert(stockMovements).values({
+        tenantId: ctx.tenantId,
+        productId,
+        variantId,
+        delta,
+        balanceAfter: x.stockQty,
+        reason: prev ? reason : "initial",
+        actorUserId: ctx.userId,
+        note: variantLabel(values.option1, values.option2),
+      });
+    }
+  }
+
+  const dropped = existing.filter((v) => !keep.has(v.id)).map((v) => v.id);
+  if (dropped.length) await tx.delete(productVariants).where(inArray(productVariants.id, dropped));
+
+  await tx
+    .update(products)
+    .set({
+      option1Name: opts.variants.length ? opts.option1Name : null,
+      option2Name: opts.variants.length && two ? opts.option2Name : null,
+    })
+    .where(eq(products.id, productId));
+
+  return opts.variants.length ? total : null;
+}
+
 export async function createProduct(
   ctx: ActiveContext,
   input: ProductInput,
+  opts?: ProductOptionsInput,
 ): Promise<string> {
   const v = normalize(input);
+  const withOptions = Boolean(opts?.variants.length);
+  if (withOptions) v.stockQty = opts!.variants.reduce((n, x) => n + x.stockQty, 0);
   return withTenant(ctx.tenantId, async (tx) => {
     const [row] = await tx
       .insert(products)
       .values({ tenantId: ctx.tenantId, ...v, price: v.price })
       .returning({ id: products.id });
 
-    if (v.stockQty !== 0) {
+    if (withOptions) {
+      await syncVariants(tx, ctx, row.id, opts!, "initial");
+    } else if (v.stockQty !== 0) {
       await tx.insert(stockMovements).values({
         tenantId: ctx.tenantId,
         productId: row.id,
@@ -179,6 +320,7 @@ export async function updateProduct(
   ctx: ActiveContext,
   id: string,
   input: ProductInput,
+  opts?: ProductOptionsInput,
 ): Promise<void> {
   const v = normalize(input);
   await withTenant(ctx.tenantId, async (tx) => {
@@ -187,13 +329,18 @@ export async function updateProduct(
     });
     if (!existing) throw new Error("Product not found.");
 
+    // Options on (or switched off): variants own the stock; the product row
+    // just mirrors their sum and the movements are written per variant.
+    const optionTotal = opts ? await syncVariants(tx, ctx, id, opts, "manual_adjustment") : null;
+    if (optionTotal !== null) v.stockQty = optionTotal;
+
     await tx
       .update(products)
       .set({ ...v, updatedAt: new Date() })
       .where(and(eq(products.id, id), eq(products.tenantId, ctx.tenantId)));
 
     const delta = v.stockQty - existing.stockQty;
-    if (delta !== 0) {
+    if (delta !== 0 && optionTotal === null) {
       await tx.insert(stockMovements).values({
         tenantId: ctx.tenantId,
         productId: id,
@@ -234,6 +381,9 @@ export async function setStock(
       where: and(eq(products.id, id), eq(products.tenantId, ctx.tenantId)),
     });
     if (!existing) throw new Error("Product not found.");
+    if (existing.option1Name) {
+      throw new Error("This product has options — set stock per option on its page.");
+    }
 
     const delta = stockQty - existing.stockQty;
     if (delta === 0) return stockQty;

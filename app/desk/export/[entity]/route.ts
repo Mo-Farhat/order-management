@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { customers, orderItems, orders, products } from "@/db/schema";
+import { customers, orderItems, orders, productVariants, products } from "@/db/schema";
+import { variantLabel } from "@/lib/industries";
 import { requireActive } from "@/lib/session";
 
 /** FR-14: self-serve CSV export of customers / products / orders. */
@@ -41,13 +42,25 @@ export async function GET(
       .from(products)
       .where(eq(products.tenantId, ctx.tenantId))
       .orderBy(desc(products.createdAt));
+    const variants = await db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.tenantId, ctx.tenantId))
+      .orderBy(productVariants.sortOrder);
+    // "S (3) | M (5) | L @ 1500 (0)" — option, price if it differs, stock.
+    const optionsBy = new Map<string, string[]>();
+    for (const v of variants) {
+      const cell = `${variantLabel(v.option1, v.option2)}${v.price ? ` @ ${v.price}` : ""} (${v.stockQty})`;
+      optionsBy.set(v.productId, [...(optionsBy.get(v.productId) ?? []), cell]);
+    }
     filename = "products.csv";
     csv = toCsv(
-      ["name", "price", "stock", "category", "sku", "low_stock_threshold", "archived"],
+      ["name", "price", "stock", "options", "category", "sku", "low_stock_threshold", "archived"],
       rows.map((r) => [
         r.name,
         r.price,
         r.stockQty,
+        r.option1Name ? (optionsBy.get(r.id) ?? []).join(" | ") : "",
         r.category ?? "",
         r.sku ?? "",
         r.lowStockThreshold ?? "",

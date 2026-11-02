@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { tenants } from "@/db/schema";
 import { notFound } from "next/navigation";
 import { requireActive } from "@/lib/session";
 import { distinctCategories, getProduct } from "@/lib/catalog";
@@ -23,10 +26,14 @@ export default async function ProductPage({
 }) {
   const ctx = await requireActive();
   const { id } = await params;
-  const [data, categories] = await Promise.all([getProduct(ctx, id), distinctCategories(ctx)]);
+  const [data, categories, tenant] = await Promise.all([
+    getProduct(ctx, id),
+    distinctCategories(ctx),
+    db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId), columns: { industry: true } }),
+  ]);
   if (!data) notFound();
 
-  const { product, photos, movements, hasOrderHistory } = data;
+  const { product, photos, movements, hasOrderHistory, variants, variantLabelById } = data;
   const boundUpdate = updateProductAction.bind(null, id);
 
   return (
@@ -45,6 +52,18 @@ export default async function ProductPage({
         storageEnabled={isStorageConfigured()}
         photos={photos.map((p) => ({ id: p.id, url: p.url }))}
         categories={categories}
+        industry={tenant?.industry ?? "general"}
+        options={{
+          option1Name: product.option1Name ?? "",
+          option2Name: product.option2Name ?? "",
+          variants: variants.map((v) => ({
+            id: v.id,
+            option1: v.option1,
+            option2: v.option2,
+            price: v.price,
+            stockQty: v.stockQty,
+          })),
+        }}
         defaults={{
           name: product.name,
           price: product.price,
@@ -69,6 +88,9 @@ export default async function ProductPage({
               <li key={m.id} className="flex items-center justify-between gap-3 px-3 py-2">
                 <span className="text-muted">
                   {new Date(m.createdAt).toLocaleString()} · {REASON_LABEL[m.reason] ?? m.reason}
+                  {m.variantId && variantLabelById.get(m.variantId) && m.note !== variantLabelById.get(m.variantId)
+                    ? ` · ${variantLabelById.get(m.variantId)}`
+                    : ""}
                   {m.note ? ` · ${m.note}` : ""}
                 </span>
                 <span className="font-mono">

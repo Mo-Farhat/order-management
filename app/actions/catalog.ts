@@ -22,7 +22,7 @@ import {
   isStorageConfigured,
   uploadProductPhoto,
 } from "@/lib/storage";
-import { productSchema, stockAdjustSchema } from "@/lib/validation";
+import { productOptionsSchema, productSchema, stockAdjustSchema } from "@/lib/validation";
 import type { ZodError } from "zod";
 
 export type CatalogState =
@@ -51,6 +51,23 @@ function toInput(formData: FormData) {
   };
 }
 
+/** The product form's options editor posts one JSON field; absent = untouched. */
+function parseOptions(formData: FormData) {
+  const raw = formData.get("options");
+  if (typeof raw !== "string" || !raw) return { ok: true as const, data: undefined };
+  let json: unknown;
+  try {
+    json = JSON.parse(raw);
+  } catch {
+    return { ok: false as const, error: "Couldn't read the options — try again." };
+  }
+  const parsed = productOptionsSchema.safeParse(json);
+  if (!parsed.success) {
+    return { ok: false as const, error: parsed.error.issues[0]?.message ?? "Check the options." };
+  }
+  return { ok: true as const, data: parsed.data };
+}
+
 async function handlePhotoUploads(
   tenantId: string,
   productId: string,
@@ -72,10 +89,12 @@ export async function createProductAction(
   const ctx = await requireCapability("catalog:edit");
   const parsed = productSchema.safeParse(toInput(formData));
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+  const options = parseOptions(formData);
+  if (!options.ok) return { fieldErrors: { options: [options.error] } };
 
   let id: string;
   try {
-    id = await createProduct(ctx, parsed.data);
+    id = await createProduct(ctx, parsed.data, options.data);
     await handlePhotoUploads(ctx.tenantId, id, formData, ctx);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Couldn't save the product." };
@@ -94,9 +113,11 @@ export async function updateProductAction(
   const ctx = await requireCapability("catalog:edit");
   const parsed = productSchema.safeParse(toInput(formData));
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+  const options = parseOptions(formData);
+  if (!options.ok) return { fieldErrors: { options: [options.error] } };
 
   try {
-    await updateProduct(ctx, productId, parsed.data);
+    await updateProduct(ctx, productId, parsed.data, options.data);
     await handlePhotoUploads(ctx.tenantId, productId, formData, ctx);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Couldn't save changes." };

@@ -5,6 +5,8 @@ import type { CatalogState } from "@/app/actions/catalog";
 import { removePhotoAction } from "@/app/actions/catalog";
 import { Field, FormError, SubmitButton } from "@/components/form";
 import { ImageUploadInput } from "@/components/image-upload-input";
+import { OptionsEditor, type OptionsInitial } from "@/components/catalog/options-editor";
+import { INDUSTRY_PRESETS, type Industry } from "@/lib/industries";
 
 type Photo = { id: string; url: string };
 
@@ -14,6 +16,8 @@ export function ProductForm({
   storageEnabled,
   photos = [],
   categories = [],
+  industry = "general",
+  options,
   defaults,
 }: {
   action: (prev: CatalogState, formData: FormData) => Promise<CatalogState>;
@@ -22,6 +26,10 @@ export function ProductForm({
   photos?: Photo[];
   /** Existing categories, suggested so "Dress" and "dresses" don't split into two storefront filters. */
   categories?: string[];
+  /** The shop's industry — picks the option presets and placeholders. */
+  industry?: Industry;
+  /** Existing options/variants when editing. */
+  options?: OptionsInitial;
   defaults?: {
     name?: string;
     price?: string;
@@ -34,6 +42,7 @@ export function ProductForm({
   };
 }) {
   const [state, formAction] = useActionState<CatalogState, FormData>(action, undefined);
+  const [hasOptions, setHasOptions] = useState(Boolean(options?.variants.length));
   const [showMore, setShowMore] = useState(
     Boolean(defaults?.description || defaults?.category || defaults?.lowStockThreshold || defaults?.sku),
   );
@@ -81,12 +90,13 @@ export function ProductForm({
         label="Name"
         name="name"
         required
+        placeholder={INDUSTRY_PRESETS[industry].productPlaceholder}
         defaultValue={defaults?.name}
         errors={state?.fieldErrors?.name}
       />
       <div className="grid grid-cols-2 gap-4">
         <Field
-          label="Price"
+          label={hasOptions ? "Base price" : "Price"}
           name="price"
           required
           inputMode="numeric"
@@ -94,16 +104,29 @@ export function ProductForm({
           defaultValue={defaults?.price}
           errors={state?.fieldErrors?.price}
         />
-        <Field
-          label="Stock quantity"
-          name="stockQty"
-          required
-          inputMode="numeric"
-          placeholder="0"
-          defaultValue={defaults?.stockQty != null ? String(defaults.stockQty) : "0"}
-          errors={state?.fieldErrors?.stockQty}
-        />
+        {hasOptions ? (
+          // Options own the stock (set per option below); the server sums them.
+          <input type="hidden" name="stockQty" value="0" />
+        ) : (
+          <Field
+            label="Stock quantity"
+            name="stockQty"
+            required
+            inputMode="numeric"
+            placeholder="0"
+            defaultValue={defaults?.stockQty != null ? String(defaults.stockQty) : "0"}
+            errors={state?.fieldErrors?.stockQty}
+          />
+        )}
       </div>
+
+      <OptionsEditor
+        industry={industry}
+        initial={options}
+        basePrice={defaults?.price ?? ""}
+        error={state?.fieldErrors?.options?.[0]}
+        onActiveChange={setHasOptions}
+      />
 
       <button
         type="button"

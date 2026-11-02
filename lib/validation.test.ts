@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { onAccentFor, storefrontConfigSchema } from "@/lib/validation";
+import { onAccentFor, productOptionsSchema, storefrontConfigSchema } from "@/lib/validation";
 
 describe("onAccentFor", () => {
   it("returns a manual hex when given a valid one", () => {
@@ -23,5 +23,45 @@ describe("storefrontConfigSchema", () => {
   it("rejects a non-hex colour", () => {
     expect(storefrontConfigSchema.safeParse({ secondaryColor: "blue" }).success).toBe(false);
     expect(storefrontConfigSchema.safeParse({ secondaryColor: "#334155" }).success).toBe(true);
+  });
+});
+
+describe("productOptionsSchema", () => {
+  const v = (option1: string, option2 = "", stockQty = 1, price = "") => ({ option1, option2, stockQty, price });
+
+  it("treats no variants as a simple product", () => {
+    const r = productOptionsSchema.safeParse({});
+    expect(r.success && r.data.variants).toEqual([]);
+  });
+
+  it("accepts one option with per-variant price and stock", () => {
+    const r = productOptionsSchema.safeParse({
+      option1Name: "Size",
+      variants: [v("S"), v("M", "", 3, "1500")],
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("requires a name for the option", () => {
+    const r = productOptionsSchema.safeParse({ option1Name: "", variants: [v("S")] });
+    expect(r.success).toBe(false);
+  });
+
+  it("rejects duplicate combinations, case-insensitively", () => {
+    const r = productOptionsSchema.safeParse({
+      option1Name: "Size",
+      option2Name: "Colour",
+      variants: [v("M", "Red"), v("m", "red")],
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("needs a second value on every combination when there are two options", () => {
+    const r = productOptionsSchema.safeParse({
+      option1Name: "Size",
+      option2Name: "Colour",
+      variants: [v("M", "Red"), v("L")],
+    });
+    expect(r.success).toBe(false);
   });
 });

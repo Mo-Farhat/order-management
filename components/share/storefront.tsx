@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Storefront as StorefrontData } from "@/lib/share";
 import { SORT_KEYS, type SortKey } from "@/lib/validation";
 import { toCents } from "@/lib/money";
-import { useStorefrontCart } from "@/components/share/use-cart";
+import { productQty, resolveLines, useStorefrontCart } from "@/components/share/use-cart";
 import { Step, Placeholder } from "@/components/share/shared";
 import { CartSheet } from "@/components/share/cart-sheet";
 
@@ -56,10 +56,10 @@ export function Storefront({
     }
   }
 
-  const subtotalCents = Object.entries(lines).reduce((n, [id, q]) => {
-    const p = cartProducts.find((x) => x.id === id);
-    return p ? n + toCents(p.price) * q : n;
-  }, 0);
+  const subtotalCents = resolveLines(lines, cartProducts).reduce(
+    (n, l) => n + toCents(l.price) * l.quantity,
+    0,
+  );
 
   function add(id: string, q: number) {
     setQty(id, q);
@@ -132,7 +132,8 @@ export function Storefront({
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {products.map((p) => {
-              const q = lines[p.id] ?? 0;
+              const hasOptions = p.variants.length > 0;
+              const q = hasOptions ? productQty(lines, p.id) : (lines[p.id] ?? 0);
               const out = p.stockState === "out";
               return (
                 <div
@@ -157,12 +158,31 @@ export function Storefront({
                       {p.name}
                     </Link>
                     <p className="font-mono text-[11px] tabular-nums text-muted">
+                      {p.priceVaries && "from "}
                       {cur} {p.price}
                       {p.stockState === "low" && " · low stock"}
                       {out && " · sold out"}
                     </p>
+                    {hasOptions && (
+                      <p className="line-clamp-1 text-[11px] text-muted">
+                        {[...new Set(p.variants.map((v) => v.option1))].join(" · ")}
+                      </p>
+                    )}
                     <div className="mt-auto pt-2">
-                      {q > 0 ? (
+                      {hasOptions ? (
+                        <Link
+                          href={`/s/${slug}/${p.id}`}
+                          aria-disabled={out}
+                          className={`sf-eyebrow block w-full rounded-[2px] py-2 text-center ${
+                            q > 0
+                              ? "border border-[var(--sf-accent)] text-[var(--sf-accent)]"
+                              : "text-[var(--sf-accent-fg)]"
+                          } ${out ? "pointer-events-none opacity-40" : ""}`}
+                          style={q > 0 ? undefined : { background: "var(--sf-accent)" }}
+                        >
+                          {q > 0 ? `${q} in order` : `Choose ${p.optionNames[0].toLowerCase()}`}
+                        </Link>
+                      ) : q > 0 ? (
                         <div className="flex items-center justify-between">
                           <Step onClick={() => add(p.id, q - 1)}>−</Step>
                           <span className="text-sm tabular-nums">{q}</span>

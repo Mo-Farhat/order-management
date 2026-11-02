@@ -53,6 +53,7 @@ const dbName = (() => {
 const TENANT_TABLES = [
   "products",
   "product_photos",
+  "product_variants",
   "stock_movements",
   "customers",
   "orders",

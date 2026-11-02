@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useState } from "react";
 import { saveBusinessBasics } from "@/app/actions/onboarding";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { AuthError, AuthField, AuthSubmit } from "@/components/auth/fields";
+import { AuthError, AuthField, AuthSelect, AuthSubmit } from "@/components/auth/fields";
+import { INDUSTRIES, INDUSTRY_LABEL } from "@/lib/industries";
 import type { FormState } from "@/app/actions/auth";
 
 // Mirrors lib/validation#slugify closely enough for a live preview; the server
@@ -42,7 +43,7 @@ export function BusinessBasicsForm({ email }: { email: string }) {
         <p className="mkt-eyebrow text-[10px] text-muted">Step 2 of 2</p>
         <h1 className="mkt-serif mt-1.5 text-[1.75rem] text-ink">Set up your business</h1>
         <p className="mt-1 text-sm text-muted">
-          Two details and your workspace is ready.
+          Three quick details and your workspace is ready.
         </p>
       </div>
 
@@ -73,11 +74,21 @@ export function BusinessBasicsForm({ email }: { email: string }) {
           type="text"
           inputMode="tel"
           autoComplete="tel"
-          placeholder="+1 555 123 4567"
+          placeholder="+94 77 123 4567"
           required
           maxLength={24}
           hint="Where storefront orders reach you. Include your country code."
           errors={state?.fieldErrors?.whatsappNumber}
+        />
+
+        <AuthSelect
+          label="What do you sell?"
+          name="industry"
+          options={INDUSTRIES.map((v) => ({ value: v, label: INDUSTRY_LABEL[v] }))}
+          placeholder="Pick the closest one"
+          required
+          hint="Sets up sizes, flavours and the like for you. Change it any time."
+          errors={state?.fieldErrors?.industry}
         />
 
         <AuthSubmit>Continue</AuthSubmit>

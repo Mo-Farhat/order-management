@@ -59,6 +59,7 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
     currency: formData.get("currency") ?? "LKR",
     accentColor: formData.get("accentColor") ?? "",
     sharePolicyText: formData.get("sharePolicyText") ?? "",
+    industry: formData.get("industry") ?? "",
   });
   if (!parsed.success) {
     return { fieldErrors: z2fieldErrors(parsed.error) };
@@ -107,6 +108,7 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
           name: parsed.data.businessName,
           slug,
           whatsappNumber,
+          industry: parsed.data.industry,
           instagramHandle: parsed.data.instagramHandle || null,
           currency: parsed.data.currency,
           accentColor: parsed.data.accentColor || null,

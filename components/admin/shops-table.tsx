@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { ShopRow } from "@/lib/admin";
 import { PlanCell } from "@/components/admin/plan-cell";
 import { scrollShadowStyle } from "@/components/desk/ui";
+import { INDUSTRY_SHORT } from "@/lib/industries";
 
 type SortKey = "name" | "createdAt" | "orders" | "gmv" | "lastOrderAt" | "customers";
 
@@ -76,10 +77,11 @@ export function ShopsTable({ rows }: { rows: ShopRow[] }) {
 
   return (
     <div className="overflow-x-auto" style={scrollShadowStyle}>
-      <table className="w-full min-w-[860px] text-sm">
+      <table className="w-full min-w-[960px] text-sm">
         <thead className="border-b border-line bg-surface">
           <tr>
             {header("name", "Shop")}
+            <th className="px-3 py-2.5 text-left font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">Sells</th>
             <th className="px-3 py-2.5 text-left font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">Plan</th>
             {header("createdAt", "Joined", "right")}
             {header("orders", "Orders", "right")}
@@ -103,6 +105,13 @@ export function ShopsTable({ rows }: { rows: ShopRow[] }) {
                 <span className="block font-mono text-xs text-muted">
                   /{s.slug}
                   {s.paused && " · paused"}
+                </span>
+              </td>
+              <td className="px-3 py-2.5 text-xs">
+                {s.industry ? INDUSTRY_SHORT[s.industry] : <span className="text-muted">—</span>}
+                <span className="block text-muted">
+                  {s.products} products
+                  {s.productsWithOptions > 0 && ` · ${s.productsWithOptions} w/ options`}
                 </span>
               </td>
               <td className="px-3 py-2.5">

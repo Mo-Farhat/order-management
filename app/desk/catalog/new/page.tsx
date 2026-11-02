@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { tenants } from "@/db/schema";
 import { requireActive } from "@/lib/session";
 import { distinctCategories } from "@/lib/catalog";
 import { isStorageConfigured } from "@/lib/storage";
@@ -7,7 +10,10 @@ import { ProductForm } from "@/components/catalog/product-form";
 
 export default async function NewProductPage() {
   const ctx = await requireActive();
-  const categories = await distinctCategories(ctx);
+  const [categories, tenant] = await Promise.all([
+    distinctCategories(ctx),
+    db.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId), columns: { industry: true } }),
+  ]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -23,6 +29,7 @@ export default async function NewProductPage() {
         submitLabel="Save product"
         storageEnabled={isStorageConfigured()}
         categories={categories}
+        industry={tenant?.industry ?? "general"}
       />
     </div>
   );

@@ -11,6 +11,7 @@ import { upsellState } from "@/lib/upsell";
 import { GettingStarted, DismissOnboarding } from "@/components/desk/getting-started";
 import { StatusPill, relativeTime } from "@/components/orders/status-pill";
 import { OrderRows } from "@/components/orders/order-rows";
+import { IndustryPrompt } from "@/components/desk/industry-prompt";
 import { UpsellBanner } from "@/components/desk/upsell-banner";
 import { PageHeader, Card, StatCard, BtnLink, EmptyState, Table, Th, Td } from "@/components/desk/ui";
 
@@ -45,6 +46,8 @@ export default async function DashboardPage() {
         subtitle={`Overview for ${tenant?.name ?? "your shop"}`}
         actions={<BtnLink href="/desk/orders/new">+ New order</BtnLink>}
       />
+
+      {tenant && !tenant.industry && <IndustryPrompt />}
 
       {showOnboarding && (
         <GettingStarted steps={onboarding.steps} storeUrl={onboarding.storeUrl} />

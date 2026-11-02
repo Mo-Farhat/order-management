@@ -1,10 +1,10 @@
 import "server-only";
 import { cache } from "react";
 import { unstable_cache, updateTag } from "next/cache";
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import { db } from "@/db";
-import { memberships, productPhotos, products, tenants, users } from "@/db/schema";
+import { memberships, productPhotos, productVariants, products, tenants, users } from "@/db/schema";
 import type { PlanTier } from "@/db/schema";
 import { publicUrlForKey } from "@/lib/storage";
 import { computeTotals, fromCents, toCents } from "@/lib/money";
@@ -21,20 +21,100 @@ import {
 } from "@/lib/validation";
 import { honoredConfig, showsPoweredBy, tierAllows } from "@/lib/entitlements";
 import type { ActiveContext } from "@/lib/session";
+import { variantLabel } from "@/lib/industries";
 
 /** One lookup on `tenants.slug` per request, shared by chrome + catalog reads. */
 const tenantBySlug = cache((slug: string) =>
   db.query.tenants.findFirst({ where: eq(tenants.slug, slug) }),
 );
 
+export type StorefrontVariant = {
+  id: string;
+  option1: string;
+  option2: string | null;
+  label: string;
+  /** Effective price — the variant's own, else the product's. */
+  price: string;
+  stockState: "in" | "low" | "out";
+};
+
 export type StorefrontProduct = {
   id: string;
   name: string;
+  /** Lowest price across options when the product has them (shown "from …"). */
   price: string;
   category: string | null;
   photoUrl: string | null;
   stockState: "in" | "low" | "out";
+  /** Option names ("Size", "Colour"); empty when the product has no options. */
+  optionNames: string[];
+  variants: StorefrontVariant[];
+  /** True when options have different prices, so the grid says "from". */
+  priceVaries: boolean;
 };
+
+type ProductRow = typeof products.$inferSelect;
+type VariantRow = typeof productVariants.$inferSelect;
+
+/** Public variants for these products, grouped by product id. */
+async function loadVariants(tenantId: string, productIds: string[]) {
+  const out = new Map<string, VariantRow[]>();
+  if (productIds.length === 0) return out;
+  const rows = await db
+    .select()
+    .from(productVariants)
+    .where(and(eq(productVariants.tenantId, tenantId), inArray(productVariants.productId, productIds)))
+    .orderBy(productVariants.sortOrder);
+  for (const v of rows) out.set(v.productId, [...(out.get(v.productId) ?? []), v]);
+  return out;
+}
+
+/** Shape one product (+ its variants) for the public storefront. */
+function toStorefrontProduct(
+  p: ProductRow,
+  variants: VariantRow[],
+  photoUrl: string | null,
+  tracking: boolean,
+): StorefrontProduct {
+  const optionNames = p.option1Name
+    ? [p.option1Name, ...(p.option2Name ? [p.option2Name] : [])]
+    : [];
+  const vs: StorefrontVariant[] = optionNames.length
+    ? variants.map((v) => ({
+        id: v.id,
+        option1: v.option1,
+        option2: v.option2,
+        label: variantLabel(v.option1, v.option2),
+        price: v.price ?? p.price,
+        stockState: stockStateOf(
+          { stockQty: v.stockQty, lowStockThreshold: p.lowStockThreshold },
+          tracking,
+        ),
+      }))
+    : [];
+  const prices = vs.map((v) => Number(v.price));
+  const minPrice = vs.length
+    ? vs.reduce((m, v) => (Number(v.price) < Number(m) ? v.price : m), vs[0].price)
+    : p.price;
+  return {
+    id: p.id,
+    name: p.name,
+    price: minPrice,
+    category: p.category,
+    photoUrl,
+    // With options, the product is sold out only when every option is.
+    stockState: vs.length
+      ? vs.every((v) => v.stockState === "out")
+        ? "out"
+        : vs.some((v) => v.stockState === "in")
+          ? "in"
+          : "low"
+      : stockStateOf(p, tracking),
+    optionNames,
+    variants: vs,
+    priceVaries: prices.length > 1 && Math.min(...prices) !== Math.max(...prices),
+  };
+}
 
 export type StorefrontTenant = {
   name: string;
@@ -243,7 +323,7 @@ async function loadStorefront(
   // for the cart (a shopper can filter after adding things from another category).
   const cartRows = opts.category
     ? await db
-        .select({ id: products.id, name: products.name, price: products.price })
+        .select()
         .from(products)
         .where(
           and(
@@ -281,25 +361,20 @@ async function loadStorefront(
           }
         : null;
 
-  const shown: StorefrontProduct[] = rows.map((p) => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    category: p.category,
-    photoUrl: firstPhoto.get(p.id) ?? null,
-    stockState: stockStateOf(p, tenant.stockTrackingEnabled),
-  }));
+  const variantMap = await loadVariants(
+    tenant.id,
+    [...rows, ...(cartRows ?? [])].filter((p) => p.option1Name).map((p) => p.id),
+  );
+  const shape = (p: ProductRow) =>
+    toStorefrontProduct(
+      p,
+      variantMap.get(p.id) ?? [],
+      firstPhoto.get(p.id) ?? null,
+      tenant.stockTrackingEnabled,
+    );
 
-  const cartProducts: StorefrontProduct[] = cartRows
-    ? cartRows.map((p) => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        category: null,
-        photoUrl: firstPhoto.get(p.id) ?? null,
-        stockState: "in",
-      }))
-    : shown;
+  const shown: StorefrontProduct[] = rows.map(shape);
+  const cartProducts: StorefrontProduct[] = cartRows ? cartRows.map(shape) : shown;
 
   return {
     tenant: storefrontTenant(tenant),
@@ -313,13 +388,8 @@ async function loadStorefront(
 
 export type StorefrontProductDetail = {
   tenant: StorefrontTenant;
-  product: {
-    id: string;
-    name: string;
-    price: string;
+  product: StorefrontProduct & {
     description: string | null;
-    category: string | null;
-    stockState: "in" | "low" | "out";
     photos: string[];
   };
 };
@@ -342,29 +412,34 @@ async function loadStorefrontProduct(
   });
   if (!product) return null;
 
-  const photos = await db
-    .select()
-    .from(productPhotos)
-    .where(eq(productPhotos.productId, product.id))
-    .orderBy(productPhotos.sortOrder);
+  const [photos, variantMap] = await Promise.all([
+    db
+      .select()
+      .from(productPhotos)
+      .where(eq(productPhotos.productId, product.id))
+      .orderBy(productPhotos.sortOrder),
+    product.option1Name ? loadVariants(tenant.id, [product.id]) : Promise.resolve(new Map()),
+  ]);
+  const photoUrls = photos.map((ph) => publicUrlForKey(ph.key));
 
   return {
     tenant: storefrontTenant(tenant),
     product: {
-      id: product.id,
-      name: product.name,
-      price: product.price,
+      ...toStorefrontProduct(
+        product,
+        variantMap.get(product.id) ?? [],
+        photoUrls[0] ?? null,
+        tenant.stockTrackingEnabled,
+      ),
       description: product.description,
-      category: product.category,
-      stockState: stockStateOf(product, tenant.stockTrackingEnabled),
-      photos: photos.map((ph) => publicUrlForKey(ph.key)),
+      photos: photoUrls,
     },
   };
 }
 
 export type HandoffInput = {
   slug: string;
-  items: { productId: string; quantity: number }[];
+  items: { productId: string; variantId?: string; quantity: number }[];
   note?: string;
   customerName: string;
   customerPhone: string;
@@ -443,11 +518,26 @@ export async function createShareHandoff(input: HandoffInput): Promise<HandoffRe
     .from(products)
     .where(and(eq(products.tenantId, tenant.id), isNull(products.archivedAt), eq(products.storefrontHidden, false)));
   const byId = new Map(catalog.map((p) => [p.id, p]));
+  const variantMap = await loadVariants(
+    tenant.id,
+    [...new Set(clean.map((i) => i.productId))].filter((id) => byId.get(id)?.option1Name),
+  );
 
   const lines = clean.map((i) => {
     const p = byId.get(i.productId);
     if (!p) throw new Error("One of the items is no longer available.");
-    return { name: p.name, price: p.price, priceCents: toCents(p.price), quantity: i.quantity };
+    if (!p.option1Name) {
+      return { name: p.name, price: p.price, priceCents: toCents(p.price), quantity: i.quantity };
+    }
+    const v = (variantMap.get(p.id) ?? []).find((x) => x.id === i.variantId);
+    if (!v) throw new Error(`Pick a ${p.option1Name.toLowerCase()} for ${p.name}.`);
+    const price = v.price ?? p.price;
+    return {
+      name: `${p.name} — ${variantLabel(v.option1, v.option2)}`,
+      price,
+      priceCents: toCents(price),
+      quantity: i.quantity,
+    };
   });
   const deliveryFeeCents = toCents(tenant.deliveryFeeDefault ?? "0");
   const totals = computeTotals({

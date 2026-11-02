@@ -1,4 +1,8 @@
 import * as z from "zod";
+import { INDUSTRIES } from "@/lib/industries";
+
+/** What the shop sells — required at signup, editable in Settings. */
+export const industrySchema = z.enum(INDUSTRIES, { error: "Pick what you sell." });
 
 export const emailSchema = z.email({ error: "Enter a valid email address." });
 
@@ -47,6 +51,7 @@ export const businessBasicsSchema = z.object({
     .regex(/^\+?[0-9\s-]+$/, {
       error: "Use digits only (spaces, dashes and a leading + are fine).",
     }),
+  industry: industrySchema,
 });
 
 /**
@@ -70,6 +75,7 @@ export const signupWithBusinessSchema = z.object({
     .regex(/^\+?[0-9\s-]+$/, {
       error: "Use digits only (spaces, dashes and a leading + are fine).",
     }),
+  industry: industrySchema,
   instagramHandle: z
     .union([
       z.literal(""),
@@ -134,6 +140,7 @@ export const businessSettingsSchema = z.object({
     .union([z.literal(""), z.string().trim().regex(/^\d+(\.\d{1,2})?$/, { error: "Enter an amount like 350 or 350.00." })])
     .optional(),
   stockTrackingEnabled: z.boolean().default(true),
+  industry: industrySchema,
 });
 
 export const changePasswordSchema = z
@@ -177,6 +184,53 @@ export const productSchema = z.object({
 
 export type ProductInput = z.infer<typeof productSchema>;
 
+const optionText = z.string().trim().min(1, { error: "Option values can't be blank." }).max(40);
+const optionName = z.string().trim().max(30);
+
+/**
+ * A product's options + variants, posted by the product form as one JSON
+ * field. Empty `variants` = a simple product (no options).
+ */
+export const productOptionsSchema = z
+  .object({
+    option1Name: optionName.default(""),
+    option2Name: optionName.default(""),
+    variants: z
+      .array(
+        z.object({
+          id: z.uuid().optional(),
+          option1: optionText,
+          option2: z.string().trim().max(40).optional().default(""),
+          price: z.union([z.literal(""), priceString]).default(""),
+          stockQty: stockInt,
+        }),
+      )
+      .max(100, { error: "Up to 100 combinations per product." })
+      .default([]),
+  })
+  .superRefine((v, ctx) => {
+    if (v.variants.length === 0) return;
+    if (!v.option1Name) {
+      ctx.addIssue({ code: "custom", message: "Name the option (e.g. Size).", path: ["option1Name"] });
+    }
+    const two = Boolean(v.option2Name);
+    const seen = new Set<string>();
+    for (const x of v.variants) {
+      if (two && !x.option2) {
+        ctx.addIssue({ code: "custom", message: `Every combination needs a ${v.option2Name}.`, path: ["variants"] });
+        return;
+      }
+      const k = `${x.option1.toLowerCase()}\u0000${two ? x.option2.toLowerCase() : ""}`;
+      if (seen.has(k)) {
+        ctx.addIssue({ code: "custom", message: "Each option combination can only appear once.", path: ["variants"] });
+        return;
+      }
+      seen.add(k);
+    }
+  });
+
+export type ProductOptionsInput = z.infer<typeof productOptionsSchema>;
+
 export const stockAdjustSchema = z.object({
   stockQty: stockInt,
   note: z.string().trim().max(200).optional().or(z.literal("")),
@@ -210,6 +264,7 @@ export const orderDraftSchema = z.object({
     .array(
       z.object({
         productId: z.uuid(),
+        variantId: z.uuid().optional(),
         quantity: z.number().int().min(1).max(100000),
         note: z.string().trim().max(200).optional(),
       }),
@@ -391,6 +446,7 @@ export const shareHandoffSchema = z.object({
     .array(
       z.object({
         productId: z.uuid(),
+        variantId: z.uuid().optional(),
         quantity: z.number().int().min(1).max(100000),
       }),
     )

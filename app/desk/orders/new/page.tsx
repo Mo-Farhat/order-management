@@ -20,6 +20,12 @@ export default async function NewOrderPage() {
     price: p.price,
     stockQty: p.stockQty,
     photoUrl: p.photoUrl,
+    variants: p.variants.map((v) => ({
+      id: v.id,
+      label: v.label,
+      price: v.price,
+      stockQty: v.stockQty,
+    })),
   }));
 
   return (

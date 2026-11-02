@@ -10,6 +10,7 @@ import {
   orderItems,
   orders,
   products,
+  productVariants,
   stockMovements,
   tenants,
   type Order,
@@ -30,6 +31,10 @@ import {
 } from "@/lib/pipeline";
 import type { ActiveContext } from "@/lib/session";
 import type { OrderDraftInput } from "@/lib/validation";
+import { variantLabel } from "@/lib/industries";
+
+/** One order line as far as stock is concerned. */
+type StockLine = { productId: string; variantId?: string | null; quantity: number };
 
 /** Enough context to write an order — the storefront has a tenant but no user. */
 type WriteCtx = { tenantId: string; userId: string | null };
@@ -322,6 +327,8 @@ async function resolveCustomer(
 
 type PricedItem = {
   productId: string;
+  variantId: string | null;
+  variantLabel: string | null;
   nameSnapshot: string;
   priceCents: number;
   quantity: number;
@@ -331,7 +338,7 @@ type PricedItem = {
 async function priceItems(
   tx: Tx,
   ctx: WriteCtx,
-  items: { productId: string; quantity: number; note?: string }[],
+  items: { productId: string; variantId?: string; quantity: number; note?: string }[],
 ): Promise<PricedItem[]> {
   const ids = [...new Set(items.map((i) => i.productId))];
   const rows = await tx
@@ -340,13 +347,34 @@ async function priceItems(
     .where(and(eq(products.tenantId, ctx.tenantId), inArray(products.id, ids)));
   const byId = new Map(rows.map((r) => [r.id, r]));
 
+  const variantIds = [...new Set(items.map((i) => i.variantId).filter((v): v is string => !!v))];
+  const variants = variantIds.length
+    ? await tx
+        .select()
+        .from(productVariants)
+        .where(
+          and(eq(productVariants.tenantId, ctx.tenantId), inArray(productVariants.id, variantIds)),
+        )
+    : [];
+  const variantById = new Map(variants.map((v) => [v.id, v]));
+
   return items.map((i) => {
     const p = byId.get(i.productId);
     if (!p) throw new Error("One of the products is no longer in your catalog.");
+    if (p.option1Name && !i.variantId) {
+      throw new Error(`Pick a ${p.option1Name.toLowerCase()} for ${p.name}.`);
+    }
+    const v = i.variantId ? variantById.get(i.variantId) : undefined;
+    if (i.variantId && (!v || v.productId !== p.id)) {
+      throw new Error(`One of the options for ${p.name} is no longer available.`);
+    }
+    const label = v ? variantLabel(v.option1, v.option2) : null;
     return {
       productId: p.id,
-      nameSnapshot: p.name,
-      priceCents: toCents(p.price),
+      variantId: v?.id ?? null,
+      variantLabel: label,
+      nameSnapshot: label ? `${p.name} — ${label}` : p.name,
+      priceCents: toCents(v?.price ?? p.price),
       quantity: i.quantity,
       note: i.note?.trim() || null,
     };
@@ -371,68 +399,91 @@ function money(input: {
   });
 }
 
-async function commitStock(
+/**
+ * Move `delta` units of stock for one line. With a variant, the variant's own
+ * stock moves and the product's total follows (it mirrors the sum); the ledger
+ * row records the variant and its balance. Returns false if the product (or
+ * variant) is gone.
+ */
+async function moveStock(
   tx: Tx,
   ctx: WriteCtx,
   orderId: string,
-  items: { productId: string; quantity: number }[],
-) {
+  line: { productId: string; variantId?: string | null },
+  delta: number,
+  reason: "order_confirmed" | "order_cancelled",
+): Promise<void> {
+  const [p] = await tx
+    .select({ stockQty: products.stockQty })
+    .from(products)
+    .where(and(eq(products.id, line.productId), eq(products.tenantId, ctx.tenantId)));
+  if (!p) return;
+
+  let balance = p.stockQty + delta;
+  let variantId: string | null = null;
+  if (line.variantId) {
+    const [v] = await tx
+      .select({ stockQty: productVariants.stockQty })
+      .from(productVariants)
+      .where(and(eq(productVariants.id, line.variantId), eq(productVariants.tenantId, ctx.tenantId)));
+    if (v) {
+      variantId = line.variantId;
+      balance = v.stockQty + delta;
+      await tx
+        .update(productVariants)
+        .set({ stockQty: balance, updatedAt: new Date() })
+        .where(eq(productVariants.id, line.variantId));
+    }
+  }
+  await tx
+    .update(products)
+    .set({ stockQty: p.stockQty + delta, updatedAt: new Date() })
+    .where(eq(products.id, line.productId));
+  await tx.insert(stockMovements).values({
+    tenantId: ctx.tenantId,
+    productId: line.productId,
+    variantId,
+    delta,
+    balanceAfter: balance,
+    reason,
+    orderId,
+    actorUserId: ctx.userId,
+  });
+}
+
+async function commitStock(tx: Tx, ctx: WriteCtx, orderId: string, items: StockLine[]) {
   for (const item of items) {
-    const [p] = await tx
-      .select({ stockQty: products.stockQty })
-      .from(products)
-      .where(and(eq(products.id, item.productId), eq(products.tenantId, ctx.tenantId)));
-    if (!p) continue;
-    const next = p.stockQty - item.quantity;
-    await tx
-      .update(products)
-      .set({ stockQty: next, updatedAt: new Date() })
-      .where(eq(products.id, item.productId));
-    await tx.insert(stockMovements).values({
-      tenantId: ctx.tenantId,
-      productId: item.productId,
-      delta: -item.quantity,
-      balanceAfter: next,
-      reason: "order_confirmed",
-      orderId,
-      actorUserId: ctx.userId,
-    });
+    await moveStock(tx, ctx, orderId, item, -item.quantity, "order_confirmed");
   }
 }
 
 async function restoreStock(tx: Tx, ctx: WriteCtx, orderId: string) {
-  const committed = await tx
-    .select({ productId: stockMovements.productId, delta: stockMovements.delta })
+  const moves = await tx
+    .select({
+      productId: stockMovements.productId,
+      variantId: stockMovements.variantId,
+      delta: stockMovements.delta,
+    })
     .from(stockMovements)
-    .where(and(eq(stockMovements.orderId, orderId), eq(stockMovements.reason, "order_confirmed")));
-  const restoredAlready = await tx
-    .select({ productId: stockMovements.productId, delta: stockMovements.delta })
-    .from(stockMovements)
-    .where(and(eq(stockMovements.orderId, orderId), eq(stockMovements.reason, "order_cancelled")));
+    .where(
+      and(
+        eq(stockMovements.orderId, orderId),
+        inArray(stockMovements.reason, ["order_confirmed", "order_cancelled"]),
+      ),
+    );
 
-  const net = new Map<string, number>();
-  for (const m of committed) net.set(m.productId, (net.get(m.productId) ?? 0) + m.delta);
-  for (const m of restoredAlready) net.set(m.productId, (net.get(m.productId) ?? 0) + m.delta);
+  // Net held per (product, variant): what was taken minus what's come back.
+  const net = new Map<string, { productId: string; variantId: string | null; delta: number }>();
+  for (const m of moves) {
+    const k = `${m.productId}:${m.variantId ?? ""}`;
+    const cur = net.get(k) ?? { productId: m.productId, variantId: m.variantId, delta: 0 };
+    cur.delta += m.delta;
+    net.set(k, cur);
+  }
 
-  for (const [productId, delta] of net) {
-    if (delta >= 0) continue;
-    const restoreQty = -delta;
-    const [p] = await tx
-      .select({ stockQty: products.stockQty })
-      .from(products)
-      .where(eq(products.id, productId));
-    if (!p) continue;
-    const next = p.stockQty + restoreQty;
-    await tx.update(products).set({ stockQty: next, updatedAt: new Date() }).where(eq(products.id, productId));
-    await tx.insert(stockMovements).values({
-      tenantId: ctx.tenantId,
-      productId,
-      delta: restoreQty,
-      balanceAfter: next,
-      reason: "order_cancelled",
-      orderId,
-      actorUserId: ctx.userId,
-    });
+  for (const line of net.values()) {
+    if (line.delta >= 0) continue;
+    await moveStock(tx, ctx, orderId, line, -line.delta, "order_cancelled");
   }
 }
 
@@ -440,7 +491,7 @@ type StorefrontOrderInput = {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
-  items: { productId: string; quantity: number }[];
+  items: { productId: string; variantId?: string; quantity: number }[];
   note?: string;
   /** The shop's default delivery fee, carried onto the pending order. */
   deliveryFee?: string;
@@ -509,6 +560,8 @@ async function insertOrderRow(
       tenantId: ctx.tenantId,
       orderId: order.id,
       productId: p.productId,
+      variantId: p.variantId,
+      variantLabel: p.variantLabel,
       nameSnapshot: p.nameSnapshot,
       priceSnapshot: fromCents(p.priceCents),
       quantity: p.quantity,
@@ -615,10 +668,14 @@ async function endPending(
     if (to === "confirmed" && (await stockTrackingOn(tx, ctx.tenantId))) {
       const items = (
         await tx
-          .select({ productId: orderItems.productId, quantity: orderItems.quantity })
+          .select({
+            productId: orderItems.productId,
+            variantId: orderItems.variantId,
+            quantity: orderItems.quantity,
+          })
           .from(orderItems)
           .where(eq(orderItems.orderId, id))
-      ).filter((i): i is { productId: string; quantity: number } => !!i.productId);
+      ).filter((i): i is typeof i & { productId: string } => !!i.productId);
       await commitStock(tx, ctx, id, items);
       stockCommitted = true;
     }
@@ -673,12 +730,14 @@ export async function setOrderStatus(
 
     let stockCommitted = order.stockCommitted;
     const items = await tx
-      .select({ productId: orderItems.productId, quantity: orderItems.quantity })
+      .select({
+        productId: orderItems.productId,
+        variantId: orderItems.variantId,
+        quantity: orderItems.quantity,
+      })
       .from(orderItems)
       .where(eq(orderItems.orderId, id));
-    const known = items.filter(
-      (i): i is { productId: string; quantity: number } => !!i.productId,
-    );
+    const known = items.filter((i): i is typeof i & { productId: string } => !!i.productId);
 
     if (shouldHoldStock(to) && !stockCommitted && (await stockTrackingOn(tx, ctx.tenantId))) {
       await commitStock(tx, ctx, id, known);
@@ -839,6 +898,8 @@ export async function editOrder(
         tenantId: ctx.tenantId,
         orderId: id,
         productId: p.productId,
+        variantId: p.variantId,
+        variantLabel: p.variantLabel,
         nameSnapshot: p.nameSnapshot,
         priceSnapshot: fromCents(p.priceCents),
         quantity: p.quantity,

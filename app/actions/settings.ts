@@ -11,7 +11,7 @@ import { hashPassword, verifyPassword } from "@/lib/password";
 import { db } from "@/db";
 import { auditLog, tenants, users } from "@/db/schema";
 import { requireActive, requireCapability } from "@/lib/session";
-import { businessSettingsSchema, changePasswordSchema } from "@/lib/validation";
+import { businessSettingsSchema, changePasswordSchema, industrySchema } from "@/lib/validation";
 
 export type SettingsState =
   | { error?: string; fieldErrors?: Record<string, string[]>; ok?: string }
@@ -37,6 +37,7 @@ export async function saveBusinessSettings(
     currency: formData.get("currency"),
     deliveryFeeDefault: formData.get("deliveryFeeDefault") ?? "",
     stockTrackingEnabled: formData.get("stockTrackingEnabled") === "on",
+    industry: formData.get("industry") ?? "",
   });
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
 
@@ -61,6 +62,7 @@ export async function saveBusinessSettings(
       currency: parsed.data.currency,
       deliveryFeeDefault: parsed.data.deliveryFeeDefault || null,
       stockTrackingEnabled: parsed.data.stockTrackingEnabled,
+      industry: parsed.data.industry,
       updatedAt: new Date(),
     })
     .where(eq(tenants.id, ctx.tenantId));
@@ -71,8 +73,15 @@ export async function saveBusinessSettings(
     action: "tenant.settings_updated",
     entity: "tenant",
     entityId: ctx.tenantId,
-    before: before ? { name: before.name, slug: before.slug, currency: before.currency } : null,
-    after: { name: parsed.data.name, slug: parsed.data.slug, currency: parsed.data.currency },
+    before: before
+      ? { name: before.name, slug: before.slug, currency: before.currency, industry: before.industry }
+      : null,
+    after: {
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      currency: parsed.data.currency,
+      industry: parsed.data.industry,
+    },
   });
 
   if (slugChanged) {
@@ -128,4 +137,28 @@ export async function changePassword(
   await updateSession({});
 
   return { ok: "Password changed. Other devices have been signed out." };
+}
+
+/** Dashboard prompt for shops that predate the signup question. */
+export async function saveIndustry(
+  _prev: SettingsState,
+  formData: FormData,
+): Promise<SettingsState> {
+  const ctx = await requireCapability("catalog:edit");
+  const parsed = industrySchema.safeParse(formData.get("industry"));
+  if (!parsed.success) return { error: "Pick what you sell." };
+  await db
+    .update(tenants)
+    .set({ industry: parsed.data, updatedAt: new Date() })
+    .where(eq(tenants.id, ctx.tenantId));
+  await db.insert(auditLog).values({
+    tenantId: ctx.tenantId,
+    actorUserId: ctx.userId,
+    action: "tenant.industry_set",
+    entity: "tenant",
+    entityId: ctx.tenantId,
+    after: { industry: parsed.data },
+  });
+  revalidatePath("/desk");
+  return { ok: "Thanks!" };
 }

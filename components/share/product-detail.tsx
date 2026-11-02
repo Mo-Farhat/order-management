@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { StorefrontProductDetail } from "@/lib/share";
-import { useStorefrontCart } from "@/components/share/use-cart";
+import { lineKey, useStorefrontCart } from "@/components/share/use-cart";
 import { Step, Placeholder } from "@/components/share/shared";
 
 export function ProductDetail({
@@ -16,13 +16,49 @@ export function ProductDetail({
   const { tenant, product } = data;
   const cur = tenant.currency;
   const { lines, setQty, count } = useStorefrontCart(slug);
-  const qty = lines[product.id] ?? 0;
   const [active, setActive] = useState(0);
   const [added, setAdded] = useState(false);
-  const out = product.stockState === "out";
+
+  // Options: pick a value per option; the matching variant is what's added.
+  const hasOptions = product.variants.length > 0;
+  const values1 = useMemo(
+    () => [...new Set(product.variants.map((v) => v.option1))],
+    [product.variants],
+  );
+  const values2 = useMemo(
+    () => [...new Set(product.variants.map((v) => v.option2).filter((x): x is string => !!x))],
+    [product.variants],
+  );
+  const twoOptions = product.optionNames.length > 1;
+  // Pre-select when there's only one choice, so a one-option product isn't a puzzle.
+  const [sel1, setSel1] = useState<string | null>(values1.length === 1 ? values1[0] : null);
+  const [sel2, setSel2] = useState<string | null>(values2.length === 1 ? values2[0] : null);
+  const variant = hasOptions
+    ? (product.variants.find(
+        (v) => v.option1 === sel1 && (!twoOptions || v.option2 === sel2),
+      ) ?? null)
+    : null;
+  const missing = hasOptions && !variant
+    ? !sel1
+      ? product.optionNames[0]
+      : twoOptions && !sel2
+        ? product.optionNames[1]
+        : null
+    : null;
+  const comboOut = (o1: string, o2: string | null) => {
+    const v = product.variants.find((x) => x.option1 === o1 && (!twoOptions || x.option2 === o2));
+    return !v || v.stockState === "out";
+  };
+
+  const key = lineKey(product.id, variant?.id);
+  const qty = hasOptions && !variant ? 0 : (lines[key] ?? 0);
+  const out = hasOptions ? (variant ? variant.stockState === "out" : product.stockState === "out") : product.stockState === "out";
+  const price = variant?.price ?? product.price;
+  const stockState = variant?.stockState ?? product.stockState;
 
   function add(q: number) {
-    setQty(product.id, q);
+    if (hasOptions && !variant) return;
+    setQty(key, q);
     if (q > 0 && qty === 0) {
       setAdded(true);
       setTimeout(() => setAdded(false), 900);
@@ -84,12 +120,40 @@ export function ProductDetail({
         <div className="mt-5 flex flex-col gap-3 md:mt-0">
           <h1 className="text-2xl font-semibold leading-tight tracking-tight">{product.name}</h1>
           <p className="font-mono text-base tabular-nums">
-            {cur} {product.price}
-            {product.stockState === "low" && (
-              <span className="ml-2 text-xs text-muted">low stock</span>
-            )}
+            {hasOptions && !variant && product.priceVaries && "from "}
+            {cur} {price}
+            {stockState === "low" && <span className="ml-2 text-xs text-muted">low stock</span>}
             {out && <span className="ml-2 text-xs text-danger">sold out</span>}
           </p>
+
+          {hasOptions && (
+            <div className="mt-1 flex flex-col gap-4">
+              <OptionPicker
+                name={product.optionNames[0]}
+                values={values1}
+                selected={sel1}
+                onSelect={setSel1}
+                isOut={(v) =>
+                  twoOptions
+                    ? sel2
+                      ? comboOut(v, sel2)
+                      : values2.every((o2) => comboOut(v, o2))
+                    : comboOut(v, null)
+                }
+              />
+              {twoOptions && (
+                <OptionPicker
+                  name={product.optionNames[1]}
+                  values={values2}
+                  selected={sel2}
+                  onSelect={setSel2}
+                  isOut={(v) =>
+                    sel1 ? comboOut(sel1, v) : values1.every((o1) => comboOut(o1, v))
+                  }
+                />
+              )}
+            </div>
+          )}
           {product.description && (
             <p className="mt-1 max-w-prose whitespace-pre-line text-sm leading-relaxed text-muted">
               {product.description}
@@ -109,12 +173,12 @@ export function ProductDetail({
           ) : (
             <button
               type="button"
-              disabled={out}
+              disabled={out || Boolean(missing)}
               onClick={() => add(1)}
               className="sf-eyebrow h-11 flex-1 rounded-[2px] text-[var(--sf-accent-fg)] transition-colors disabled:opacity-40"
               style={{ background: "var(--sf-accent)" }}
             >
-              {added ? "Added ✓" : "Add to order"}
+              {added ? "Added ✓" : missing ? `Choose ${missing.toLowerCase()}` : "Add to order"}
             </button>
           )}
           <Link
@@ -126,5 +190,49 @@ export function ProductDetail({
         </div>
       </div>
     </main>
+  );
+}
+
+function OptionPicker({
+  name,
+  values,
+  selected,
+  onSelect,
+  isOut,
+}: {
+  name: string;
+  values: string[];
+  selected: string | null;
+  onSelect: (v: string) => void;
+  isOut: (v: string) => boolean;
+}) {
+  return (
+    <fieldset className="flex flex-col gap-2 border-0 p-0">
+      <legend className="sf-eyebrow mb-2 text-muted">
+        {name}
+        {selected && <span className="ml-1.5 normal-case tracking-normal text-ink">· {selected}</span>}
+      </legend>
+      <div className="flex flex-wrap gap-2">
+        {values.map((v) => {
+          const on = selected === v;
+          const out = isOut(v);
+          return (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={on}
+              onClick={() => onSelect(v)}
+              className={`min-h-10 min-w-11 rounded-[3px] border px-3 text-sm transition-colors ${
+                on
+                  ? "border-[var(--sf-accent)] bg-[var(--sf-accent)] text-[var(--sf-accent-fg)]"
+                  : "border-line bg-card text-ink hover:border-[var(--sf-accent)]"
+              } ${out && !on ? "text-muted line-through opacity-60" : ""}`}
+            >
+              {v}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }

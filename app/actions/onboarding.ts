@@ -37,6 +37,7 @@ export async function saveBusinessBasics(
   const parsed = businessBasicsSchema.safeParse({
     name: formData.get("name"),
     whatsappNumber: formData.get("whatsappNumber"),
+    industry: formData.get("industry") ?? "",
   });
   if (!parsed.success) {
     const fieldErrors: Record<string, string[]> = {};
@@ -66,7 +67,13 @@ export async function saveBusinessBasics(
     tenantId = await pooledDb().transaction(async (tx) => {
       const [tenant] = await tx
         .insert(tenants)
-        .values({ name: parsed.data.name, slug, whatsappNumber, trialEndsAt: trialEndsAt() })
+        .values({
+          name: parsed.data.name,
+          slug,
+          whatsappNumber,
+          industry: parsed.data.industry,
+          trialEndsAt: trialEndsAt(),
+        })
         .returning({ id: tenants.id });
 
       if (!tenant) throw new Error("tenant insert returned no row");

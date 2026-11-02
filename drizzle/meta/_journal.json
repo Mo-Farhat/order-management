@@ -99,6 +99,13 @@
       "when": 1790188499903,
       "tag": "0013_abandoned_lester",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793616606543,
+      "tag": "0014_omniscient_maggott",
+      "breakpoints": true
     }
   ]
 }

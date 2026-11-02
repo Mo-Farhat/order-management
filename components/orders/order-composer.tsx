@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import type { OrderState } from "@/app/actions/orders";
@@ -9,15 +9,24 @@ import { computeTotals, toCents } from "@/lib/money";
 import { FormError } from "@/components/form";
 import { Spinner } from "@/components/desk/ui";
 
+type Variant = { id: string; label: string; price: string | null; stockQty: number };
+
+export type ComposerProduct = Product;
+
 type Product = {
   id: string;
   name: string;
   price: string;
   stockQty: number;
   photoUrl: string | null;
+  /** Non-empty when the product has options — a line must then name one. */
+  variants?: Variant[];
 };
 
-type Line = { productId: string; quantity: number; note?: string };
+type Line = { productId: string; variantId?: string; quantity: number; note?: string };
+
+const keyOf = (productId: string, variantId?: string) =>
+  variantId ? `${productId}:${variantId}` : productId;
 type PaymentStatus = "unpaid" | "partial" | "paid";
 type DiscountType = "none" | "flat" | "percent";
 
@@ -71,14 +80,30 @@ export function OrderComposer({
   const [amountPaid, setAmountPaid] = useState(initial?.amountPaid ?? "");
   const [note, setNote] = useState(initial?.note ?? "");
   const [productQuery, setProductQuery] = useState("");
+  const [picking, setPicking] = useState<string | null>(null);
 
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+
+  /** Display name + unit price for a line ("Dress — M", the variant's price). */
+  const lineInfo = useCallback(
+    (l: Line) => {
+      const p = byId.get(l.productId);
+      if (!p) return null;
+      const v = l.variantId ? p.variants?.find((x) => x.id === l.variantId) : undefined;
+      if (l.variantId && !v) return null;
+      return {
+        name: v ? `${p.name} — ${v.label}` : p.name,
+        price: v?.price ?? p.price,
+      };
+    },
+    [byId],
+  );
 
   const totals = useMemo(() => {
     const items = lines
       .map((l) => {
-        const p = byId.get(l.productId);
-        return p ? { priceCents: toCents(p.price), quantity: l.quantity } : null;
+        const info = lineInfo(l);
+        return info ? { priceCents: toCents(info.price), quantity: l.quantity } : null;
       })
       .filter((x): x is { priceCents: number; quantity: number } => !!x);
     return computeTotals({
@@ -88,23 +113,28 @@ export function OrderComposer({
       discountValue:
         discountType === "percent" ? Number(discountValue || "0") : toCents(discountValue || "0"),
     });
-  }, [lines, byId, deliveryFee, discountType, discountValue]);
+  }, [lines, lineInfo, deliveryFee, discountType, discountValue]);
 
   const fmt = (cents: number) => `${currency} ${(cents / 100).toFixed(2)}`;
 
-  function setQty(productId: string, quantity: number) {
+  function setQty(productId: string, quantity: number, variantId?: string) {
+    const k = keyOf(productId, variantId);
     setLines((prev) => {
-      const existing = prev.find((l) => l.productId === productId);
-      const others = prev.filter((l) => l.productId !== productId);
-      return quantity > 0
-        ? [...others, { productId, quantity, note: existing?.note }]
-        : others;
+      const idx = prev.findIndex((l) => keyOf(l.productId, l.variantId) === k);
+      if (quantity <= 0) return prev.filter((_, i) => i !== idx);
+      if (idx === -1) return [...prev, { productId, variantId, quantity }];
+      return prev.map((l, i) => (i === idx ? { ...l, quantity } : l));
     });
   }
-  function setLineNote(productId: string, note: string) {
-    setLines((prev) => prev.map((l) => (l.productId === productId ? { ...l, note } : l)));
+  function setLineNote(k: string, note: string) {
+    setLines((prev) =>
+      prev.map((l) => (keyOf(l.productId, l.variantId) === k ? { ...l, note } : l)),
+    );
   }
-  const qtyOf = (id: string) => lines.find((l) => l.productId === id)?.quantity ?? 0;
+  const qtyOf = (productId: string, variantId?: string) =>
+    lines.find((l) => keyOf(l.productId, l.variantId) === keyOf(productId, variantId))?.quantity ?? 0;
+  const productTotal = (productId: string) =>
+    lines.filter((l) => l.productId === productId).reduce((n, l) => n + l.quantity, 0);
 
   // Search only kicks in once a catalog is big enough to scroll past; picked
   // items always stay visible so a filter never hides what's in the order.
@@ -236,8 +266,61 @@ export function OrderComposer({
             )}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {visibleProducts.map((p) => {
-                const q = qtyOf(p.id);
+                const hasOptions = Boolean(p.variants?.length);
+                const q = hasOptions ? productTotal(p.id) : qtyOf(p.id);
                 const out = stockTracking && p.stockQty <= 0;
+                if (hasOptions) {
+                  const open = picking === p.id;
+                  return (
+                    <div
+                      key={p.id}
+                      className={`flex flex-col rounded-lg border p-2 ${
+                        q > 0 || open ? "border-accent" : "border-line"
+                      } ${open ? "col-span-2 sm:col-span-3" : ""} ${out && q === 0 ? "opacity-50" : ""}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setPicking(open ? null : p.id)}
+                        aria-expanded={open}
+                        className="flex flex-1 flex-col items-start gap-1 text-left"
+                      >
+                        <span className="line-clamp-2 text-xs font-medium">{p.name}</span>
+                        <span className="text-xs text-muted">
+                          {p.variants!.length} options
+                          {q > 0 ? ` · ${q} added` : open ? "" : " · tap to pick"}
+                        </span>
+                      </button>
+                      {open && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {p.variants!.map((v) => {
+                            const vq = qtyOf(p.id, v.id);
+                            const vOut = stockTracking && v.stockQty <= 0;
+                            return (
+                              <button
+                                key={v.id}
+                                type="button"
+                                disabled={vOut && vq === 0}
+                                onClick={() => setQty(p.id, vq + 1, v.id)}
+                                className={`flex min-h-10 flex-col items-start rounded-md border px-3 py-1.5 text-left text-xs disabled:opacity-40 ${
+                                  vq > 0 ? "border-accent bg-accent-weak" : "border-line"
+                                }`}
+                              >
+                                <span className="font-medium">
+                                  {v.label}
+                                  {vq > 0 && <span className="ml-1 text-accent">×{vq}</span>}
+                                </span>
+                                <span className="text-muted">
+                                  {currency} {v.price ?? p.price}
+                                  {stockTracking && (vOut ? " · out" : ` · ${v.stockQty} left`)}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
                 return (
                   <div
                     key={p.id}
@@ -307,21 +390,22 @@ export function OrderComposer({
 
           <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
             {lines.map((l) => {
-              const p = byId.get(l.productId);
-              if (!p) return null;
+              const info = lineInfo(l);
+              if (!info) return null;
+              const k = keyOf(l.productId, l.variantId);
               return (
-                <li key={l.productId} className="flex flex-col gap-1.5 p-2 text-sm">
+                <li key={k} className="flex flex-col gap-1.5 p-2 text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-xs text-muted">{currency} {p.price}</span>
-                    <button type="button" onClick={() => setQty(l.productId, l.quantity - 1)} className="size-9 shrink-0 rounded-md border border-line md:size-7">−</button>
+                    <span className="flex-1 truncate">{info.name}</span>
+                    <span className="text-xs text-muted">{currency} {info.price}</span>
+                    <button type="button" onClick={() => setQty(l.productId, l.quantity - 1, l.variantId)} className="size-9 shrink-0 rounded-md border border-line md:size-7">−</button>
                     <span className="w-6 shrink-0 text-center">{l.quantity}</span>
-                    <button type="button" onClick={() => setQty(l.productId, l.quantity + 1)} className="size-9 shrink-0 rounded-md border border-line md:size-7">+</button>
-                    <button type="button" onClick={() => setQty(l.productId, 0)} className="ml-1 shrink-0 px-1 py-2 text-xs text-danger">remove</button>
+                    <button type="button" onClick={() => setQty(l.productId, l.quantity + 1, l.variantId)} className="size-9 shrink-0 rounded-md border border-line md:size-7">+</button>
+                    <button type="button" onClick={() => setQty(l.productId, 0, l.variantId)} className="ml-1 shrink-0 px-1 py-2 text-xs text-danger">remove</button>
                   </div>
                   <input
                     value={l.note ?? ""}
-                    onChange={(e) => setLineNote(l.productId, e.target.value)}
+                    onChange={(e) => setLineNote(k, e.target.value)}
                     maxLength={200}
                     placeholder="Note for this item (size, colour, name…)"
                     className="h-10 w-full rounded-md border border-line bg-surface px-2 text-base outline-none focus:border-accent md:h-8 md:text-xs"

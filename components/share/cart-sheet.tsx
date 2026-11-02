@@ -5,7 +5,7 @@ import { startShareHandoff } from "@/app/actions/share";
 import type { StorefrontProduct, StorefrontTenant } from "@/lib/share";
 import { toCents } from "@/lib/money";
 import { Step, Placeholder } from "@/components/share/shared";
-import { useStorefrontCart } from "@/components/share/use-cart";
+import { resolveLines, useStorefrontCart } from "@/components/share/use-cart";
 import {
   PAYMENT_METHODS,
   PAYMENT_METHOD_LABEL,
@@ -60,7 +60,6 @@ export function CartSheet({
 }) {
   const cur = tenant.currency;
   const { lines, setQty, clear, count } = useStorefrontCart(slug);
-  const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
   const [view, setView] = useState<View>("cart");
   // The sheet only mounts after a tap, never during SSR, so reading
@@ -80,10 +79,8 @@ export function CartSheet({
     instagram: string | null;
   } | null>(null);
 
-  const items = Object.entries(lines)
-    .filter(([id, q]) => q > 0 && byId.has(id))
-    .map(([id, q]) => ({ product: byId.get(id)!, quantity: q }));
-  const subtotalCents = items.reduce((n, i) => n + toCents(i.product.price) * i.quantity, 0);
+  const items = useMemo(() => resolveLines(lines, products), [lines, products]);
+  const subtotalCents = items.reduce((n, i) => n + toCents(i.price) * i.quantity, 0);
   const deliveryCents = toCents(tenant.deliveryFee ?? "0");
   const totalCents = subtotalCents + deliveryCents;
   const money = (c: number) => `${cur} ${(c / 100).toFixed(2)}`;
@@ -108,7 +105,11 @@ export function CartSheet({
     start(async () => {
       const res = await startShareHandoff({
         slug,
-        items: items.map((i) => ({ productId: i.product.id, quantity: i.quantity })),
+        items: items.map((i) => ({
+          productId: i.product.id,
+          variantId: i.variantId ?? undefined,
+          quantity: i.quantity,
+        })),
         note: note.trim() || undefined,
         customerName: form.name.trim(),
         customerPhone: form.phone.trim(),
@@ -276,8 +277,8 @@ export function CartSheet({
               </p>
             ) : (
               <ul className="flex flex-col divide-y divide-line">
-                {items.map(({ product, quantity }) => (
-                  <li key={product.id} className="flex items-center gap-3 py-3">
+                {items.map(({ key, product, name, price, quantity }) => (
+                  <li key={key} className="flex items-center gap-3 py-3">
                     <div className="size-12 shrink-0 overflow-hidden rounded-[3px]">
                       {product.photoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -287,17 +288,17 @@ export function CartSheet({
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-muted">{cur} {product.price} each</p>
+                      <p className="truncate text-sm font-medium">{name}</p>
+                      <p className="text-xs text-muted">{cur} {price} each</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Step onClick={() => setQty(product.id, quantity - 1)}>−</Step>
+                      <Step onClick={() => setQty(key, quantity - 1)}>−</Step>
                       <span className="w-5 text-center text-sm tabular-nums">{quantity}</span>
-                      <Step onClick={() => setQty(product.id, quantity + 1)}>+</Step>
+                      <Step onClick={() => setQty(key, quantity + 1)}>+</Step>
                     </div>
                     <button
-                      onClick={() => setQty(product.id, 0)}
-                      aria-label={`Remove ${product.name}`}
+                      onClick={() => setQty(key, 0)}
+                      aria-label={`Remove ${name}`}
                       className="ml-1 text-xs text-danger"
                     >
                       Remove
@@ -371,13 +372,13 @@ export function CartSheet({
             /* CONFIRM */
             <div className="flex flex-col gap-3 py-2 text-sm">
               <ul className="flex flex-col divide-y divide-line rounded-[3px] border border-line">
-                {items.map(({ product, quantity }) => (
-                  <li key={product.id} className="flex justify-between gap-2 px-3 py-2">
+                {items.map(({ key, name, price, quantity }) => (
+                  <li key={key} className="flex justify-between gap-2 px-3 py-2">
                     <span>
-                      {quantity} × {product.name}
+                      {quantity} × {name}
                     </span>
                     <span className="tabular-nums text-muted">
-                      {cur} {(toCents(product.price) * quantity / 100).toFixed(2)}
+                      {cur} {(toCents(price) * quantity / 100).toFixed(2)}
                     </span>
                   </li>
                 ))}

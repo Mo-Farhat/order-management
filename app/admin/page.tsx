@@ -2,6 +2,7 @@ import { platformOverview, shopsTable, platformTrend } from "@/lib/admin";
 import { PageHeader, Card, StatCard } from "@/components/desk/ui";
 import { RangeTabs } from "@/components/admin/range-tabs";
 import { TrendChart } from "@/components/admin/trend-chart";
+import { INDUSTRIES, INDUSTRY_SHORT } from "@/lib/industries";
 import { ShopsTable } from "@/components/admin/shops-table";
 
 const RANGES: Record<string, number> = { "7": 7, "30": 30, "90": 90, all: 0 };
@@ -105,6 +106,26 @@ export default async function AdminPage({
           table below once they&apos;ve paid. Note that status is <strong>recorded, not
           enforced</strong>: nothing in the app gates access on it, so a shop marked
           read-only or cancelled still has full access until trial enforcement lands.
+        </p>
+      </Card>
+
+      <Card title="What shops sell">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[...INDUSTRIES, "unset" as const].map((k) => (
+            <div key={k} className="rounded-lg border border-line bg-surface px-3 py-3 text-center">
+              <p className="text-lg font-semibold tabular-nums">{overview.industryBreakdown[k] ?? 0}</p>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted">
+                {k === "unset" ? "Not answered" : INDUSTRY_SHORT[k]}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-muted">
+          <strong className="text-ink">{overview.productsWithOptions}</strong> product
+          {overview.productsWithOptions === 1 ? "" : "s"} use options (sizes, colours…), across{" "}
+          <strong className="text-ink">{overview.shopsUsingOptions}</strong> shop
+          {overview.shopsUsingOptions === 1 ? "" : "s"}. &ldquo;Not answered&rdquo; = shops from
+          before the signup question; they&apos;re asked on the dashboard.
         </p>
       </Card>
 

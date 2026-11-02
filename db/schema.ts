@@ -38,6 +38,19 @@ export const planStatusEnum = pgEnum("plan_status", [
 // (see lib/entitlements.ts). `basic` = the default everyone starts on.
 export const planTierEnum = pgEnum("plan_tier", ["basic", "studio", "pro"]);
 
+// What the shop sells — asked at signup, editable in Settings. Only drives
+// defaults (option presets, placeholders); see lib/industries.ts. Null = never
+// answered (shops created before the question existed).
+export const industryEnum = pgEnum("industry", [
+  "general",
+  "clothing",
+  "food",
+  "beauty",
+  "jewellery",
+  "home",
+  "other",
+]);
+
 // Order lifecycle. `draft/packed/shipped/delivered` are legacy values kept in
 // the type for historical `order_events` rows. The app uses:
 //   pending    — created by the storefront, awaiting the owner's Accept
@@ -86,6 +99,7 @@ export const tenants = pgTable("tenants", {
   // Public share-link slug: desk.<domain>/{slug}
   slug: text("slug").notNull().unique(),
   whatsappNumber: text("whatsapp_number"),
+  industry: industryEnum("industry"),
 
   // Configuration-over-customisation settings, present on every tenant from day one.
   currency: text("currency").notNull().default("LKR"),
@@ -185,6 +199,12 @@ export const products = pgTable(
     lowStockThreshold: integer("low_stock_threshold"),
     sku: text("sku"),
 
+    // Options (size, colour, …). Set when the product has variants; each
+    // variant is one combination in `product_variants`. With variants,
+    // `stock_qty` is kept equal to the sum of the variants' stock.
+    option1Name: text("option1_name"),
+    option2Name: text("option2_name"),
+
     // Soft delete (FR-6): archived products leave the public page and the
     // new-order grid but stay attached to historical orders.
     archivedAt: timestamp("archived_at", { withTimezone: true }),
@@ -199,6 +219,32 @@ export const products = pgTable(
     index("products_tenant_idx").on(t.tenantId, t.archivedAt),
     index("products_tenant_category_idx").on(t.tenantId, t.category),
   ],
+);
+
+/**
+ * One sellable combination of a product's options — "M", or "M / Red". Price
+ * null = the product's base price. Stock is tracked here; the product's
+ * `stock_qty` mirrors the sum.
+ */
+export const productVariants = pgTable(
+  "product_variants",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    option1: text("option1").notNull(),
+    option2: text("option2"),
+    price: numeric("price", { precision: 12, scale: 2 }),
+    stockQty: integer("stock_qty").notNull().default(0),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("product_variants_product_idx").on(t.productId, t.sortOrder)],
 );
 
 export const productPhotos = pgTable(
@@ -233,6 +279,9 @@ export const stockMovements = pgTable(
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
+    // Set when the movement was on one option (e.g. size M); balance_after is
+    // then that variant's balance.
+    variantId: uuid("variant_id").references(() => productVariants.id, { onDelete: "set null" }),
     delta: integer("delta").notNull(),
     balanceAfter: integer("balance_after").notNull(),
     reason: stockMovementReasonEnum("reason").notNull(),
@@ -332,6 +381,10 @@ export const orderItems = pgTable(
     // Product may later be archived; kept for reordering/analytics. Never null
     // in v1 because deletion is blocked once ordered (FR-6).
     productId: uuid("product_id").references(() => products.id, { onDelete: "set null" }),
+    // The option picked, if any. `name_snapshot` already reads "Dress — M / Red";
+    // these keep the structured form for stock and reporting.
+    variantId: uuid("variant_id").references(() => productVariants.id, { onDelete: "set null" }),
+    variantLabel: text("variant_label"),
     nameSnapshot: text("name_snapshot").notNull(),
     priceSnapshot: numeric("price_snapshot", { precision: 12, scale: 2 }).notNull(),
     quantity: integer("quantity").notNull(),
@@ -518,6 +571,8 @@ export type Membership = typeof memberships.$inferSelect;
 export type Role = (typeof roleEnum.enumValues)[number];
 export type Product = typeof products.$inferSelect;
 export type ProductPhoto = typeof productPhotos.$inferSelect;
+export type ProductVariant = typeof productVariants.$inferSelect;
+export type IndustryValue = (typeof industryEnum.enumValues)[number];
 export type StockMovement = typeof stockMovements.$inferSelect;
 export type StockMovementReason = (typeof stockMovementReasonEnum.enumValues)[number];
 export type Customer = typeof customers.$inferSelect;

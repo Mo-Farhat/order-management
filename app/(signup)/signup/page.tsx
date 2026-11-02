@@ -12,6 +12,9 @@ import {
   AuthSubmit,
   AuthTextarea,
 } from "@/components/auth/fields";
+import { INDUSTRIES, INDUSTRY_LABEL } from "@/lib/industries";
+
+const INDUSTRY_OPTIONS = INDUSTRIES.map((v) => ({ value: v, label: INDUSTRY_LABEL[v] }));
 
 const CURRENCIES = [
   { value: "AED", label: "AED — UAE dirham" },
@@ -122,6 +125,15 @@ export default function SignupPage() {
               errors={state?.fieldErrors?.whatsappNumber}
             />
           </Row>
+          <AuthSelect
+            label="What do you sell?"
+            name="industry"
+            options={INDUSTRY_OPTIONS}
+            placeholder="Pick the closest one"
+            required
+            hint="Sets up sizes, flavours and the like for you. Change it any time."
+            errors={state?.fieldErrors?.industry}
+          />
           <Row>
             <AuthField
               label="Instagram (optional)"

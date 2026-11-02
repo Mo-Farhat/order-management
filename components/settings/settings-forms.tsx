@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { saveBusinessSettings, changePassword, type SettingsState } from "@/app/actions/settings";
 import { FormError } from "@/components/form";
 import { SubmitBtn } from "@/components/desk/submit-btn";
+import { INDUSTRIES, INDUSTRY_LABEL, type Industry } from "@/lib/industries";
 
 function Note({ state }: { state: SettingsState }) {
   return (
@@ -54,18 +55,48 @@ export function BusinessSettingsForm({
   currency,
   deliveryFeeDefault,
   stockTrackingEnabled,
+  industry,
 }: {
   name: string;
   slug: string;
   currency: string;
   deliveryFeeDefault: string;
   stockTrackingEnabled: boolean;
+  industry: Industry | null;
 }) {
   const [state, action] = useActionState(saveBusinessSettings, undefined);
   return (
     <form action={action} className="flex flex-col gap-4">
       <Note state={state} />
       <LabeledInput label="Business name" name="name" defaultValue={name} errors={state?.fieldErrors?.name} />
+
+      <label className="flex flex-col gap-1.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
+          What you sell
+        </span>
+        <select
+          name="industry"
+          defaultValue={industry ?? ""}
+          required
+          className="h-11 rounded-lg border border-line bg-surface px-3 text-base outline-none focus:border-accent"
+        >
+          <option value="" disabled>
+            Pick the closest one
+          </option>
+          {INDUSTRIES.map((v) => (
+            <option key={v} value={v}>
+              {INDUSTRY_LABEL[v]}
+            </option>
+          ))}
+        </select>
+        {state?.fieldErrors?.industry?.map((e) => (
+          <span key={e} className="text-xs text-danger">{e}</span>
+        )) ?? (
+          <span className="text-xs text-muted">
+            Sets the size / flavour presets on new products. Existing products don&apos;t change.
+          </span>
+        )}
+      </label>
 
       <label className="flex flex-col gap-1.5">
         <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-muted">
