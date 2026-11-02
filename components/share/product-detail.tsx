@@ -223,10 +223,17 @@ function OptionPicker({
               aria-pressed={on}
               onClick={() => onSelect(v)}
               className={`min-h-10 min-w-11 rounded-[3px] border px-3 text-sm transition-colors ${
-                on
-                  ? "border-[var(--sf-accent)] bg-[var(--sf-accent)] text-[var(--sf-accent-fg)]"
-                  : "border-line bg-card text-ink hover:border-[var(--sf-accent)]"
+                on ? "" : "border-line bg-card text-ink hover:border-[var(--sf-accent)]"
               } ${out && !on ? "text-muted line-through opacity-60" : ""}`}
+              style={
+                on
+                  ? {
+                      background: "var(--sf-accent)",
+                      borderColor: "var(--sf-accent)",
+                      color: "var(--sf-accent-fg)",
+                    }
+                  : undefined
+              }
             >
               {v}
             </button>
