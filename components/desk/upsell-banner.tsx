@@ -10,7 +10,7 @@ export function UpsellBanner({ reason }: { reason: string }) {
       <span className="font-medium">Ready for a real website?</span>
       <span className="text-muted">{reason} Your catalog and orders come with you — nothing to rebuild.</span>
       <a
-        href="mailto:hello@example.com?subject=Website%20upgrade"
+        href="mailto:support@sfdesk.lk?subject=Website%20upgrade"
         className="font-semibold text-accent underline underline-offset-2"
       >
         Talk to us
